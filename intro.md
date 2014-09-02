@@ -23,6 +23,8 @@ Bandwidth
 
 Latency is the bottleneck
 * It improves slower than bandwidth 
-1. Speed of light
-2. Routers in the middle (traffic stops)
+  
+Speed of light
+  
+  Routers in the middle (traffic stops)
 * Request-respond cycles dominate application

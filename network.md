@@ -19,3 +19,5 @@
 * Organizes data into `frames` before passing it down. Sequences packets (if necessary)
 * Accepts acknowledgements from immediate receiver
 * Examples: Ethernet MAC, PPP
+
+An ethernet switch is an example of a device that works on layer 2 It forwards ethernet frames from one host to another as long as the hosts are connected to the switch (switches may be cascaded) This set of hosts and switches defines the `local area network (LAN)`

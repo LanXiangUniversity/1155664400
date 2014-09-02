@@ -24,3 +24,10 @@ Bandwidth
 Latency is the bottleneck
 * It improves slower than bandwidth : Speed of light, Routers in the middle (traffic stops)
 * Request-respond cycles dominate application
+
+## Challenges
+
+* Secure communication over public networks
+* Fault-tolerance
+* Replication, caching, naming
+* Coordination and shared state

@@ -4,7 +4,7 @@
 
 ### Physical Layer
 
-Deals with representing bits
+`Deals with representing bits`
 
 * Transmits and receives raw data to communication medium
 * Does not care about contents
@@ -13,7 +13,7 @@ Deals with representing bits
 
 ### Data Link Layer
 
-Deal with frames
+`Deal with frames`
 
 * Detects and corrects errors
 * Organizes data into `frames` before passing it down. Sequences packets (if necessary)

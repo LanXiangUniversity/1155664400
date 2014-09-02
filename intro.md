@@ -22,6 +22,7 @@ Bandwidth
 * Depends on size of vehicle
 
 Latency is the bottleneck
-* It improves slower than bandwidth � Speed of light
-* Routers in the middle (traffic stops)
+* It improves slower than bandwidth 
+* * Speed of light
+* * Routers in the middle (traffic stops)
 * Request-respond cycles dominate application

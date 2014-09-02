@@ -39,3 +39,11 @@ An IP router is an example of a device that works on layer 3.
 A router takes an incoming IP packet and determines which interface to send it out.
 
 It enables `multiple networks` to be connected together.
+
+### Transport Layer
+
+`Deals with segments`
+
+* Provides an interface for end-to-end (application-to-application) communication: sends & receives `segments` of data. Manages flow control. May include end-to-end reliability.
+* Network interface is similar to a mailbox.
+* Examples: TCP, UDP

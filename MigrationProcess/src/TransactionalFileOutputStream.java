@@ -6,13 +6,13 @@ import java.io.Serializable;
 /**
  * Created by Tong Wei on 8/28/14.
  */
-public class TransactionalFileOutputStream extends OutputStream implements Serializable{
+public class TransactionalFileOutputStream extends OutputStream implements Serializable {
 	private FileStatus fileStatus = FileStatus.CLOSED;
 	private int position = 0;
 	private File file;
-	private boolean
+	private boolean d1;
 
-	public TransactionalFileOutputStream(String filename, boolean ) {
+	public TransactionalFileOutputStream(String filename, boolean d) {
 		file = new File(filename);
 	}
 

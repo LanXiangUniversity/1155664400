@@ -18,6 +18,7 @@ public class TransactionalFileInputStream extends InputStream implements Seriali
 
 	@Override
 	public int read() throws IOException {
+
 		return 0;
 	}
 }

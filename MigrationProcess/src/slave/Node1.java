@@ -2,17 +2,21 @@ package slave;
 
 import processes.MigratableProcess;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 /**
  * Created by Wei on 9/4/14.
  */
-public class Node implements Runnable{
+public class Node1 implements Runnable{
 
 	private String nodeName;
 	private int masterPort;
@@ -24,7 +28,7 @@ public class Node implements Runnable{
 	private final ConcurrentHashMap<Integer, MigratableProcess> processList;
 	private List<Integer> terminatedList;
 
-	public Node(String nodeName, int masterPort) {
+	public Node1(String nodeName, int masterPort) {
 		this.nodeName = nodeName;
 		this.masterPort = masterPort;
 
@@ -176,7 +180,7 @@ public class Node implements Runnable{
 	*/
 	public static void main(String[] args) {
 		// Init node and start it.
-		Node node = new Node("node1", 38887);
+		Node1 node = new Node1("node2", 38887);
 		node.connectToMaster();
 
 		new Thread(node).start();

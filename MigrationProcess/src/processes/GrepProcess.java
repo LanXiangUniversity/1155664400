@@ -1,3 +1,5 @@
+package processes;
+
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -10,7 +12,7 @@ public class GrepProcess implements MigratableProcess {
 
 	private volatile boolean suspending;
 
-	public GrepProcess(String args[]) throws Exception {
+	public GrepProcess(String[] args) throws Exception {
 		if (args.length != 3) {
 			System.out.println("usage: GrepProcess <queryString> <inputFile> <outputFile>");
 			throw new Exception("Invalid Arguments");
@@ -35,9 +37,10 @@ public class GrepProcess implements MigratableProcess {
 					out.println(line);
 				}
 
-				// Make grep take longer so that we don't require extremely large files for interesting results
+				// Make grep take longer so that we don't require extremely large
+				// files for interesting results
 				try {
-					Thread.sleep(100);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					// ignore it
 				}

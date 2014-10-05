@@ -1,5 +1,7 @@
 package remote;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -55,6 +57,7 @@ public class RemoteObjectRef implements Serializable {
 	}
 
 	// Create a new stub and return it.
+	@Nullable
 	public Object localise() throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		// If the stub class name is remoteInterfaceName+"_stub,
 		// then create a new stub.

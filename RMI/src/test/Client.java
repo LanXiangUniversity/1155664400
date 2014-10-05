@@ -1,5 +1,6 @@
 package test;
 
+import org.jetbrains.annotations.NotNull;
 import registry.FileRegistry;
 import remote.RemoteObjectRef;
 import remote.TestService;
@@ -13,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 public class Client {
 	public static final String SERVER_IP = "localhost";
 	public static final int SERVER_PORT = 9901;
+	@NotNull
 	public static String REG_PATH = "/Users/parasitew/Documents/CMU/15640/lab/lab2/registry/reg.dat";
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

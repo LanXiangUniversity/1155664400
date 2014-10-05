@@ -2,6 +2,7 @@ package remote;
 
 import message.RemoteMsg;
 import message.RemoteMsgType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,6 +22,7 @@ public class TestService_stub implements TestService, Stub {
 	}
 
 	// Send msg to remote host and return its result.
+	@NotNull
 	@Override
 	public RemoteMsg sendMsgToRemoteProxy(RemoteMsg msg) throws IOException, ClassNotFoundException {
 		// Connect to remote host.
@@ -42,8 +44,9 @@ public class TestService_stub implements TestService, Stub {
 
 	// A stub for remote invocation which packs up method and args into a RemoteMsg
 	// and then calls sendMsgRemoteProxy to invoke remote  method.
+	@NotNull
 	@Override
-	public String test(String str) throws ClassNotFoundException, NoSuchMethodException, IOException {
+	public String test(@NotNull String str) throws ClassNotFoundException, NoSuchMethodException, IOException {
 		Class<?>[] paramsType = new Class<?>[1];
 		List<Object> params = new ArrayList<Object>();
 
@@ -58,14 +61,15 @@ public class TestService_stub implements TestService, Stub {
 
 	// Get return value from RemoteMsg.
 	@Override
-	public Object unMarshallReturnValue(RemoteMsg msg) {
+	public Object unMarshallReturnValue(@NotNull RemoteMsg msg) {
 		return msg.getContent();
 	}
 
 	// Marshall
+	@NotNull
 	@Override
-	public RemoteMsg marshall(String methodName, List<Object> params, Class<?>[] paramsType, RemoteObjectRef ror
-	                          ) throws NoSuchMethodException {
+	public RemoteMsg marshall(String methodName, @NotNull List<Object> params, Class<?>[] paramsType, RemoteObjectRef ror
+	) throws NoSuchMethodException {
 		RemoteMsg msg = new RemoteMsg(RemoteMsgType.MSG_INVOKE);
 
 		msg.setMethodName(this.getClass().getMethod(methodName, paramsType).getName());

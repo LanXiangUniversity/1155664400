@@ -5,7 +5,6 @@ import message.RemoteMsgType;
 import registry.FileRegistry;
 import remote.RORTable;
 import remote.RemoteObjectRef;
-import sun.reflect.Reflection;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -72,7 +71,7 @@ public class Server {
 			Object obj = this.rorTbl.findObject(ror.getObjKey());
 
 			Class<?> c = Class.forName(ror.getRemoteInterfaceName() + "Impl");
- 			Method[] methods  = c.getDeclaredMethods();
+			Method[] methods = c.getDeclaredMethods();
 			Method method = null;
 
 			for (Method m : methods) {
@@ -99,7 +98,7 @@ public class Server {
 			System.out.println("Remote invocation error.");
 		}
 
-		System.out.println("return value: " + (String)rtnMsg.getContent());
+		System.out.println("return value: " + (String) rtnMsg.getContent());
 
 		return rtnMsg;
 	}

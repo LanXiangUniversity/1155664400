@@ -1,13 +1,12 @@
 package remote;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 /**
  * Created by Wei on 10/3/14.
  */
-public class RORTable implements Serializable{
+public class RORTable implements Serializable {
 	private int count;
 	private HashMap entries;
 

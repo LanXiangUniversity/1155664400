@@ -3,7 +3,6 @@ package test;
 import registry.FileRegistry;
 import remote.RemoteObjectRef;
 import remote.TestService;
-import remote.TestService_stub;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

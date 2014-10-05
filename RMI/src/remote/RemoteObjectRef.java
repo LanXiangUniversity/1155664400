@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Created by Wei on 10/3/14.
  */
-public class RemoteObjectRef implements Serializable{
+public class RemoteObjectRef implements Serializable {
 	// Connection to server
 	private String IPAddress;
 	private int port;

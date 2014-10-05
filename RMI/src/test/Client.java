@@ -1,0 +1,27 @@
+package test;
+
+import registry.FileRegistry;
+import remote.RemoteObjectRef;
+import remote.TestService_stub;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
+/**
+ * Created by Wei on 10/3/14.
+ */
+public class Client {
+	public static final String SERVER_IP = "localhost";
+	public static final int SERVER_PORT = 9901;
+	public static String REG_PATH = "/Users/parasitew/Documents/CMU/15640/lab/lab2/registry/reg.dat";
+
+	public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+		String serviceName = "testService";
+		FileRegistry registry = new FileRegistry(REG_PATH);
+		RemoteObjectRef ror = registry.lookup(serviceName);
+
+		TestService_stub srv = (TestService_stub) ror.localise();
+
+		System.out.println(srv.test("testService"));
+	}
+}

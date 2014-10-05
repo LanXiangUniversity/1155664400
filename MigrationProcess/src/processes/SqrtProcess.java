@@ -1,8 +1,13 @@
+/**
+ * SqrtProcess.java
+ * @author Tong Wei (twei1), Guoli Ma (guolim)
+ * 
+ * Description: This is a migratable process. Given a number n, the process
+ * 				tries to calculate the square root of n.
+ */
+
 package processes;
 
-/**
- * Created by Wei on 9/10/14.
- */
 public class SqrtProcess implements MigratableProcess {
 	private volatile boolean suspending;
 	private double n = 0;

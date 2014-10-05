@@ -2,6 +2,7 @@ package test;
 
 import registry.FileRegistry;
 import remote.RemoteObjectRef;
+import remote.TestService;
 import remote.TestService_stub;
 
 import java.io.IOException;
@@ -20,8 +21,8 @@ public class Client {
 		FileRegistry registry = new FileRegistry(REG_PATH);
 		RemoteObjectRef ror = registry.lookup(serviceName);
 
-		TestService_stub srv = (TestService_stub) ror.localise();
+		TestService srv = (TestService) ror.localise();
 
-		System.out.println(srv.test("testService"));
+		System.out.println("Result: " + srv.test("testService"));
 	}
 }

@@ -13,11 +13,20 @@ public class RemoteMsg implements Serializable {
 	private String methodName;
 	private List<Object> params;
 	private Object content;
+	private String remoteException;
 
 	public RemoteMsg(RemoteMsgType msgType) {
 		this.msgType = msgType;
 		this.params = new ArrayList<Object>();
 
+	}
+
+	public String getRemoteException() {
+		return remoteException;
+	}
+
+	public void setRemoteException(String remoteException) {
+		this.remoteException = remoteException;
 	}
 
 	public RemoteMsg() {

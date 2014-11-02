@@ -22,8 +22,10 @@ public class Client {
 		FileRegistry registry = new FileRegistry(REG_PATH);
 		RemoteObjectRef ror = registry.lookup(serviceName);
 
+		assert ror != null;
 		TestService srv = (TestService) ror.localise();
 
+		assert srv != null;
 		System.out.println("Result: " + srv.test("testService"));
 	}
 }

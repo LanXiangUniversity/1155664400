@@ -4,7 +4,8 @@ import message.RemoteMsg;
 import message.RemoteMsgType;
 import org.jetbrains.annotations.NotNull;
 import registry.FileRegistry;
-import remote.RORTable;
+import remote.ObjectTable;
+import remote.RemoteInterface;
 import remote.RemoteObjectRef;
 
 import java.io.IOException;
@@ -14,6 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Wei on 10/3/14.
@@ -27,12 +30,18 @@ public class Server {
 	private int dispatcherPort = 12345;
 	private boolean isRunning;
 	private Dispatcher dispatcher;
-	private RORTable rorTbl;
+	private ObjectTable objTbl;
+	private HashMap rorTbl;
+	private int counter = 0; // objKey
+	private FileRegistry registry;
+
 
 	public Server() {
 		this.dispatcher = new Dispatcher();
 		this.isRunning = true;
-		this.rorTbl = new RORTable();
+		this.objTbl = new ObjectTable();
+		this.rorTbl = new HashMap();
+		this.registry = new FileRegistry(REG_PATH);
 	}
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
@@ -41,19 +50,22 @@ public class Server {
 		srv.startDispatcher();
 	}
 
+	public void registerRemoteObject(Object obj, String serviceName) throws IOException, ClassNotFoundException {
+		objTbl.addObject(this.counter, obj);
+		RemoteObjectRef ror = new RemoteObjectRef("localhost", 12345, this.counter, serviceName);
+		this.rorTbl.put(obj, ror);
+		this.registry.rebind(serviceName, ror);
+
+		this.counter++;
+	}
+
 	public void registService() throws ClassNotFoundException, IllegalAccessException, InstantiationException, IOException {
-		int counter = 0;
-		FileRegistry registry = new FileRegistry(REG_PATH);
 		String serviceName = "remote.TestService";
 
 		// Create a remote object.
 		Class<?> c = Class.forName(serviceName + "Impl");
 		Object obj = c.newInstance();
-		this.rorTbl.addObject(counter, obj);
-		// Register a remote service.
-		RemoteObjectRef ror = new RemoteObjectRef("localhost", 12345, counter, serviceName);
-		registry.rebind("testService", ror);
-		counter++;
+		this.registerRemoteObject(obj, serviceName);
 	}
 
 	public void startDispatcher() {
@@ -72,7 +84,7 @@ public class Server {
 			String methodName = msg.getMethodName();
 
 			RemoteObjectRef ror = (RemoteObjectRef) msg.getContent();
-			Object obj = this.rorTbl.findObject(ror.getObjKey());
+			Object obj = objTbl.findObject(ror.getObjKey());
 
 			Class<?> c = Class.forName(ror.getRemoteInterfaceName() + "Impl");
 			Method[] methods = c.getDeclaredMethods();
@@ -83,19 +95,20 @@ public class Server {
 				if (m.getName().equals(msg.getMethodName()) && msg.getParams().size() ==
 						m.getParameterTypes().length) {
 					method = m;
-					System.out.println("Find method " + method.getName());
 				}
 			}
 
 			assert method != null;
-			Object[] params = new Object[msg.getParams().size()];
+			Object[] params = this.unmarshallParams(msg.getParams());
 
 			for (int i = 0; i < msg.getParams().size(); i++) {
 				params[i] = msg.getParams().get(i);
 			}
+
 			Object rtn = method.invoke(obj, params);
 
-			rtnMsg = marshallReturnValue(rtn);
+			// Replace remote objects with stubs.
+			rtnMsg = marshallReturnValue(rtn, method.getReturnType());
 
 		} else {
 			rtnMsg.setMsgType(RemoteMsgType.MSG_ERROR);
@@ -107,10 +120,42 @@ public class Server {
 		return rtnMsg;
 	}
 
+	// Get local object from RemoteObjectReference
+	private Object[] unmarshallParams(List<Object> params) {
+		Object[] res = new Object[params.size()];
+
+		for (int i = 0; i < params.size(); i++) {
+			if (params.get(i) instanceof RemoteObjectRef &&
+					((RemoteObjectRef) params.get(i)).getIPAddress().equals(this.IPAddress)
+					&& ((RemoteObjectRef) params.get(i)).getPort() == this.dispatcherPort) {
+				int objKey = ((RemoteObjectRef) params.get(i)).getObjKey();
+
+				res[i] = this.objTbl.findObject(objKey);
+			} else {
+				res[i] = params.get(i);
+			}
+		}
+
+		System.out.println("Get local object from ROR (params).");
+
+		return res;
+	}
+
 	@NotNull
-	public RemoteMsg marshallReturnValue(Object obj) {
+	public RemoteMsg marshallReturnValue(Object obj, Class c) throws ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
+		RemoteObjectRef ror = null;
 		RemoteMsg rtnMsg = new RemoteMsg(RemoteMsgType.MSG_RETURN);
-		rtnMsg.setContent(obj);
+
+		if (obj instanceof RemoteInterface) {
+			ror = (RemoteObjectRef) this.rorTbl.get(obj);
+			rtnMsg.setContent(ror.localise());
+
+			System.out.println("Return ROR to remote client.");
+		} else {
+			rtnMsg.setContent(obj);
+
+			System.out.println("Return object to remote client.");
+		}
 
 		return rtnMsg;
 	}

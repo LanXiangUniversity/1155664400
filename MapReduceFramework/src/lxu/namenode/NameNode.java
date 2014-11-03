@@ -1,9 +1,11 @@
 package lxu.namenode;
 
 import lxu.lxdfs.Block;
+import lxu.lxdfs.BlocksLocation;
 import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.DataNodeInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,12 +20,39 @@ public class NameNode {
 	private List<DataNodeDescriptor> dataNodes;
 	// Map from file name to Block.
 	private HashMap<String, Block> fileNameToBlockMap;
-	// Map from Blocks to Data Nodes.
-	private HashMap<List<Block>, DataNodeDescriptor> blocksToDataNodeMap;
+	// Map from Block to Data Nodes.
+	private HashMap<Block, List<BlocksLocation>> blockToLocationsMap;
+	// Map from BlockID to Block
+	private HashMap<Integer, Block> IDToBlockMap;
 
 	/**
 	 * ************************Services for client ************************
 	 */
+
+	/**
+	 *
+	 * @param blockID
+	 * @return locations that store the Block
+	 */
+	public List<BlocksLocation> locateBlock(int blockID) {
+		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
+
+		// get Block by ID
+		if (!IDToBlockMap.containsKey(blockID)) {
+			return blockLocations;
+		}
+		Block block = IDToBlockMap.get(blockID);
+
+		// get Data Node by Block
+		if (!blockToLocationsMap.containsKey(block)) {
+			return blockLocations;
+		}
+
+		List<BlocksLocation> locations = blockToLocationsMap.get(block);
+
+		return locations;
+	}
+
 	// Locating Block
 
 	// File create

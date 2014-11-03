@@ -7,6 +7,8 @@ public class DataNodeDescriptor {
 	private int dataNodeID;
 	private String dataNodeIP;
 	private int dataNodePort;
+	// # Blocks in the Data Node
+	private int blockNum;
 
 	@Override
 	public boolean equals(Object o) {

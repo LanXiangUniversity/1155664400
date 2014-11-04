@@ -4,6 +4,7 @@ package lxu.lxdfs;
  * Created by Wei on 11/3/14.
  */
 public class BlocksLocation {
+	private Block block;
 	private DataNodeDescriptor dataNode;
 	private String fileName;
 

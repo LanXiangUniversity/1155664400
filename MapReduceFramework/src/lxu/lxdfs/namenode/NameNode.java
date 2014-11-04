@@ -4,6 +4,8 @@ import lxu.lxdfs.Block;
 import lxu.lxdfs.BlocksLocation;
 import lxu.lxdfs.DataNodeDescriptor;
 
+import java.rmi.Naming;
+import java.rmi.RMISecurityManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +17,8 @@ public class NameNode {
 	/**
 	 * ********************** Data structures *********************
 	 */
+	private NameSystemService nameSystem;
+
 	// List of Data Nodes available.
 	private List<DataNodeDescriptor> dataNodes;
 	// Map from file name to Block.
@@ -28,28 +32,13 @@ public class NameNode {
 	 * ************************Services for client ************************
 	 */
 
-	/**
-	 * Return the locations<datanode, filename> of a Block
-	 * @param blockID
-	 * @return locations that store the Block
-	 */
-	public List<BlocksLocation> getBlockLocations(int blockID) {
-		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
+	public static void main(String[] args) {
+		NameNode nameNode = new NameNode();
 
-		// get Block by ID
-		if (!IDToBlockMap.containsKey(blockID)) {
-			return blockLocations;
-		}
-		Block block = IDToBlockMap.get(blockID);
+		// Regsiter and start RPC service.
+		nameNode.registerService();
 
-		// get Data Node by Block
-		if (!blockToLocationsMap.containsKey(block)) {
-			return blockLocations;
-		}
 
-		List<BlocksLocation> locations = blockToLocationsMap.get(block);
-
-		return locations;
 	}
 
 
@@ -94,41 +83,6 @@ public class NameNode {
 	// Block Synchronization update
 
 	/**
-	 * ********************** Threads ****************************
-	 */
-
-	/**
-	 * Listens for any new request from the client, put client request to call queue.
-	 */
-	private class RequestListener implements Runnable {
-		@Override
-		public void run() {
-
-		}
-	}
-
-	/**
-	 * Handles client request, processing it and updating response queue.
-	 */
-	private class RequestHandler implements Runnable {
-		@Override
-		public void run() {
-
-		}
-	}
-
-	/**
-	 * Respondes to client after taking element from response queue.
-	 */
-	private class RequestResponder implements Runnable {
-		@Override
-		public void run() {
-
-		}
-	}
-
-
-	/**
 	 *  Start up
 	 */
 	// 1. Loads default configurations and user modified configurations.
@@ -160,9 +114,32 @@ public class NameNode {
 
 	// 8. Starts processing Client request after exiting Safe Mode.
 
+	/**
+	 * Return the locations<datanode, filename> of a Block
+	 * @param blockID
+	 * @return locations that store the Block
+	 */
+	public List<BlocksLocation> getBlockLocations(int blockID) {
+		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
+
+		// get Block by ID
+		if (!IDToBlockMap.containsKey(blockID)) {
+			return blockLocations;
+		}
+		Block block = IDToBlockMap.get(blockID);
+
+		// get Data Node by Block
+		if (!blockToLocationsMap.containsKey(block)) {
+			return blockLocations;
+		}
+
+		List<BlocksLocation> locations = blockToLocationsMap.get(block);
+
+		return locations;
+	}
 
 	/**
-	 *  Storage
+	 * Storage
 	 */
 	// 1. File related information like name. replication factor etc.
 	// 2. Block mapping for the file names.
@@ -170,8 +147,17 @@ public class NameNode {
 	// 4. Blocks to data node mapping
 	// 5. Network mtetrics
 	// 6. Edit log
+	public void registerService() {
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new RMISecurityManager());
+		}
+		try {
+			NameSystemService nameSystem = new NameSystemService();
 
-	public static void main(String[] args) {
-
+			Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
+		} catch (Exception e) {
+			System.out.println("Exception: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 }

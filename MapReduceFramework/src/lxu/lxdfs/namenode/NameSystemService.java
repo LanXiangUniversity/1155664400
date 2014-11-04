@@ -15,7 +15,7 @@ import java.util.Set;
  * Remote object for Name System.
  * Created by Wei on 11/3/14.
  */
-public class NameSystem implements INameSystem {
+public class NameSystemService implements INameSystemService {
 	private int dataAllocId = 0;
 	// Path of root of the DFS
 	private String rootPath;
@@ -32,7 +32,8 @@ public class NameSystem implements INameSystem {
 	// List of file names.
 	private Set<String> fileNames;
 
-	public NameSystem() {
+
+	public NameSystemService() {
 		DataNodeDescriptor dnd1 = new DataNodeDescriptor();
 		dnd1.setDataNodeID(1);
 
@@ -49,8 +50,16 @@ public class NameSystem implements INameSystem {
 		return false;
 	}
 
+	/**
+	 * Allocate two replicas for a Block with filename and Block offset.
+	 *
+	 * @param fileName
+	 * @param offset   the blockId of in the file
+	 * @return Locations for two blocks.
+	 * @throws RemoteException
+	 */
 	@Override
-	public List<Block> allocateBlock(String fileName, int offset) throws RemoteException {
+	public List<BlocksLocation> allocateBlock(String fileName, int offset) throws RemoteException {
 		Block block = new Block();
 		int blockId = this.blockID++;
 		List<BlocksLocation> locations = new ArrayList<BlocksLocation>();
@@ -58,39 +67,55 @@ public class NameSystem implements INameSystem {
 		for (int i = 0; i < this.replicaNum; i++) {
 			BlocksLocation location = new BlocksLocation();
 
-
 			locations.add(location);
 		}
 
+		// Register blocks
 		this.fileNameToBlocksMap.get(fileName).add(block);
 		this.IDToBlockMap.put(blockId, block);
+		// Store Blocks locations
 		this.blockToLocationsMap.put(block, locations);
 
 		this.blockID++;
+
+		return locations;
+	}
+
+	@Override
+	public ClientOutputStream open(Path path) throws RemoteException {
+		/*
+			To be implemented
+		 */
+
 		return null;
 	}
 
+
+	/**
+	 *
+	 * @param path
+	 * @return
+	 * @throws RemoteException
+	 */
 	@Override
-	public boolean open(Path path) throws RemoteException {
-		String fileName = this.rootPath + path.toString();
+	public ClientOutputStream create(Path path) throws RemoteException {
+		String fileName = path.toString();
 
-		if (this.fileNames.contains(fileName)) {
-			return false;
-		}
-
-		return false;
-	}
-
-
-	@Override
-	public DFSOutputStream create(Path path) throws RemoteException {
 		if (this.fileNames.contains(path)) {
 			System.out.println("Cannot create file, file exists");
 
 			return null;
 		}
 
-		return new DFSOutputStream();
+		// Resgiter file.
+		this.fileNames.add(fileName);
+		this.fileNameToBlocksMap.put(fileName, new ArrayList<Block>());
+
+		// Create ClientOutputStream
+		ClientOutputStream cos = new ClientOutputStream();
+		cos.setFileName(fileName);
+
+		return new ClientOutputStream();
 	}
 
 	@Override

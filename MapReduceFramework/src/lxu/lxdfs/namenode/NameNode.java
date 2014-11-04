@@ -1,9 +1,8 @@
-package lxu.namenode;
+package lxu.lxdfs.namenode;
 
 import lxu.lxdfs.Block;
 import lxu.lxdfs.BlocksLocation;
 import lxu.lxdfs.DataNodeDescriptor;
-import lxu.lxdfs.DataNodeInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,11 +29,11 @@ public class NameNode {
 	 */
 
 	/**
-	 *
+	 * Return the locations<datanode, filename> of a Block
 	 * @param blockID
 	 * @return locations that store the Block
 	 */
-	public List<BlocksLocation> locateBlock(int blockID) {
+	public List<BlocksLocation> getBlockLocations(int blockID) {
 		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
 
 		// get Block by ID
@@ -52,6 +51,9 @@ public class NameNode {
 
 		return locations;
 	}
+
+
+
 
 	// Locating Block
 

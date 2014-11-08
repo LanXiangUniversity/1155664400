@@ -1,6 +1,5 @@
 package lxu.lxdfs.datanode;
 
-import lxu.lxdfs.datanode.BlockService;
 import lxu.lxdfs.service.INameSystemService;
 
 import java.io.IOException;
@@ -8,8 +7,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class DataNode implements Runnable {
 
@@ -59,7 +56,8 @@ public class DataNode implements Runnable {
                 if (isRunning) {
                     try {
                         Thread.sleep(5000);
-                    } catch (InterruptedException e1) {}
+                    } catch (InterruptedException e1) {
+                    }
                 }
             }
         }
@@ -69,7 +67,8 @@ public class DataNode implements Runnable {
         if (dataNodeThread != null) {
             try {
                 dataNodeThread.join();
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
         }
     }
 

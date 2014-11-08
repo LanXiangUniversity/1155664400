@@ -1,13 +1,13 @@
 package lxu.lxdfs.datanode;
 
+import lxu.lxdfs.client.ClientPacket;
+import lxu.lxdfs.metadata.Block;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-
-import lxu.lxdfs.metadata.Block;
-import lxu.lxdfs.client.ClientPacket;
 
 /**
  * Created by magl on 14/11/8.
@@ -44,7 +44,7 @@ public class BlockService implements Runnable {
             } else {
                 try {
                     BufferedReader reader = new BufferedReader(new FileReader(fileName));
-                    String line = null;
+                    String line;
                     while ((line = reader.readLine()) != null) {
                         lines.add(line);
                     }
@@ -114,7 +114,7 @@ public class BlockService implements Runnable {
             try {
                 Socket socket = serverSocket.accept();
                 ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-                ClientPacket packet = (ClientPacket)input.readObject();
+                ClientPacket packet = (ClientPacket) input.readObject();
                 switch (packet.getOperation()) {
                     case ClientPacket.BLOCK_READ:
                         (new Thread(new BlockReader(packet, socket))).start();

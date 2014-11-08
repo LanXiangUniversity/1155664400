@@ -14,10 +14,10 @@ public class DataNodePacket implements Serializable {
     private boolean operationState;
     private ArrayList<String> lines;
 
-    public DataNodePacket (int ackPacketID,
-                           Block block,
-                           boolean operationState,
-                           ArrayList<String> lines) {
+    public DataNodePacket(int ackPacketID,
+                          Block block,
+                          boolean operationState,
+                          ArrayList<String> lines) {
         this.ackPacketID = ackPacketID;
         this.block = block;
         this.operationState = operationState;

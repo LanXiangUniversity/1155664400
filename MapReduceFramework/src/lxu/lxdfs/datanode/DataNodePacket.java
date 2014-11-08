@@ -1,6 +1,6 @@
 package lxu.lxdfs.datanode;
 
-import lxu.lxdfs.Block;
+import lxu.lxdfs.metadata.Block;
 
 import java.io.Serializable;
 import java.util.ArrayList;

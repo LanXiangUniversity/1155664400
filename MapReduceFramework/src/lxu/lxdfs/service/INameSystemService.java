@@ -1,7 +1,7 @@
 package lxu.lxdfs.service;
 
-import lxu.lxdfs.DataNodeDescriptor;
-import lxu.lxdfs.namenode.ClientOutputStream;
+import lxu.lxdfs.client.ClientOutputStream;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.nio.file.Path;
 import java.rmi.Remote;

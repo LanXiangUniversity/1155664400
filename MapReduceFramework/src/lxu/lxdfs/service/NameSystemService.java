@@ -1,9 +1,9 @@
 package lxu.lxdfs.service;
 
-import lxu.lxdfs.Block;
-import lxu.lxdfs.DataNodeDescriptor;
-import lxu.lxdfs.DataNodeDescriptor;
-import lxu.lxdfs.namenode.ClientOutputStream;
+
+import lxu.lxdfs.client.ClientOutputStream;
+import lxu.lxdfs.metadata.Block;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.nio.file.Path;
 import java.rmi.RemoteException;
@@ -60,15 +60,13 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public List<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException {
+	public ArrayList<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException {
 		Block block = new Block();
 		int blockId = this.blockID++;
-		List<DataNodeDescriptor> locations = new ArrayList<DataNodeDescriptor>();
+		ArrayList<DataNodeDescriptor> locations = new ArrayList<DataNodeDescriptor>();
 
 		for (int i = 0; i < this.replicaNum; i++) {
-			DataNodeDescriptor location = new DataNodeDescriptor();
-
-			locations.add(location);
+			locations.add(this.dataNodes.get(i));
 		}
 
 		// Register blocks

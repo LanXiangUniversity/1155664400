@@ -1,7 +1,7 @@
-package lxu.lxdfs.namenode;
+package lxu.lxdfs.client;
 
-import lxu.lxdfs.DataNodeDescriptor;
-import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.namenode.ClientPacket;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
@@ -105,6 +105,8 @@ public class ClientOutputStream {
 	 * @return
 	 */
 	public int write(String data) {
+		ArrayList<DataNodeDescriptor> locations = null;
+
 		// get data
 		String[] lines = data.split("\n");
 
@@ -116,7 +118,7 @@ public class ClientOutputStream {
 		while (buffer.size() >= blockSize) {
 			// Allocate new Blocks through RPC and get the locations.
 			try {
-				List<DataNodeDescriptor> locations = nameSystem.allocateBlock(this.fileName, this.blockOffset);
+				locations = nameSystem.allocateBlock(this.fileName, this.blockOffset);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -124,7 +126,7 @@ public class ClientOutputStream {
 			// Update info about the first Data Node.
 
 			// Create packet.
-			ClientPacket packet = this.getPacketFromBuffer();
+			ClientPacket packet = this.getPacketFromBuffer(locations);
 
 			// Send packet to the first Data Node.
 			this.dataQueue.add(packet);
@@ -167,12 +169,12 @@ public class ClientOutputStream {
 	 *
 	 * @return
 	 */
-	public ClientPacket getPacketFromBuffer() {
+	public ClientPacket getPacketFromBuffer(ArrayList<DataNodeDescriptor> locations) {
 		if (buffer.size() == 0) {
 			return null;
 		}
 
-		List<String> lines = new ArrayList<String>();
+		ArrayList<String> lines = new ArrayList<String>();
 
 		// Get top elements in the buffer.
 		int blockLen = blockSize > buffer.size() ? buffer.size() : blockSize;
@@ -184,8 +186,7 @@ public class ClientOutputStream {
 		// Create a new packet.
 		ClientPacket packet = new ClientPacket();
 		packet.setLines(lines);
-		packet.setLen(buffer.size());
-		packet.setLocations(this.locations);
+		packet.setLocations(locations);
 		packet.setReplicaID(1);
 		packet.setReplicaNum(2);
 

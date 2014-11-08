@@ -1,4 +1,4 @@
-package lxu.lxdfs;
+package lxu.lxdfs.metadata;
 
 import java.util.List;
 

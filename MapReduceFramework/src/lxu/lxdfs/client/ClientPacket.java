@@ -1,8 +1,8 @@
-package lxu.lxdfs.namenode;
+package lxu.lxdfs.client;
 
-import lxu.lxdfs.Block;
-import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.datanode.DataNodePacket;
+import lxu.lxdfs.metadata.Block;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.io.Serializable;
 import java.util.ArrayList;

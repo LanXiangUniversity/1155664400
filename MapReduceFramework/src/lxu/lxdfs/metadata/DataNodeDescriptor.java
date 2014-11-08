@@ -1,4 +1,4 @@
-package lxu.lxdfs;
+package lxu.lxdfs.metadata;
 
 /**
  * This class stores the meta-data of a Data Node.

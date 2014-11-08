@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/MapReduceFramework/MapReduceFramework.iml" filepath="$PROJECT_DIR$/MapReduceFramework/MapReduceFramework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MigrationProcess/MigrationProcess.iml" filepath="$PROJECT_DIR$/MigrationProcess/MigrationProcess.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RMI/RMI.iml" filepath="$PROJECT_DIR$/RMI/RMI.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RMIProject/RMIProject.iml" filepath="$PROJECT_DIR$/RMIProject/RMIProject.iml" />
+    </modules>
+  </component>
+</project>
+

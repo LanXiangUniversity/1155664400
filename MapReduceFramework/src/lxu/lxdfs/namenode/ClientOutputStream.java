@@ -156,7 +156,7 @@ public class ClientOutputStream {
 
 			// Log
 			System.out.println("Succeed to write to DataNode " +
-					packet.getLocations().get(0).getDataNodeID());
+					packet.getLocations().get(0).getDataNode().getDataNodeID());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

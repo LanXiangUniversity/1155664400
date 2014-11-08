@@ -29,5 +29,5 @@ public interface INameSystemService extends Remote {
 	public List<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException;
 
 	// Services for Data Node
-    public void register();
+    public boolean register(String dataNodeHostName, int port);
 }

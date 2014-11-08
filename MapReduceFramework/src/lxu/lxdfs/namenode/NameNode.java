@@ -3,6 +3,7 @@ package lxu.lxdfs.namenode;
 import lxu.lxdfs.Block;
 import lxu.lxdfs.BlocksLocation;
 import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;

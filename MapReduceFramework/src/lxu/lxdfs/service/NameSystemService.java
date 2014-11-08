@@ -1,8 +1,9 @@
-package lxu.lxdfs.namenode;
+package lxu.lxdfs.service;
 
 import lxu.lxdfs.Block;
 import lxu.lxdfs.BlocksLocation;
 import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.namenode.ClientOutputStream;
 
 import java.nio.file.Path;
 import java.rmi.RemoteException;

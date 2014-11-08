@@ -1,6 +1,7 @@
-package lxu.lxdfs.namenode;
+package lxu.lxdfs.service;
 
 import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.namenode.ClientOutputStream;
 
 import java.nio.file.Path;
 import java.rmi.Remote;

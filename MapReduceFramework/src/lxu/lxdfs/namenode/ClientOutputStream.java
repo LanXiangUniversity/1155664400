@@ -1,6 +1,7 @@
 package lxu.lxdfs.namenode;
 
 import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;

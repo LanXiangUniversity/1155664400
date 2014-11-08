@@ -6,9 +6,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lxu.lxdfs.metadata.Block;
+import lxu.lxdfs.client.ClientPacket;
 
 /**
- * Created by magl on 14/11/8
+ * Created by magl on 14/11/8.
  */
 public class BlockService implements Runnable {
     // blockID -> local file name

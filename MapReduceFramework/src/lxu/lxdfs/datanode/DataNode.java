@@ -1,10 +1,13 @@
-package mydfs.namenode;
+package lxu.lxdfs.datanode;
 
 import lxu.lxdfs.datanode.BlockService;
 import lxu.lxdfs.service.INameSystemService;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class DataNode implements Runnable {
 
@@ -14,16 +17,20 @@ public class DataNode implements Runnable {
     private Thread blockServiceThread = null;
     private ServerSocket dataNodeServerSocket = null;
     private INameSystemService nameNode = null;
+    private String nameNodeHostName = null;
 
-    public DataNode() throws IOException {
+    public DataNode() throws Exception {
         dataNodeServerSocket = new ServerSocket(port);
         dataNodeThread = new Thread(this);
         dataNodeThread.start();
         register();
     }
 
-    private void register() throws IOException {
-
+    private void register() throws IOException, NotBoundException {
+        nameNodeHostName = "";
+        Registry registry = LocateRegistry.getRegistry(nameNodeHostName);
+        nameNode = (INameSystemService) registry.lookup("");
+        nameNode.register();
     }
 
     /**

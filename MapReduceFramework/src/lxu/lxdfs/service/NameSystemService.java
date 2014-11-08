@@ -151,7 +151,7 @@ public class NameSystemService implements INameSystemService {
      * Data Node
      */
     @Override
-    public void register() {
-
+    public boolean register(String dataNodeHostName, int port) {
+        return false;
     }
 }

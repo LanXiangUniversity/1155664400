@@ -4,6 +4,7 @@ import lxu.lxdfs.datanode.BlockService;
 import lxu.lxdfs.service.INameSystemService;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -30,7 +31,7 @@ public class DataNode implements Runnable {
     private void register() throws IOException, NotBoundException {
         nameNodeHostName = "";
         nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
-        nameNode.register();
+        nameNode.register(InetAddress.getLocalHost().getHostName(), port);
     }
 
     /**

@@ -1,9 +1,8 @@
 package lxu.lxdfs.namenode;
 
-import lxu.lxdfs.Block;
-import lxu.lxdfs.DataNodeDescriptor;
-import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.datanode.DataNodePacket;
+import lxu.lxdfs.metadata.Block;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;

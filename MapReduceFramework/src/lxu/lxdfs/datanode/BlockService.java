@@ -6,8 +6,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lxu.lxdfs.Block;
-import lxu.lxdfs.namenode.ClientPacket;
 
 /**
  * Created by magl on 14/11/8

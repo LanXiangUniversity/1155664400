@@ -30,8 +30,8 @@ public class ClientOutputStream {
 	private Queue<String> buffer;
 	private AckListener ackListener;
 
-	public ClientOutputStream(int listenPort) {
-		this.listenPort = listenPort;
+	public ClientOutputStream() {
+		this.listenPort = 15998;
 		this.ackListener = new AckListener();
 	}
 

@@ -82,6 +82,21 @@ public class NameSystemService implements INameSystemService {
 		return locations;
 	}
 
+	/**
+	 * Alloc DataNodes to store the new Block.
+	 * @param replicNum Number of replications for each Block.
+	 * @return
+	 */
+	public ArrayList<DataNodeDescriptor> allocDataNodes(int replicNum) {
+		ArrayList<DataNodeDescriptor> dataNodes = new ArrayList<DataNodeDescriptor>();
+
+		for (int i = 0; i < this.replicaNum; i++) {
+			dataNodes.add(this.dataNodes.get(i));
+		}
+
+		return dataNodes;
+	}
+
 	@Override
 	public ClientOutputStream open(Path path) throws RemoteException {
 		/*

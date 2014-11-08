@@ -1,8 +1,8 @@
 package lxu.lxdfs.namenode;
 
-import lxu.lxdfs.Block;
-import lxu.lxdfs.BlocksLocation;
-import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.metadata.Block;
+import lxu.lxdfs.metadata.BlocksLocation;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
@@ -41,8 +41,6 @@ public class NameNode {
 
 
 	}
-
-
 
 
 	// Locating Block
@@ -117,6 +115,7 @@ public class NameNode {
 
 	/**
 	 * Return the locations<datanode, filename> of a Block
+	 *
 	 * @param blockID
 	 * @return locations that store the Block
 	 */
@@ -148,6 +147,11 @@ public class NameNode {
 	// 4. Blocks to data node mapping
 	// 5. Network mtetrics
 	// 6. Edit log
+
+	/**
+	 * Register remote object in registry
+	 * for Clients and DataNodes.
+	 */
 	public void registerService() {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new RMISecurityManager());

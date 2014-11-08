@@ -1,6 +1,7 @@
-package lxu.lxdfs.namenode;
+package lxu.lxdfs.client;
 
-import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.metadata.BlocksLocation;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class ClientPacket implements Serializable {
 	// Data to be transferred.
 	private ArrayList<String> lines;
 	// Locations for each Block replica.
-	private ArrayList<BlocksLocation> locations;
+	private ArrayList<DataNodeDescriptor> locations;
 	// ID of this replica.
 	private int replicaID;
 	// Total replication Num.
@@ -47,7 +48,7 @@ public class ClientPacket implements Serializable {
 		this.len = len;
 	}
 
-	public List<String> getLines() {
+	public ArrayList<String> getLines() {
 		return lines;
 	}
 
@@ -55,11 +56,11 @@ public class ClientPacket implements Serializable {
 		this.lines = lines;
 	}
 
-	public List<BlocksLocation> getLocations() {
+	public ArrayList<DataNodeDescriptor> getLocations() {
 		return locations;
 	}
 
-	public void setLocations(ArrayList<BlocksLocation> locations) {
+	public void setLocations(ArrayList<DataNodeDescriptor> locations) {
 		this.locations = locations;
 	}
 

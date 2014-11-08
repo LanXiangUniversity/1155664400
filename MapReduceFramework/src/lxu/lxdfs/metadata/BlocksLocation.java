@@ -1,4 +1,4 @@
-package lxu.lxdfs;
+package lxu.lxdfs.metadata;
 
 /**
  * Created by Wei on 11/3/14.

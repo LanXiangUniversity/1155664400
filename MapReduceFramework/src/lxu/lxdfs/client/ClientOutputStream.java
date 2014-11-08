@@ -1,6 +1,7 @@
-package lxu.lxdfs.namenode;
+package lxu.lxdfs.client;
 
-import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.metadata.BlocksLocation;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
@@ -14,22 +15,27 @@ import java.util.Queue;
 /**
  * Created by Wei on 11/3/14.
  */
-public class ClientOutputStream {
+public class ClientOutputStream extends ClientStream {
 	private String fileName;
 	private int blockOffset;
 	private NameSystemService nameSystem;
 	private int blockSize = 10;
 
 	// Locations for all replicas
-	private List<BlocksLocation> locations;
+	private ArrayList<BlocksLocation> locations;
 
 	// Packets to be sent.
 	private Queue<ClientPacket> dataQueue;
 	// Packets to be acked.
 	private Queue<ClientPacket> ackQueue;
 
+	// Store lines of data.
 	private Queue<String> buffer;
 
+	/**
+	 * Getters and Setters.
+	 * @return
+	 */
 	public String getFileName() {
 		return fileName;
 	}
@@ -62,12 +68,11 @@ public class ClientOutputStream {
 		this.blockSize = blockSize;
 	}
 
-
-	public List<BlocksLocation> getLocations() {
+	public ArrayList<BlocksLocation> getLocations() {
 		return locations;
 	}
 
-	public void setLocations(List<BlocksLocation> locations) {
+	public void setLocations(ArrayList<BlocksLocation> locations) {
 		this.locations = locations;
 	}
 
@@ -103,27 +108,24 @@ public class ClientOutputStream {
 	 * @param data
 	 * @return
 	 */
-	public int write(String data) {
-		// get data
+	public int write(String data) throws RemoteException {
+		// Split data into lines.
 		String[] lines = data.split("\n");
 
-		// Buffer
+		// Add lines to the buffer.
 		for (String line : lines) {
 			buffer.add(line);
 		}
 
 		while (buffer.size() >= blockSize) {
 			// Allocate new Blocks through RPC and get the locations.
-			try {
-				List<BlocksLocation> locations = nameSystem.allocateBlock(this.fileName, this.blockOffset);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+			ArrayList<DataNodeDescriptor> locations = nameSystem.allocateBlock(
+															this.fileName, this.blockOffset);
 
 			// Update info about the first Data Node.
 
 			// Create packet.
-			ClientPacket packet = this.getPacketFromBuffer();
+			ClientPacket packet = this.getPacketFromBuffer(locations);
 
 			// Send packet to the first Data Node.
 			this.dataQueue.add(packet);
@@ -143,8 +145,8 @@ public class ClientOutputStream {
 	 * Send packet (Block) to the first Data Node.
 	 */
 	public void sendPacket(ClientPacket packet) {
-		String ip = packet.getLocations().get(0).getDataNode().getDataNodeIP();
-		int port = packet.getLocations().get(0).getDataNode().getDataNodePort();
+		String ip = packet.getLocations().get(0).getDataNodeIP();
+		int port = packet.getLocations().get(0).getDataNodePort();
 
 		try {
 			Socket sock = new Socket(ip, port);
@@ -155,7 +157,7 @@ public class ClientOutputStream {
 
 			// Log
 			System.out.println("Succeed to write to DataNode " +
-					packet.getLocations().get(0).getDataNode().getDataNodeID());
+					packet.getLocations().get(0).getDataNodeID());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -163,15 +165,14 @@ public class ClientOutputStream {
 
 	/**
 	 * Get data from buffer and build a packet.
-	 *
 	 * @return
 	 */
-	public ClientPacket getPacketFromBuffer() {
+	public ClientPacket getPacketFromBuffer(ArrayList<DataNodeDescriptor> locations) {
 		if (buffer.size() == 0) {
 			return null;
 		}
 
-		List<String> lines = new ArrayList<String>();
+		ArrayList<String> lines = new ArrayList<String>();
 
 		// Get top elements in the buffer.
 		int blockLen = blockSize > buffer.size() ? buffer.size() : blockSize;
@@ -184,7 +185,7 @@ public class ClientOutputStream {
 		ClientPacket packet = new ClientPacket();
 		packet.setLines(lines);
 		packet.setLen(buffer.size());
-		packet.setLocations(this.locations);
+		packet.setLocations(locations);
 		packet.setReplicaID(1);
 		packet.setReplicaNum(2);
 

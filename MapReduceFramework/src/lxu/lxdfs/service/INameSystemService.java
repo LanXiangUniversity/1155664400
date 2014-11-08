@@ -1,8 +1,7 @@
 package lxu.lxdfs.service;
 
-import lxu.lxdfs.metadata.BlocksLocation;
-import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.namenode.ClientOutputStream;
 
 import java.nio.file.Path;
 import java.rmi.Remote;
@@ -30,5 +29,5 @@ public interface INameSystemService extends Remote {
 	public List<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException;
 
 	// Services for Data Node
-
+    public void register();
 }

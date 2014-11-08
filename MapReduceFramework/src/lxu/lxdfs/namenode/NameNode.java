@@ -1,8 +1,9 @@
 package lxu.lxdfs.namenode;
 
-import lxu.lxdfs.metadata.Block;
-import lxu.lxdfs.metadata.BlocksLocation;
-import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.Block;
+import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
@@ -25,7 +26,7 @@ public class NameNode {
 	// Map from file name to Block.
 	private HashMap<String, Block> fileNameToBlockMap;
 	// Map from Block to Data Nodes.
-	private HashMap<Block, List<BlocksLocation>> blockToLocationsMap;
+	private HashMap<Block, List<DataNodeDescriptor>> blockToLocationsMap;
 	// Map from BlockID to Block
 	private HashMap<Integer, Block> IDToBlockMap;
 
@@ -41,6 +42,8 @@ public class NameNode {
 
 
 	}
+
+
 
 
 	// Locating Block
@@ -115,12 +118,11 @@ public class NameNode {
 
 	/**
 	 * Return the locations<datanode, filename> of a Block
-	 *
 	 * @param blockID
 	 * @return locations that store the Block
 	 */
-	public List<BlocksLocation> getBlockLocations(int blockID) {
-		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
+	public List<DataNodeDescriptor> getBlockLocations(int blockID) {
+		List<DataNodeDescriptor> blockLocations = new ArrayList<DataNodeDescriptor>();
 
 		// get Block by ID
 		if (!IDToBlockMap.containsKey(blockID)) {
@@ -133,7 +135,7 @@ public class NameNode {
 			return blockLocations;
 		}
 
-		List<BlocksLocation> locations = blockToLocationsMap.get(block);
+		List<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
 
 		return locations;
 	}
@@ -147,11 +149,6 @@ public class NameNode {
 	// 4. Blocks to data node mapping
 	// 5. Network mtetrics
 	// 6. Edit log
-
-	/**
-	 * Register remote object in registry
-	 * for Clients and DataNodes.
-	 */
 	public void registerService() {
 		if (System.getSecurityManager() == null) {
 			System.setSecurityManager(new RMISecurityManager());

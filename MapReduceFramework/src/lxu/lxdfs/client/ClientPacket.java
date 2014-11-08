@@ -1,23 +1,21 @@
 package lxu.lxdfs.client;
 
-import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Wei on 11/4/14.
  */
 public class ClientPacket implements Serializable {
-    public static final int BLOCK_READ = 0;
-    public static final int BLOCK_WRITE = 1;
+	public static final int BLOCK_READ = 0;
+	public static final int BLOCK_WRITE = 1;
 	// Used for validate ack.
 	private int packetID;
-    // Target block
-    private Block block;
+	// Target block
+	private Block block;
 	// Data to be transferred.
 	private ArrayList<String> lines;
 	// Locations for each Block replica.
@@ -26,18 +24,17 @@ public class ClientPacket implements Serializable {
 	private int replicaID;
 	// Total replication Num.
 	private int replicaNum;
+	// Client operation.
+	// Possible operation: read (1), write (2)
+	private int operation;
 
-    public int getOperation() {
-        return operation;
-    }
+	public int getOperation() {
+		return operation;
+	}
 
-    public void setOperation(int operation) {
-        this.operation = operation;
-    }
-
-    // Client operation.
-    // Possible operation: read (1), write (2)
-    private int operation;
+	public void setOperation(int operation) {
+		this.operation = operation;
+	}
 
 	public int getPacketID() {
 		return packetID;

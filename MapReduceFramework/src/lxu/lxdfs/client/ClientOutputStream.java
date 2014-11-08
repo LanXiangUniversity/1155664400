@@ -1,15 +1,16 @@
 package lxu.lxdfs.client;
 
+import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Created by Wei on 11/3/14.
@@ -17,18 +18,34 @@ import java.util.Queue;
 public class ClientOutputStream {
 	private String fileName;
 	private int blockOffset;
+	private int listenPort;
 	private NameSystemService nameSystem;
 	private int blockSize = 10;
-
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
-
 	// Packets to be sent.
 	private Queue<ClientPacket> dataQueue;
 	// Packets to be acked.
 	private Queue<ClientPacket> ackQueue;
-
 	private Queue<String> buffer;
+	private AckListener ackListener;
+
+	public ClientOutputStream(int listenPort) {
+		this.listenPort = listenPort;
+		this.ackListener = new AckListener();
+	}
+
+	public void close() {
+		this.ackListener.stop();
+	}
+
+	public int getListenPort() {
+		return listenPort;
+	}
+
+	public void setListenPort(int listenPort) {
+		this.listenPort = listenPort;
+	}
 
 	public String getFileName() {
 		return fileName;
@@ -196,9 +213,51 @@ public class ClientOutputStream {
 	 * Listen for acks from data node.
 	 */
 	private class AckListener implements Runnable {
+		private boolean isRunning = true;
+
+		public boolean isRunning() {
+			return isRunning;
+		}
+
+		public void setRunning(boolean isRunning) {
+			this.isRunning = isRunning;
+		}
+
+		public void stop() {
+			this.isRunning = false;
+		}
+
 		@Override
 		public void run() {
+			ServerSocket srvSock = null;
+			Socket sock = null;
+			ObjectInputStream dis = null;
+			DataNodePacket packet = null;
 
+			while (this.isRunning) {
+				try {
+					srvSock = new ServerSocket(listenPort);
+					sock = srvSock.accept();
+					dis = new ObjectInputStream(sock.getInputStream());
+					packet = (DataNodePacket) dis.readObject();
+
+					int ackID = packet.getAckPacketID();
+					System.out.println("ACK ID: " + ackID);
+
+					dis.close();
+					sock.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				srvSock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

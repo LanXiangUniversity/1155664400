@@ -10,7 +10,7 @@ import lxu.lxdfs.Block;
 import lxu.lxdfs.namenode.ClientPacket;
 
 /**
- * Created by magl on 14/11/8.
+ * Created by magl on 14/11/8
  */
 public class BlockService implements Runnable {
     // blockID -> local file name

@@ -1,6 +1,8 @@
 package lxu.lxdfs.namenode;
 
-import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.Block;
+import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.datanode.DataNodePacket;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,18 +12,32 @@ import java.util.List;
  * Created by Wei on 11/4/14.
  */
 public class ClientPacket implements Serializable {
+    public static final int BLOCK_READ = 0;
+    public static final int BLOCK_WRITE = 1;
 	// Used for validate ack.
 	private int packetID;
-	// size of Block data(lines).
-	private int len;
+    // Target block
+    private Block block;
 	// Data to be transferred.
 	private ArrayList<String> lines;
 	// Locations for each Block replica.
-	private ArrayList<BlocksLocation> locations;
+	private ArrayList<DataNodeDescriptor> locations;
 	// ID of this replica.
 	private int replicaID;
 	// Total replication Num.
 	private int replicaNum;
+
+    public int getOperation() {
+        return operation;
+    }
+
+    public void setOperation(int operation) {
+        this.operation = operation;
+    }
+
+    // Client operation.
+    // Possible operation: read (1), write (2)
+    private int operation;
 
 	public int getPacketID() {
 		return packetID;
@@ -39,15 +55,15 @@ public class ClientPacket implements Serializable {
 		this.replicaNum = replicaNum;
 	}
 
-	public int getLen() {
-		return len;
+	public Block getBlock() {
+		return this.block;
 	}
 
-	public void setLen(int len) {
-		this.len = len;
+	public void setBlock(Block block) {
+		this.block = block;
 	}
 
-	public List<String> getLines() {
+	public ArrayList<String> getLines() {
 		return lines;
 	}
 
@@ -55,11 +71,11 @@ public class ClientPacket implements Serializable {
 		this.lines = lines;
 	}
 
-	public List<BlocksLocation> getLocations() {
+	public ArrayList<DataNodeDescriptor> getLocations() {
 		return locations;
 	}
 
-	public void setLocations(ArrayList<BlocksLocation> locations) {
+	public void setLocations(ArrayList<DataNodeDescriptor> locations) {
 		this.locations = locations;
 	}
 

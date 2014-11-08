@@ -1,7 +1,7 @@
 package lxu.lxdfs.service;
 
 import lxu.lxdfs.Block;
-import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.namenode.ClientOutputStream;
 
@@ -27,7 +27,7 @@ public class NameSystemService implements INameSystemService {
 	// Map from file name to Block.
 	private HashMap<String, List<Block>> fileNameToBlocksMap;
 	// Map from Block to Data Nodes.
-	private HashMap<Block, List<BlocksLocation>> blockToLocationsMap;
+	private HashMap<Block, List<DataNodeDescriptor>> blockToLocationsMap;
 	// Map from BlockID to Block
 	private HashMap<Integer, Block> IDToBlockMap;
 	// List of file names.
@@ -60,13 +60,13 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public List<BlocksLocation> allocateBlock(String fileName, int offset) throws RemoteException {
+	public List<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException {
 		Block block = new Block();
 		int blockId = this.blockID++;
-		List<BlocksLocation> locations = new ArrayList<BlocksLocation>();
+		List<DataNodeDescriptor> locations = new ArrayList<DataNodeDescriptor>();
 
 		for (int i = 0; i < this.replicaNum; i++) {
-			BlocksLocation location = new BlocksLocation();
+			DataNodeDescriptor location = new DataNodeDescriptor();
 
 			locations.add(location);
 		}
@@ -130,8 +130,8 @@ public class NameSystemService implements INameSystemService {
 	}
 
 	@Override
-	public List<BlocksLocation> getBlockLocations(int blockID) throws RemoteException {
-		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
+	public List<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException {
+		List<DataNodeDescriptor> blockLocations = new ArrayList<DataNodeDescriptor>();
 
 		// get Block by ID
 		if (!IDToBlockMap.containsKey(blockID)) {
@@ -144,8 +144,16 @@ public class NameSystemService implements INameSystemService {
 			return blockLocations;
 		}
 
-		List<BlocksLocation> locations = blockToLocationsMap.get(block);
+		List<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
 
 		return locations;
 	}
+
+    /**
+     * Data Node
+     */
+    @Override
+    public void register() {
+
+    }
 }

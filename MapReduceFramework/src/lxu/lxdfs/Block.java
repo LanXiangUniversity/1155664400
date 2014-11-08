@@ -6,11 +6,22 @@ import java.util.List;
  * Created by Wei on 11/3/14.
  */
 public class Block {
-	private long blockID;              // global Block ID
-	private long offset;               // the offset in the file
+	private Long blockID;              // global Block ID
 	private long len;                  // size of bytes
 
-	private String fileName;
-	private List<DataNodeDescriptor> dataNodes;          // dataNodeID where the Block is stored
-	private List<String> dataNodeFileNames;               // Filename of the Block
+    public long getLen() {
+        return len;
+    }
+
+    public void setLen(long len) {
+        this.len = len;
+    }
+
+    public Long getBlockID() {
+        return blockID;
+    }
+
+    public void setBlockID(Long blockID) {
+        this.blockID = blockID;
+    }
 }

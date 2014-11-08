@@ -1,8 +1,9 @@
 package lxu.lxdfs.namenode;
 
 import lxu.lxdfs.Block;
-import lxu.lxdfs.BlocksLocation;
 import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
@@ -25,7 +26,7 @@ public class NameNode {
 	// Map from file name to Block.
 	private HashMap<String, Block> fileNameToBlockMap;
 	// Map from Block to Data Nodes.
-	private HashMap<Block, List<BlocksLocation>> blockToLocationsMap;
+	private HashMap<Block, List<DataNodeDescriptor>> blockToLocationsMap;
 	// Map from BlockID to Block
 	private HashMap<Integer, Block> IDToBlockMap;
 
@@ -120,8 +121,8 @@ public class NameNode {
 	 * @param blockID
 	 * @return locations that store the Block
 	 */
-	public List<BlocksLocation> getBlockLocations(int blockID) {
-		List<BlocksLocation> blockLocations = new ArrayList<BlocksLocation>();
+	public List<DataNodeDescriptor> getBlockLocations(int blockID) {
+		List<DataNodeDescriptor> blockLocations = new ArrayList<DataNodeDescriptor>();
 
 		// get Block by ID
 		if (!IDToBlockMap.containsKey(blockID)) {
@@ -134,7 +135,7 @@ public class NameNode {
 			return blockLocations;
 		}
 
-		List<BlocksLocation> locations = blockToLocationsMap.get(block);
+		List<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
 
 		return locations;
 	}

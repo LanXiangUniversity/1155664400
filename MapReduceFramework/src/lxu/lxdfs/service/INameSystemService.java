@@ -1,6 +1,6 @@
 package lxu.lxdfs.service;
 
-import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.namenode.ClientOutputStream;
 
 import java.nio.file.Path;
@@ -24,10 +24,10 @@ public interface INameSystemService extends Remote {
 
 	public boolean exists(Path path) throws RemoteException;
 
-	public List<BlocksLocation> allocateBlock(String fileName, int offset) throws RemoteException;
+	public List<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException;
 
-	public List<BlocksLocation> getBlockLocations(int blockID) throws RemoteException;
+	public List<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException;
 
 	// Services for Data Node
-
+    public void register();
 }

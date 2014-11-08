@@ -1,6 +1,7 @@
 package lxu.lxdfs.namenode;
 
-import lxu.lxdfs.BlocksLocation;
+import lxu.lxdfs.DataNodeDescriptor;
+import lxu.lxdfs.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class ClientOutputStream {
 	private int blockSize = 10;
 
 	// Locations for all replicas
-	private List<BlocksLocation> locations;
+	private List<DataNodeDescriptor> locations;
 
 	// Packets to be sent.
 	private Queue<ClientPacket> dataQueue;
@@ -63,11 +64,11 @@ public class ClientOutputStream {
 	}
 
 
-	public List<BlocksLocation> getLocations() {
+	public List<DataNodeDescriptor> getLocations() {
 		return locations;
 	}
 
-	public void setLocations(List<BlocksLocation> locations) {
+	public void setLocations(List<DataNodeDescriptor> locations) {
 		this.locations = locations;
 	}
 
@@ -115,7 +116,7 @@ public class ClientOutputStream {
 		while (buffer.size() >= blockSize) {
 			// Allocate new Blocks through RPC and get the locations.
 			try {
-				List<BlocksLocation> locations = nameSystem.allocateBlock(this.fileName, this.blockOffset);
+				List<DataNodeDescriptor> locations = nameSystem.allocateBlock(this.fileName, this.blockOffset);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -143,8 +144,8 @@ public class ClientOutputStream {
 	 * Send packet (Block) to the first Data Node.
 	 */
 	public void sendPacket(ClientPacket packet) {
-		String ip = packet.getLocations().get(0).getDataNode().getDataNodeIP();
-		int port = packet.getLocations().get(0).getDataNode().getDataNodePort();
+		String ip = packet.getLocations().get(0).getDataNodeIP();
+		int port = packet.getLocations().get(0).getDataNodePort();
 
 		try {
 			Socket sock = new Socket(ip, port);
@@ -155,7 +156,7 @@ public class ClientOutputStream {
 
 			// Log
 			System.out.println("Succeed to write to DataNode " +
-					packet.getLocations().get(0).getDataNode().getDataNodeID());
+					packet.getLocations().get(0).getDataNodeID());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

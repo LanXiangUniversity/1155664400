@@ -1,7 +1,6 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.metadata.DataNodeDescriptor;
-import lxu.lxdfs.namenode.ClientPacket;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;

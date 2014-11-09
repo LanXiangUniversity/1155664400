@@ -36,6 +36,11 @@ public class NameSystemService implements INameSystemService {
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 
 	public NameSystemService() {
+        dataNodes = new LinkedList<DataNodeDescriptor>();
+        fileNameToBlocksMap = new HashMap<String, List<Block>>();
+        blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
+        IDToBlockMap = new HashMap<Integer, Block>();
+        fileNames = new HashSet<String>();
 	}
 
 	public boolean isSafeMode() {

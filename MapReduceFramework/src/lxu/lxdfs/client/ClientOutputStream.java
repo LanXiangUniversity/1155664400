@@ -26,23 +26,19 @@ public class ClientOutputStream {
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
 	// Packets to be sent.
-	private LinkedList<ClientPacket> dataQueue;
+	private Queue<ClientPacket> dataQueue;
 	// Packets to be acked.
-	private LinkedList<ClientPacket> ackQueue;
+	private Queue<ClientPacket> ackQueue;
 	private Queue<String> buffer;
-    private List<AckListener> ackListeners;
+	private AckListener ackListener;
 
 	public ClientOutputStream() {
 		this.listenPort = 15998;
-        dataQueue = new LinkedList<ClientPacket>();
-        ackQueue = new LinkedList<ClientPacket>();
-        ackListeners = new ArrayList<AckListener>();
+		this.ackListener = new AckListener();
 	}
 
 	public void close() {
-        for (AckListener ackListener : ackListeners) {
-            ackListener.stop();
-        }
+		this.ackListener.stop();
 	}
 
 	public int getListenPort() {
@@ -93,19 +89,19 @@ public class ClientOutputStream {
 		this.locations = locations;
 	}
 
-	public LinkedList<ClientPacket> getDataQueue() {
+	public Queue<ClientPacket> getDataQueue() {
 		return dataQueue;
 	}
 
-	public void setDataQueue(LinkedList<ClientPacket> dataQueue) {
+	public void setDataQueue(Queue<ClientPacket> dataQueue) {
 		this.dataQueue = dataQueue;
 	}
 
-	public LinkedList<ClientPacket> getAckQueue() {
+	public Queue<ClientPacket> getAckQueue() {
 		return ackQueue;
 	}
 
-	public void setAckQueue(LinkedList<ClientPacket> ackQueue) {
+	public void setAckQueue(Queue<ClientPacket> ackQueue) {
 		this.ackQueue = ackQueue;
 	}
 
@@ -126,7 +122,8 @@ public class ClientOutputStream {
 	 * @return
 	 */
 	public int write(String data) {
-        AllocatedBlock allocatedBlock = null;
+		int writeSize = 0;
+		AllocatedBlock allocatedBlock = null;
 
 		// get data
 		String[] lines = data.split("\n");
@@ -137,6 +134,8 @@ public class ClientOutputStream {
 		}
 
 		while (buffer.size() >= blockSize) {
+			writeSize += buffer.size() < 10 ? buffer.size() : 10;
+
 			// Allocate new Blocks through RPC and get the locations.
 			try {
 				allocatedBlock = nameSystem.allocateBlock(this.fileName, this.blockOffset);
@@ -144,48 +143,49 @@ public class ClientOutputStream {
 				e.printStackTrace();
 			}
 
-            Block block = allocatedBlock.getBlock();
-            HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
+			Block block = allocatedBlock.getBlock();
+			HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
 
 			// Update info about the first Data Node.
 
 			// Create packet.
 			List<ClientPacket> packets = this.getPacketsFromBuffer(locations, block);
 
-            for (ClientPacket packet : packets) {
-                // Send packet to the first Data Node.
-                this.dataQueue.add(packet);
-                this.sendPacket(packet);
+			for (ClientPacket packet : packets) {
+				// Send packet to the first Data Node.
+				this.dataQueue.add(packet);
+				this.sendPacket(packet);
 
-                // Wait for ack of this packet.
-                this.dataQueue.remove();
-                this.ackQueue.add(packet);
-            }
+				// Wait for ack of this packet.
+				this.dataQueue.remove();
+				this.ackQueue.add(packet);
+			}
 
 			this.blockOffset++;
 		}
 
-		return -1;
+		/* TODO wait for ackQueue to be cleared by ackListener */
+
+		return writeSize;
 	}
 
 	/**
 	 * Send packet (Block) to the first Data Node.
 	 */
 	public void sendPacket(ClientPacket packet) {
-        /*
+	    /*
 		String ip = packet.getLocations().get(0).getDataNodeIP();
 		int port = packet.getLocations().get(0).getDataNodePort();
 		*/
-        String ip = packet.getLocation().getDataNodeIP();
-        int port = packet.getLocation().getDataNodePort();
+		String ip = packet.getLocation().getDataNodeIP();
+		int port = packet.getLocation().getDataNodePort();
 
 		try {
 			Socket sock = new Socket(ip, port);
 			ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 			oos.writeObject(packet);
-            AckListener ackListener = new AckListener(sock);
-            ackListeners.add(ackListener);
-            (new Thread(ackListener)).start();
+			oos.close();
+			sock.close();
 
 			// Log
 			System.out.println("Succeed to write to DataNode " +
@@ -201,12 +201,12 @@ public class ClientOutputStream {
 	 * @return
 	 */
 	public List<ClientPacket> getPacketsFromBuffer(Set<DataNodeDescriptor> locations,
-                                                   Block block) {
+	                                               Block block) {
 		if (buffer.size() == 0) {
 			return null;
 		}
 
-        List<ClientPacket> packets = new ArrayList<ClientPacket>();
+		List<ClientPacket> packets = new ArrayList<ClientPacket>();
 
 		ArrayList<String> lines = new ArrayList<String>();
 
@@ -216,19 +216,19 @@ public class ClientOutputStream {
 		while (blockLen-- > 0) {
 			lines.add(buffer.remove());
 		}
-        block.setLen(blockLen);
 
 		// Create a new packet.
-        for (DataNodeDescriptor location : locations) {
-            ClientPacket packet = new ClientPacket();
-            packet.setLines(lines);
-            packet.setBlock(block);
-            //packet.setLocations(locations);
-            packet.setLocation(location);
-            packet.setReplicaID(1);
-            packet.setReplicaNum(2);
-            packets.add(packet);
-        }
+		for (DataNodeDescriptor location : locations) {
+			ClientPacket packet = new ClientPacket();
+			packet.setLines(lines);
+			packet.setBlock(block);
+
+			//packet.setLocations(locations);
+			packet.setLocation(location);
+			packet.setReplicaID(1);
+			packet.setReplicaNum(2);
+			packets.add(packet);
+		}
 
 		return packets;
 	}
@@ -237,12 +237,7 @@ public class ClientOutputStream {
 	 * Listen for acks from data node.
 	 */
 	private class AckListener implements Runnable {
-        private Socket socket = null;
 		private boolean isRunning = true;
-
-        public AckListener(Socket socket) {
-            this.socket = socket;
-        }
 
 		public boolean isRunning() {
 			return isRunning;
@@ -258,35 +253,37 @@ public class ClientOutputStream {
 
 		@Override
 		public void run() {
+			ServerSocket srvSock = null;
+			Socket sock = null;
 			ObjectInputStream dis = null;
 			DataNodePacket packet = null;
 
 			while (this.isRunning) {
 				try {
-					dis = new ObjectInputStream(socket.getInputStream());
+					srvSock = new ServerSocket(listenPort);
+					sock = srvSock.accept();
+					dis = new ObjectInputStream(sock.getInputStream());
 					packet = (DataNodePacket) dis.readObject();
 
 					int ackID = packet.getAckPacketID();
 					System.out.println("ACK ID: " + ackID);
 
-                    synchronized (ackQueue) {
-                        for (ClientPacket clientPacket : ackQueue) {
-                            if (clientPacket.getPacketID() == ackID) {
-                                ackQueue.remove(clientPacket);
-                                this.isRunning = false;
-                            }
-                        }
-                    }
+					/* TODO Remove ACKed Block from ackQueue */
 
 					dis.close();
-					socket.close();
+					sock.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
 			}
-            ackListeners.remove(this);
+
+			try {
+				srvSock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

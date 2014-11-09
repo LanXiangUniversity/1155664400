@@ -10,8 +10,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Remote Interface for NameSystem
@@ -36,5 +34,5 @@ public interface INameSystemService extends Remote {
 	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException;
 
 	// Services for Data Node
-    public int register(String dataNodeHostName, int port, ArrayList<Block> blocks);
+	public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks) throws RemoteException;
 }

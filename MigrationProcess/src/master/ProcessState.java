@@ -1,7 +1,7 @@
 /**
  * ProcessState.java
  * @author Tong Wei (twei1), Guoli Ma (guolim)
- * 
+ *
  * Description: The process state. Record the process ID, the process name, and
  * 				the slave node on which it is running.
  */
@@ -13,37 +13,37 @@ package master;
  * Modified by Ma on 9/10/14.
  */
 public class ProcessState {
-    private int pid;
-    private String processName;
-    private String nodeName;
+	private int pid;
+	private String processName;
+	private String nodeName;
 
-    public String getProcessName() {
-        return processName;
-    }
+	public ProcessState(int pid, String processName, String nodeName) {
+		this.processName = processName;
+		this.nodeName = nodeName;
+		this.pid = pid;
+	}
 
-    public void setProcessName(String processName) {
-        this.processName = processName;
-    }
+	public String getProcessName() {
+		return processName;
+	}
 
-    public String getNodeName() {
-        return nodeName;
-    }
+	public void setProcessName(String processName) {
+		this.processName = processName;
+	}
 
-    public void setNodeName(String nodeName) {
-        this.nodeName = nodeName;
-    }
+	public String getNodeName() {
+		return nodeName;
+	}
 
-    public int getPid() {
-        return pid;
-    }
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
 
-    public void setPid(int pid) {
-        this.pid = pid;
-    }
+	public int getPid() {
+		return pid;
+	}
 
-    public ProcessState(int pid, String processName, String nodeName) {
-        this.processName = processName;
-        this.nodeName = nodeName;
-        this.pid = pid;
-    }
+	public void setPid(int pid) {
+		this.pid = pid;
+	}
 }

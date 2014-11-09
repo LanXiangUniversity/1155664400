@@ -1,129 +1,130 @@
 package lxu.lxdfs.namenode;
 
-import lxu.lxdfs.datanode.DataNodePacket;
-import lxu.lxdfs.metadata.Block;
-import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by Wei on 11/2/14.
  */
 public class NameNode {
-    /**
-     * ********************** Data structures *********************
-     */
-    private NameSystemService nameSystem;
+	/**
+	 * ********************** Data structures *********************
+	 */
+	private NameSystemService nameSystem;
 
-    /**
-     * ************************Services for client ************************
-     */
+	/**
+	 * ************************Services for client ************************
+	 */
 
-    public static void main(String[] args) {
-        NameNode nameNode = new NameNode();
+	public static void main(String[] args) {
+		NameNode nameNode = new NameNode();
 
-        // Regsiter and start RPC service.
-        nameNode.registerService();
-
-
-    }
+		// Regsiter and start RPC service.
+		nameNode.registerService();
 
 
-    // Locating Block
+		nameNode.nameSystem.enterSafeMode();
 
-    // File create
+		/* TODO enter safe mode. */
+		/* TODO reconstruct NameSystem. */
+		/* TODO exit safe mode. */
 
-    // Block creation
-
-    // Complete
-
-    // Bad Blocks
-
-    // Data node report
-
-    // Blocks size
-
-    // Safe mode
-
-    // Name space
-
-    // Meta data operations
+		nameNode.nameSystem.exitSafeMode();
+	}
 
 
-    /**
-     * ************************Services for Data Node ************************
-     */
-    // Registration
+	// Locating Block
 
-    // Block report
+	// File create
 
-    // Block received
+	// Block creation
 
-    // Bad Blocks
+	// Complete
 
-    // Generation time stamp
+	// Bad Blocks
 
-    // Version information
+	// Data node report
 
-    // Block Synchronization update
+	// Blocks size
 
-    /**
-     *  Start up
-     */
-    // 1. Loads default configurations and user modified configurations.
+	// Safe mode
 
-    // 2. Creates following servers to process user request.
-    // a. RPC server
-    // b. Http server to provide monitoring information
-    // c. Trash emptier to manage user temporary files
+	// Name space
 
-    // 3. Initializes different metrics for monitoring
+	// Meta data operations
 
-    // 4. Initializes Name System
 
-    // 5. Threads for RPC server
-    // a. Listener  -- listens for incoming request
-    // b. Handler   -- handles user input and provides output Responder
-    // c. Responder -- is responsible for respond to user request
+	/**
+	 * ************************Services for Data Node ************************
+	 */
+	// Registration
 
-    // 6. Thread for Name System (internal)
-    // a. Heartbeat monitor     -- check whether data node is dead or running
-    // b. Lease manager monitor -- check lease associated with client has expired or active
-    // c. Replication monitor   -- monitors replication of blocks and replicate block as needed
+	// Block report
 
-    // 7. At startup Name Node is in Safe Mode (readonly mode for the HDFS).
-    //      Block-Machine mapping is created each time Name Node starts and it is
-    //      done by using data coming from different data nodes.
-    //      It remains in Safe Mode until it has appropriate block information
-    //      which satisfies the replication.
+	// Block received
 
-    // 8. Starts processing Client request after exiting Safe Mode.
+	// Bad Blocks
 
-    /**
-     * Storage
-     */
-    // 1. File related information like name. replication factor etc.
-    // 2. Block mapping for the file names.
-    // 3. List of Data nodes available
-    // 4. Blocks to data node mapping
-    // 5. Network mtetrics
-    // 6. Edit log
-    public void registerService() {
-        if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new RMISecurityManager());
-        }
-        try {
-            NameSystemService nameSystem = new NameSystemService();
-            Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
-            this.nameSystem = nameSystem;
-        } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+	// Generation time stamp
+
+	// Version information
+
+	// Block Synchronization update
+
+	/**
+	 *  Start up
+	 */
+	// 1. Loads default configurations and user modified configurations.
+
+	// 2. Creates following servers to process user request.
+	// a. RPC server
+	// b. Http server to provide monitoring information
+	// c. Trash emptier to manage user temporary files
+
+	// 3. Initializes different metrics for monitoring
+
+	// 4. Initializes Name System
+
+	// 5. Threads for RPC server
+	// a. Listener  -- listens for incoming request
+	// b. Handler   -- handles user input and provides output Responder
+	// c. Responder -- is responsible for respond to user request
+
+	// 6. Thread for Name System (internal)
+	// a. Heartbeat monitor     -- check whether data node is dead or running
+	// b. Lease manager monitor -- check lease associated with client has expired or active
+	// c. Replication monitor   -- monitors replication of blocks and replicate block as needed
+
+	// 7. At startup Name Node is in Safe Mode (readonly mode for the HDFS).
+	//      Block-Machine mapping is created each time Name Node starts and it is
+	//      done by using data coming from different data nodes.
+	//      It remains in Safe Mode until it has appropriate block information
+	//      which satisfies the replication.
+
+	// 8. Starts processing Client request after exiting Safe Mode.
+
+	/**
+	 * Storage
+	 */
+	// 1. File related information like name. replication factor etc.
+	// 2. Block mapping for the file names.
+	// 3. List of Data nodes available
+	// 4. Blocks to data node mapping
+	// 5. Network mtetrics
+	// 6. Edit log
+	public void registerService() {
+		if (System.getSecurityManager() == null) {
+			System.setSecurityManager(new RMISecurityManager());
+		}
+		try {
+			NameSystemService nameSystem = new NameSystemService();
+			Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
+			this.nameSystem = nameSystem;
+		} catch (Exception e) {
+			System.out.println("Exception: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
 }

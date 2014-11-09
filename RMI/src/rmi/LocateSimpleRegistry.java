@@ -1,6 +1,5 @@
 package rmi;
 
-import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,7 +10,6 @@ import java.net.Socket;
  * Created by Wei on 10/3/14.
  */
 public class LocateSimpleRegistry {
-	@Nullable
 	public static SimpleRegistry getRegistry(String host, int port) {
 		// Open socket.
 		try {

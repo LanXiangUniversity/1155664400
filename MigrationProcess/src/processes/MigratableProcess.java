@@ -1,7 +1,7 @@
 /**
  * MigratableProcess.java
  * @author Tong Wei (xxxx), Guoli Ma (guolim)
- * 
+ *
  * Description: The MigratableProcess Interface. All migratable process must
  * 				implement this interface.
  */

@@ -1,6 +1,5 @@
 package registry;
 
-import org.jetbrains.annotations.Nullable;
 import remote.RemoteObjectRef;
 
 import java.io.*;
@@ -20,7 +19,6 @@ public class FileRegistry {
 	}
 
 	// Return the ROR (if found) or null (if else)
-	@Nullable
 	public RemoteObjectRef lookup(String serviceName) throws IOException, ClassNotFoundException {
 		File file = new File(this.path);
 		ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));

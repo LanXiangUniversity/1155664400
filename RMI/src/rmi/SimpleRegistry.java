@@ -1,7 +1,5 @@
 package rmi;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import remote.RemoteObjectRef;
 
 import java.io.BufferedReader;
@@ -26,7 +24,6 @@ public class SimpleRegistry {
 	}
 
 	// Return the ROR (if found) or null (if else)
-	@Nullable
 	public RemoteObjectRef lookup(String serviceName) throws IOException {
 		Socket sock = new Socket(host, port);
 
@@ -77,7 +74,7 @@ public class SimpleRegistry {
 	}
 
 	// Rebind a ROR (can be null).
-	public void rebind(String serviceName, @NotNull RemoteObjectRef ror) throws IOException {
+	public void rebind(String serviceName, RemoteObjectRef ror) throws IOException {
 		// Open socket, same as before.
 		Socket sock = new Socket(this.host, this.port);
 

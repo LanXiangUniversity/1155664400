@@ -2,7 +2,6 @@ package remote;
 
 import message.RemoteMsg;
 import message.RemoteMsgType;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,7 +14,6 @@ import java.util.List;
  */
 public class Stub {
 	// Send msg to remote host and return its result.
-	@NotNull
 	public RemoteMsg sendMsgToRemoteProxy(RemoteObjectRef ror , RemoteMsg msg) throws IOException,
 			ClassNotFoundException {
 		// Connect to remote host.
@@ -45,7 +43,7 @@ public class Stub {
 		return rtnMsg;
 	}
 
-	public RemoteMsg marshall(String methodName, @NotNull List<Object> params, Class<?>[] paramsType, RemoteObjectRef ror
+	public RemoteMsg marshall(String methodName, List<Object> params, Class<?>[] paramsType, RemoteObjectRef ror
 	) throws NoSuchMethodException {
 		RemoteMsg msg = new RemoteMsg(RemoteMsgType.MSG_INVOKE);
 
@@ -61,7 +59,7 @@ public class Stub {
 	}
 
 	// Get return value from RemoteMsg.
-	public Object unMarshallReturnValue(@NotNull RemoteMsg msg) {
+	public Object unMarshallReturnValue(RemoteMsg msg) {
 		return msg.getContent();
 	}
 }

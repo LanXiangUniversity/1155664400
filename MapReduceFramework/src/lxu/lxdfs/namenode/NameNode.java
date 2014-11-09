@@ -1,9 +1,13 @@
 package lxu.lxdfs.namenode;
 
+import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 /**
  * Created by Wei on 11/2/14.
@@ -12,7 +16,7 @@ public class NameNode {
 	/**
 	 * ********************** Data structures *********************
 	 */
-	private NameSystemService nameSystem;
+	private INameSystemService nameSystem;
 
 	/**
 	 * ************************Services for client ************************
@@ -115,13 +119,18 @@ public class NameNode {
 	// 5. Network mtetrics
 	// 6. Edit log
 	public void registerService() {
-		if (System.getSecurityManager() == null) {
-			System.setSecurityManager(new RMISecurityManager());
-		}
+		//if (System.getSecurityManager() == null) {
+		//	System.setSecurityManager(new RMISecurityManager());
+		//}
 		try {
-			NameSystemService nameSystem = new NameSystemService();
-			Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
+			INameSystemService nameSystem = new NameSystemService();
+			//Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
+            INameSystemService stub =
+                    (INameSystemService) UnicastRemoteObject.exportObject(nameSystem);
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind("NameSystemService", stub);
 			this.nameSystem = nameSystem;
+            System.out.println("NameNode Start!");
 		} catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 			e.printStackTrace();

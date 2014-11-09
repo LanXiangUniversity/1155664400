@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class DataNode implements Runnable {
 
@@ -43,7 +45,9 @@ public class DataNode implements Runnable {
 	}
 
 	private void register() throws IOException, NotBoundException {
-		nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
+        Registry registry = LocateRegistry.getRegistry();
+		//nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
+        nameNode = (INameSystemService) registry.lookup("NameSystemService");
 		nodeID = nameNode.register(nameNodeHostName, port, blockService.getAllBlocks());
 	}
 

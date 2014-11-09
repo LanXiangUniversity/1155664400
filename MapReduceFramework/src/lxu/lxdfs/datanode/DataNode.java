@@ -29,7 +29,7 @@ public class DataNode implements Runnable {
 		blockService = new BlockService(dataNodeServerSocket);
 		blockServiceThread = new Thread(blockService);
 		blockServiceThread.start();
-        nameNodeHostName = InetAddress.getLocalHost().getHostName();
+        nameNodeHostName = InetAddress.getLocalHost().getHostAddress();
 		register();
 	}
 

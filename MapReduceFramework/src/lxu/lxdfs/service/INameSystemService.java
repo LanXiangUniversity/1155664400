@@ -33,13 +33,13 @@ public interface INameSystemService extends Remote {
 
 	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException;
 
-    public boolean isSafeMode();
+    public boolean isSafeMode() throws RemoteException;
 
-    public void setSafeMode(boolean isSafeMode);
+    public void setSafeMode(boolean isSafeMode) throws RemoteException;
 
-    public void enterSafeMode ();
+    public void enterSafeMode() throws RemoteException;
 
-    public void exitSafeMode();
+    public void exitSafeMode() throws RemoteException;
 
     // Services for Data Node
 	public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) throws RemoteException;

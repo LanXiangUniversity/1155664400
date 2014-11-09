@@ -122,6 +122,7 @@ public class ClientOutputStream {
 	 * @return
 	 */
 	public int write(String data) {
+		int writeSize = 0;
 		AllocatedBlock allocatedBlock = null;
 
 		// get data
@@ -133,6 +134,8 @@ public class ClientOutputStream {
 		}
 
 		while (buffer.size() >= blockSize) {
+			writeSize += buffer.size() < 10 ? buffer.size() : 10;
+
 			// Allocate new Blocks through RPC and get the locations.
 			try {
 				allocatedBlock = nameSystem.allocateBlock(this.fileName, this.blockOffset);
@@ -161,7 +164,9 @@ public class ClientOutputStream {
 			this.blockOffset++;
 		}
 
-		return -1;
+		/* TODO wait for ackQueue to be cleared by ackListener */
+
+		return writeSize;
 	}
 
 	/**
@@ -217,6 +222,7 @@ public class ClientOutputStream {
 			ClientPacket packet = new ClientPacket();
 			packet.setLines(lines);
 			packet.setBlock(block);
+
 			//packet.setLocations(locations);
 			packet.setLocation(location);
 			packet.setReplicaID(1);
@@ -261,6 +267,8 @@ public class ClientOutputStream {
 
 					int ackID = packet.getAckPacketID();
 					System.out.println("ACK ID: " + ackID);
+
+					/* TODO Remove ACKed Block from ackQueue */
 
 					dis.close();
 					sock.close();

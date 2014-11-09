@@ -1,14 +1,27 @@
 package lxu.lxdfs.metadata;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by Wei on 11/3/14.
  */
-public class Block {
+public class Block implements Serializable {
 	private Long blockID;              // global Block ID
     private long offset;
 	private long len;                  // size of bytes
+
+    public Block() {
+        blockID = 0L;
+        offset = 0L;
+        len = 0L;
+    }
+
+    public Block(long blockID, long offset, long len) {
+        this.blockID = blockID;
+        this.offset = offset;
+        this.len = len;
+    }
 
     public long getLen() {
         return len;

@@ -35,6 +35,7 @@ public class BlockService implements Runnable {
         public void run() {
             Block block = packet.getBlock();
             int ackPacketID = packet.getPacketID();
+            System.out.println("Send packet: " + ackPacketID + " block: " + block.getBlockID());
             String fileName = blockFiles.get(block);
             boolean operationState = false;
             ArrayList<String> lines = new ArrayList<String>();
@@ -80,6 +81,7 @@ public class BlockService implements Runnable {
         public void run() {
             Block block = packet.getBlock();
             int ackPacketID = packet.getPacketID();
+            System.out.println("Received packet: " + ackPacketID + " block: " + block.getBlockID());
             boolean operationState = false;
             ArrayList<String> lines = packet.getLines();
             String fileName = "blk_" + block.getBlockID();

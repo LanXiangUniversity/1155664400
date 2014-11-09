@@ -20,6 +20,7 @@ public class DataNode implements Runnable {
     private ServerSocket dataNodeServerSocket = null;
     private INameSystemService nameNode = null;
     private String nameNodeHostName = null;
+    private int dataNodeID = 0;
 
     public DataNode() throws Exception {
         dataNodeServerSocket = new ServerSocket(port);
@@ -28,13 +29,14 @@ public class DataNode implements Runnable {
         blockService = new BlockService(dataNodeServerSocket);
         blockServiceThread = new Thread(blockService);
         blockServiceThread.start();
+        nameNodeHostName = InetAddress.getLocalHost().getHostName();
         register();
     }
 
     private void register() throws IOException, NotBoundException {
         nameNodeHostName = "";
         nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
-        nameNode.register(InetAddress.getLocalHost().getHostName(), port, blockService.getAllBlocks());
+        dataNodeID = nameNode.register(nameNodeHostName, port, blockService.getAllBlocks());
     }
 
     /**

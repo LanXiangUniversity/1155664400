@@ -36,5 +36,5 @@ public interface INameSystemService extends Remote {
 	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException;
 
 	// Services for Data Node
-    public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks);
+    public int register(String dataNodeHostName, int port, ArrayList<Block> blocks);
 }

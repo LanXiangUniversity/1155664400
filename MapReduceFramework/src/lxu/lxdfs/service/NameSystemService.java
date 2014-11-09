@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class NameSystemService implements INameSystemService {
 	private int dataAllocId = 0;
-    private int nextDataNodeID = 1;
+    private int nextDataNodeID = 0;
 	// Path of root of the DFS
 	private String rootPath;
 	private int replicaNum = 2;
@@ -34,6 +34,11 @@ public class NameSystemService implements INameSystemService {
 
 
 	public NameSystemService() {
+        dataNodes = new ArrayList<DataNodeDescriptor>();
+        fileNameToBlocksMap = new HashMap<String, List<Block>>();
+        blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
+        IDToBlockMap = new HashMap<Integer, Block>();
+        fileNames = new HashSet<String>();
 	}
 
 	// Remote services for Client.
@@ -169,8 +174,10 @@ public class NameSystemService implements INameSystemService {
      * Data Node
      */
     @Override
-    public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
-        DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
+    public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
+        nextDataNodeID++;
+        int nodeID = nextDataNodeID;
+        DataNodeDescriptor dataNode = new DataNodeDescriptor(nodeID,
                                                              dataNodeHostName,
                                                              port,
                                                              blocks.size());
@@ -179,10 +186,12 @@ public class NameSystemService implements INameSystemService {
         // update blockToLocationsMap
         for (Block block : blocks) {
             HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
+            if (dataNodeDescriptorSet == null) {
+                dataNodeDescriptorSet = new HashSet<DataNodeDescriptor>();
+            }
             dataNodeDescriptorSet.add(dataNode);
             blockToLocationsMap.put(block, dataNodeDescriptorSet);
         }
-        nextDataNodeID++;
-        return true;
+        return nodeID;
     }
 }

@@ -75,7 +75,6 @@ public class ClientInputStream extends ClientStream {
 			for (String line : lines) {
 				res += "\n" + line;
 			}
-
 		}
 
 		return res.substring(1);

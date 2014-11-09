@@ -233,6 +233,9 @@ public class NameSystemService implements INameSystemService {
         // update blockToLocationsMap
         for (Block block : blocks) {
             HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
+            if (dataNodeDescriptorSet == null) {
+                dataNodeDescriptorSet = new HashSet<DataNodeDescriptor>();
+            }
             dataNodeDescriptorSet.add(dataNode);
             blockToLocationsMap.put(block, dataNodeDescriptorSet);
         }

@@ -145,7 +145,27 @@ public class NameSystemService implements INameSystemService {
 		return locations;
 	}
 
-    /**
+	/**
+	 * Get the allocated Blocks of the file.
+	 * @param fileName
+	 * @return
+	 * @throws RemoteException
+	 */
+	@Override
+	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException {
+		List<Block> blocks = this.fileNameToBlocksMap.get(fileName);
+		ArrayList<AllocatedBlock> result = new ArrayList<AllocatedBlock>();
+
+		for (Block block : blocks) {
+			HashSet <DataNodeDescriptor> dataNodes = this.blockToLocationsMap.get(block);
+
+			result.add(new AllocatedBlock(block, dataNodes));
+		}
+
+		return result;
+	}
+
+	/**
      * Data Node
      */
     @Override

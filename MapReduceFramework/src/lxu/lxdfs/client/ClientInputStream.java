@@ -1,6 +1,7 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.datanode.DataNodePacket;
+import lxu.lxdfs.metadata.AllocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.NameSystemService;
@@ -11,6 +12,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Created by Wei on 11/8/14.
@@ -41,22 +44,28 @@ public class ClientInputStream extends ClientStream {
 
 	// Read the content of file.
 	public String read() throws IOException, ClassNotFoundException {
-		// Get  Blocks metadata of the file from NameNode.
-		HashMap<Block, ArrayList<DataNodeDescriptor>> blockToDataNodeMap = this.nameSystemService.getFileBlocks();
+		// Get  AllocatedBlocks of the file from NameNode.
+		ArrayList<AllocatedBlock> blockToDataNodeMap = null;
+		blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName);
 		String res = "";
 
 		// Get the content of each block sequentially.
-		for (Block block : blockToDataNodeMap.keySet()) {
+		for (AllocatedBlock allocatedBlock: blockToDataNodeMap) {
+			Block block = allocatedBlock.getBlock();
+
 			Socket sock = null;
 			ObjectInputStream ois = null;
 
-			ArrayList<DataNodeDescriptor> locations = blockToDataNodeMap.get(block);
+			HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
+			Iterator<DataNodeDescriptor> iterator = locations.iterator();
+			DataNodeDescriptor dataNodeDescriptor = iterator.next();
 
-			sock = new Socket(locations.get(0).getDataNodeIP(),
-					locations.get(0).getDataNodePort());
+			// Connect to the first DataNode.
+			sock = new Socket(dataNodeDescriptor.getDataNodeIP(),
+								dataNodeDescriptor.getDataNodePort());
 
+			// Read a Block from DataNode
 			ois = new ObjectInputStream(sock.getInputStream());
-
 			DataNodePacket packet = (DataNodePacket) ois.readObject();
 			ois.close();
 			sock.close();

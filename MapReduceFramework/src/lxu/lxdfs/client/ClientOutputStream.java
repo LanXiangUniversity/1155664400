@@ -81,7 +81,6 @@ public class ClientOutputStream {
 		this.blockSize = blockSize;
 	}
 
-
 	public List<DataNodeDescriptor> getLocations() {
 		return locations;
 	}

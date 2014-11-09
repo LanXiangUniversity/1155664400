@@ -9,6 +9,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Remote Interface for NameSystem
@@ -26,9 +27,9 @@ public interface INameSystemService extends Remote {
 
 	public boolean exists(Path path) throws RemoteException;
 
-	public List<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException;
+	public Set<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException;
 
-	public List<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException;
+	public Set<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException;
 
 	// Services for Data Node
     public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks);

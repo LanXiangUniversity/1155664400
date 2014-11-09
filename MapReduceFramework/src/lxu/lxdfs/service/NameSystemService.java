@@ -7,10 +7,7 @@ import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.nio.file.Path;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Remote object for Name System.
@@ -28,7 +25,7 @@ public class NameSystemService implements INameSystemService {
 	// Map from file name to Block.
 	private HashMap<String, List<Block>> fileNameToBlocksMap;
 	// Map from Block to Data Nodes.
-	private HashMap<Block, List<DataNodeDescriptor>> blockToLocationsMap;
+	private HashMap<Block, Set<DataNodeDescriptor>> blockToLocationsMap;
 	// Map from BlockID to Block
 	private HashMap<Integer, Block> IDToBlockMap;
 	// List of file names.
@@ -53,10 +50,10 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public ArrayList<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException {
+	public Set<DataNodeDescriptor> allocateBlock(String fileName, int offset) throws RemoteException {
 		Block block = new Block();
 		int blockId = this.blockID++;
-		ArrayList<DataNodeDescriptor> locations = new ArrayList<DataNodeDescriptor>();
+		Set<DataNodeDescriptor> locations = new HashSet<DataNodeDescriptor>();
 
 		for (int i = 0; i < this.replicaNum; i++) {
 			locations.add(this.dataNodes.get(i));
@@ -121,8 +118,14 @@ public class NameSystemService implements INameSystemService {
 	}
 
 	@Override
-	public List<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException {
-		List<DataNodeDescriptor> blockLocations = new ArrayList<DataNodeDescriptor>();
+    /**
+     * Return the locations<datanode, filename> of a Block
+     *
+     * @param blockID
+     * @return locations that store the Block
+     */
+	public Set<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException {
+		Set<DataNodeDescriptor> blockLocations = new HashSet<DataNodeDescriptor>();
 
 		// get Block by ID
 		if (!IDToBlockMap.containsKey(blockID)) {
@@ -135,7 +138,7 @@ public class NameSystemService implements INameSystemService {
 			return blockLocations;
 		}
 
-		List<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
+		Set<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
 
 		return locations;
 	}
@@ -149,8 +152,15 @@ public class NameSystemService implements INameSystemService {
                                                              dataNodeHostName,
                                                              port,
                                                              blocks.size());
+        // update dataNodes list
         dataNodes.add(dataNode);
+        // update blockToLocationsMap
+        for (Block block : blocks) {
+            Set<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
+            dataNodeDescriptorSet.add(dataNode);
+            blockToLocationsMap.put(block, dataNodeDescriptorSet);
+        }
         nextDataNodeID++;
-        return false;
+        return true;
     }
 }

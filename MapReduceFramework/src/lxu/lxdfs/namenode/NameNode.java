@@ -20,15 +20,6 @@ public class NameNode {
      */
     private NameSystemService nameSystem;
 
-    // List of Data Nodes available.
-    private List<DataNodeDescriptor> dataNodes;
-    // Map from file name to Block.
-    private HashMap<String, Block> fileNameToBlockMap;
-    // Map from Block to Data Nodes.
-    private HashMap<Block, List<DataNodeDescriptor>> blockToLocationsMap;
-    // Map from BlockID to Block
-    private HashMap<Integer, Block> IDToBlockMap;
-
     /**
      * ************************Services for client ************************
      */
@@ -114,31 +105,6 @@ public class NameNode {
     // 8. Starts processing Client request after exiting Safe Mode.
 
     /**
-     * Return the locations<datanode, filename> of a Block
-     *
-     * @param blockID
-     * @return locations that store the Block
-     */
-    public List<DataNodeDescriptor> getBlockLocations(int blockID) {
-        List<DataNodeDescriptor> blockLocations = new ArrayList<DataNodeDescriptor>();
-
-        // get Block by ID
-        if (!IDToBlockMap.containsKey(blockID)) {
-            return blockLocations;
-        }
-        Block block = IDToBlockMap.get(blockID);
-
-        // get Data Node by Block
-        if (!blockToLocationsMap.containsKey(block)) {
-            return blockLocations;
-        }
-
-        List<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
-
-        return locations;
-    }
-
-    /**
      * Storage
      */
     // 1. File related information like name. replication factor etc.
@@ -153,8 +119,8 @@ public class NameNode {
         }
         try {
             NameSystemService nameSystem = new NameSystemService();
-
             Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
+            this.nameSystem = nameSystem;
         } catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());
             e.printStackTrace();

@@ -53,6 +53,13 @@ public class Client {
 
 		} else if ("rm".equals(args[0])) {
 
+		} else if ("write".equals(args[0])) {
+			String fileName = args[1];
+			String content = args[2];
+
+			ClientOutputStream cos = new ClientOutputStream();
+			cos.setFileName(fileName);
+			cos.write(content);
 		} else {
 			this.showHelpInfo(args[0]);
 		}

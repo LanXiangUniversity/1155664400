@@ -3,6 +3,7 @@ package lxu.lxdfs.client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.rmi.NotBoundException;
 
 /**
  * Created by Wei on 11/8/14.
@@ -17,7 +18,7 @@ public class Client {
 				new InputStreamReader(System.in));
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, NotBoundException {
 		Client client = new Client();
 
 		while (client.getState() == ClientState.RUNNING) {
@@ -40,7 +41,7 @@ public class Client {
 	 *
 	 * @throws IOException
 	 */
-	public void parseInput() throws IOException {
+	public void parseInput() throws IOException, NotBoundException {
 		String cmd = this.consoleReader.readLine();
 
 		String[] args = cmd.split(" ");

@@ -4,6 +4,7 @@ import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.metadata.AllocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
@@ -11,7 +12,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.*;
 
 /**
@@ -21,7 +25,7 @@ public class ClientOutputStream {
 	private String fileName;
 	private int blockOffset;
 	private int listenPort;
-	private NameSystemService nameSystem;
+	private INameSystemService nameSystem;
 	private int blockSize = 10;
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
@@ -32,12 +36,16 @@ public class ClientOutputStream {
 	private Queue<String> buffer;
 	private LinkedList<AckListener> ackListeners;
 
-	public ClientOutputStream() {
+	public ClientOutputStream() throws RemoteException, NotBoundException {
 		this.listenPort = 15998;
-        locations = new LinkedList<DataNodeDescriptor>();
-        dataQueue = new LinkedList<ClientPacket>();
-        ackQueue = new LinkedList<ClientPacket>();
+        this.locations = new LinkedList<DataNodeDescriptor>();
+        this.dataQueue = new LinkedList<ClientPacket>();
+        this.ackQueue = new LinkedList<ClientPacket>();
 		this.ackListeners = new LinkedList<AckListener>();
+		this.buffer = new LinkedList<String>();
+
+		Registry registry = LocateRegistry.getRegistry();
+		this.nameSystem = (INameSystemService)registry.lookup("NameSystemService");
 	}
 
 	public void close() {
@@ -72,7 +80,7 @@ public class ClientOutputStream {
 		this.blockOffset = blockOffset;
 	}
 
-	public NameSystemService getNameSystem() {
+	public INameSystemService getNameSystem() {
 		return nameSystem;
 	}
 
@@ -140,11 +148,14 @@ public class ClientOutputStream {
 			buffer.add(line);
 		}
 
-		while (buffer.size() >= blockSize) {
+		while (buffer.size() > 0) {
+			System.out.println("iter");
+
 			writeSize += buffer.size() < 10 ? buffer.size() : 10;
 
 			// Allocate new Blocks through RPC and get the locations.
 			try {
+				System.out.println("get blocks for "+this.fileName);
 				allocatedBlock = nameSystem.allocateBlock(this.fileName, this.blockOffset);
 			} catch (RemoteException e) {
 				e.printStackTrace();

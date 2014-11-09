@@ -8,6 +8,7 @@ import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.namenode.NameNodeState;
 
 import java.nio.file.Path;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.*;
 
@@ -79,7 +80,7 @@ public class NameSystemService implements INameSystemService {
 	@Override
 	public AllocatedBlock allocateBlock(String fileName, int offset) throws RemoteException {
 		if (this.isSafeMode()) {return null;}
-
+		System.out.println("allocate blocks for client filname: " + fileName );
 
 		// Set unique global block ID.
 		int blockId = this.blockID++;
@@ -108,7 +109,7 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public ClientOutputStream open(Path path) throws RemoteException {
+	public ClientOutputStream open(Path path) throws RemoteException, NotBoundException {
 		String fileName = path.toString();
 
 		// File doesn't exist.
@@ -130,7 +131,7 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public ClientOutputStream create(Path path) throws RemoteException {
+	public ClientOutputStream create(Path path) throws RemoteException, NotBoundException {
 		String fileName = path.toString();
 
 		if (this.fileNames.contains(path)) {

@@ -6,6 +6,7 @@ import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.nio.file.Path;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -19,9 +20,9 @@ public interface INameSystemService extends Remote {
 	// Services for Client
 	public boolean mkdirs(Path path) throws RemoteException;
 
-	public ClientOutputStream open(Path path) throws RemoteException;
+	public ClientOutputStream open(Path path) throws RemoteException, NotBoundException;
 
-	public ClientOutputStream create(Path path) throws RemoteException;
+	public ClientOutputStream create(Path path) throws RemoteException, NotBoundException;
 
 	public boolean delete(Path path) throws RemoteException;
 

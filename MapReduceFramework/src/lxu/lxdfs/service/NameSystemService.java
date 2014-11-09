@@ -18,6 +18,7 @@ import java.util.Set;
  */
 public class NameSystemService implements INameSystemService {
 	private int dataAllocId = 0;
+    private int nextDataNodeID = 1;
 	// Path of root of the DFS
 	private String rootPath;
 	private int replicaNum = 2;
@@ -35,14 +36,6 @@ public class NameSystemService implements INameSystemService {
 
 
 	public NameSystemService() {
-		DataNodeDescriptor dnd1 = new DataNodeDescriptor();
-		dnd1.setDataNodeID(1);
-
-		DataNodeDescriptor dnd2 = new DataNodeDescriptor();
-		dnd2.setDataNodeID(2);
-
-		this.dataNodes.add(dnd1);
-		this.dataNodes.add(dnd2);
 	}
 
 	// Remote services for Client.
@@ -151,7 +144,13 @@ public class NameSystemService implements INameSystemService {
      * Data Node
      */
     @Override
-    public boolean register(String dataNodeHostName, int port) {
+    public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
+        DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
+                                                             dataNodeHostName,
+                                                             port,
+                                                             blocks.size());
+        dataNodes.add(dataNode);
+        nextDataNodeID++;
         return false;
     }
 }

@@ -1,5 +1,6 @@
 package lxu.lxdfs.datanode;
 
+import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.service.INameSystemService;
 
 import java.io.IOException;
@@ -7,12 +8,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.util.ArrayList;
 
 public class DataNode implements Runnable {
 
     private int port = 12345;
     private boolean isRunning = true;
     private Thread dataNodeThread = null;
+    private BlockService blockService = null;
     private Thread blockServiceThread = null;
     private ServerSocket dataNodeServerSocket = null;
     private INameSystemService nameNode = null;
@@ -22,13 +25,16 @@ public class DataNode implements Runnable {
         dataNodeServerSocket = new ServerSocket(port);
         dataNodeThread = new Thread(this);
         dataNodeThread.start();
+        blockService = new BlockService(dataNodeServerSocket);
+        blockServiceThread = new Thread(blockService);
+        blockServiceThread.start();
         register();
     }
 
     private void register() throws IOException, NotBoundException {
         nameNodeHostName = "";
         nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
-        nameNode.register(InetAddress.getLocalHost().getHostName(), port);
+        nameNode.register(InetAddress.getLocalHost().getHostName(), port, blockService.getAllBlocks());
     }
 
     /**
@@ -46,8 +52,6 @@ public class DataNode implements Runnable {
 
     @Override
     public void run() {
-        blockServiceThread = new Thread(new BlockService(dataNodeServerSocket));
-        blockServiceThread.start();
         while (isRunning) {
             try {
                 offerService();

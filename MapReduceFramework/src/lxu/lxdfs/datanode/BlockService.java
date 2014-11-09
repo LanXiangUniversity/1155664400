@@ -14,11 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BlockService implements Runnable {
     // blockID -> local file name
-    private ConcurrentHashMap<Long, String> blockFiles = null;
+    private ConcurrentHashMap<Block, String> blockFiles = null;
     private ServerSocket serverSocket = null;
 
     public BlockService(ServerSocket serverSocket) {
-        this.blockFiles = new ConcurrentHashMap<Long, String>();
+        this.blockFiles = new ConcurrentHashMap<Block, String>();
         this.serverSocket = serverSocket;
     }
 
@@ -35,7 +35,7 @@ public class BlockService implements Runnable {
         public void run() {
             Block block = packet.getBlock();
             int ackPacketID = packet.getPacketID();
-            String fileName = blockFiles.get(block.getBlockID());
+            String fileName = blockFiles.get(block);
             boolean operationState = false;
             ArrayList<String> lines = new ArrayList<String>();
 
@@ -92,7 +92,7 @@ public class BlockService implements Runnable {
                 }
                 operationState = true;
                 // record blockID -> fileName
-                blockFiles.put(block.getBlockID(), fileName);
+                blockFiles.put(block, fileName);
             } catch (IOException e) {
                 System.err.println("Error: Data Node writing file " + fileName + " error");
             }
@@ -133,5 +133,9 @@ public class BlockService implements Runnable {
                 System.err.println(e.getMessage());
             }
         }
+    }
+
+    public ArrayList<Block> getAllBlocks() {
+        return new ArrayList<Block>(blockFiles.keySet());
     }
 }

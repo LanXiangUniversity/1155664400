@@ -7,6 +7,7 @@ import java.util.List;
  */
 public class Block {
 	private Long blockID;              // global Block ID
+    private long offset;
 	private long len;                  // size of bytes
 
     public long getLen() {
@@ -17,6 +18,13 @@ public class Block {
         this.len = len;
     }
 
+    public long getOffset() {
+        return offset;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
     public Long getBlockID() {
         return blockID;
     }
@@ -25,5 +33,19 @@ public class Block {
         this.blockID = blockID;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        Block block = (Block) o;
+
+        return blockID.equals(block.blockID);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return blockID.hashCode();
+    }
 }

@@ -5,6 +5,7 @@ import lxu.lxdfs.client.ClientOutputStream;
 import lxu.lxdfs.metadata.AllocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.namenode.NameNodeState;
 
 import java.nio.file.Path;
 import java.rmi.RemoteException;
@@ -32,9 +33,28 @@ public class NameSystemService implements INameSystemService {
 	private HashMap<Integer, Block> IDToBlockMap;
 	// List of file names.
 	private Set<String> fileNames;
-
+	private NameNodeState nameNodeState = NameNodeState.STARTING;
 
 	public NameSystemService() {
+	}
+
+	public boolean isSafeMode() {
+		return this.nameNodeState != NameNodeState.OUT_OF_SAFE_MODE;
+	}
+
+	public void setSafeMode(boolean isSafeMode) {
+		this.nameNodeState = NameNodeState.IN_SAFE_MODE;
+	}
+
+	/**
+	 * Block write operations.
+	 */
+	public void enterSafeMode () {
+		this.nameNodeState = NameNodeState.IN_SAFE_MODE;
+	}
+
+	public void exitSafeMode() {
+		this.nameNodeState = NameNodeState.OUT_OF_SAFE_MODE;
 	}
 
 	// Remote services for Client.
@@ -53,6 +73,9 @@ public class NameSystemService implements INameSystemService {
 	 */
 	@Override
 	public AllocatedBlock allocateBlock(String fileName, int offset) throws RemoteException {
+		if (this.isSafeMode()) {return null;}
+
+
 		// Set unique global block ID.
 		int blockId = this.blockID++;
         Block block = new Block(blockId, offset, 0L);
@@ -124,6 +147,8 @@ public class NameSystemService implements INameSystemService {
 
 	@Override
 	public boolean delete(Path path) throws RemoteException {
+		if (this.isSafeMode()) {return false;}
+
 		return false;
 	}
 
@@ -185,6 +210,10 @@ public class NameSystemService implements INameSystemService {
      */
     @Override
     public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
+	    if (this.nameNodeState == NameNodeState.OUT_OF_SAFE_MODE) {
+		    this.nameNodeState = NameNodeState.IN_SAFE_MODE;
+	    }
+
         DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
                                                              dataNodeHostName,
                                                              port,
@@ -201,6 +230,9 @@ public class NameSystemService implements INameSystemService {
             blockToLocationsMap.put(block, dataNodeDescriptorSet);
         }
         this.nextDataNodeID++;
+
+		// Exit safe mode.
+	    this.nameNodeState = NameNodeState.OUT_OF_SAFE_MODE;
 
 	    return true;
     }

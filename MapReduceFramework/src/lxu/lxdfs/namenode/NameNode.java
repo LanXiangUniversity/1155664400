@@ -24,9 +24,14 @@ public class NameNode {
 		// Regsiter and start RPC service.
 		nameNode.registerService();
 
+
+		nameNode.nameSystem.enterSafeMode();
+
 		/* TODO enter safe mode. */
 		/* TODO reconstruct NameSystem. */
 		/* TODO exit safe mode. */
+
+		nameNode.nameSystem.exitSafeMode();
 	}
 
 

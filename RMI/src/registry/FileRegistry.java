@@ -1,6 +1,5 @@
 package registry;
 
-import org.jetbrains.annotations.Nullable;
 import remote.RemoteObjectRef;
 
 import java.io.*;

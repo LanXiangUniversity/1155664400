@@ -192,6 +192,8 @@ public class NameSystemService implements INameSystemService {
         // update dataNodes list
         this.dataNodes.add(dataNode);
 
+	    /* TODO return <**fileName**, blocksID, replicas> */
+
         // update blockToLocationsMap
         for (Block block : blocks) {
             HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);

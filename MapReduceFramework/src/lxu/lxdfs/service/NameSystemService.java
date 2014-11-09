@@ -215,6 +215,7 @@ public class NameSystemService implements INameSystemService {
 	    }
 
         this.nextDataNodeID++;
+        System.out.println(dataNodeHostName + " registered");
         DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
                                                              dataNodeHostName,
                                                              port,

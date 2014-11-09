@@ -5,6 +5,7 @@ import lxu.lxdfs.service.NameSystemService;
 
 import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -22,7 +23,7 @@ public class NameNode {
 	 * ************************Services for client ************************
 	 */
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws RemoteException {
 		NameNode nameNode = new NameNode();
 
 		// Regsiter and start RPC service.
@@ -129,7 +130,7 @@ public class NameNode {
 			INameSystemService nameSystem = new NameSystemService();
 			//Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
             INameSystemService stub =
-                    (INameSystemService) UnicastRemoteObject.exportObject(nameSystem);
+                    (INameSystemService) UnicastRemoteObject.exportObject(nameSystem, 0);
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind("NameSystemService", stub);
 			this.nameSystem = nameSystem;

@@ -36,6 +36,11 @@ public class NameSystemService implements INameSystemService {
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 
 	public NameSystemService() {
+        dataNodes = new LinkedList<DataNodeDescriptor>();
+        fileNameToBlocksMap = new HashMap<String, List<Block>>();
+        blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
+        IDToBlockMap = new HashMap<Integer, Block>();
+        fileNames = new HashSet<String>();
 	}
 
 	public boolean isSafeMode() {
@@ -215,6 +220,7 @@ public class NameSystemService implements INameSystemService {
 	    }
 
         this.nextDataNodeID++;
+        System.out.println(dataNodeHostName + " registered");
         DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
                                                              dataNodeHostName,
                                                              port,
@@ -227,6 +233,9 @@ public class NameSystemService implements INameSystemService {
         // update blockToLocationsMap
         for (Block block : blocks) {
             HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
+            if (dataNodeDescriptorSet == null) {
+                dataNodeDescriptorSet = new HashSet<DataNodeDescriptor>();
+            }
             dataNodeDescriptorSet.add(dataNode);
             blockToLocationsMap.put(block, dataNodeDescriptorSet);
         }

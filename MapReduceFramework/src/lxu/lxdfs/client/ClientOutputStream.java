@@ -26,19 +26,26 @@ public class ClientOutputStream {
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
 	// Packets to be sent.
-	private Queue<ClientPacket> dataQueue;
+	private LinkedList<ClientPacket> dataQueue;
 	// Packets to be acked.
-	private Queue<ClientPacket> ackQueue;
+	private LinkedList<ClientPacket> ackQueue;
 	private Queue<String> buffer;
-	private AckListener ackListener;
+	private LinkedList<AckListener> ackListeners;
 
 	public ClientOutputStream() {
 		this.listenPort = 15998;
-		this.ackListener = new AckListener();
+        locations = new LinkedList<DataNodeDescriptor>();
+        dataQueue = new LinkedList<ClientPacket>();
+        ackQueue = new LinkedList<ClientPacket>();
+		this.ackListeners = new LinkedList<AckListener>();
 	}
 
 	public void close() {
-		this.ackListener.stop();
+        for (AckListener ackListener : ackListeners) {
+            if (ackListener.isRunning()) {
+                ackListener.stop();
+            }
+        }
 	}
 
 	public int getListenPort() {
@@ -89,19 +96,19 @@ public class ClientOutputStream {
 		this.locations = locations;
 	}
 
-	public Queue<ClientPacket> getDataQueue() {
+	public LinkedList<ClientPacket> getDataQueue() {
 		return dataQueue;
 	}
 
-	public void setDataQueue(Queue<ClientPacket> dataQueue) {
+	public void setDataQueue(LinkedList<ClientPacket> dataQueue) {
 		this.dataQueue = dataQueue;
 	}
 
-	public Queue<ClientPacket> getAckQueue() {
+	public LinkedList<ClientPacket> getAckQueue() {
 		return ackQueue;
 	}
 
-	public void setAckQueue(Queue<ClientPacket> ackQueue) {
+	public void setAckQueue(LinkedList<ClientPacket> ackQueue) {
 		this.ackQueue = ackQueue;
 	}
 
@@ -184,8 +191,9 @@ public class ClientOutputStream {
 			Socket sock = new Socket(ip, port);
 			ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 			oos.writeObject(packet);
-			oos.close();
-			sock.close();
+            AckListener ackListener = new AckListener(sock);
+            ackListeners.add(ackListener);
+            (new Thread(ackListener)).start();
 
 			// Log
 			System.out.println("Succeed to write to DataNode " +
@@ -217,6 +225,7 @@ public class ClientOutputStream {
 			lines.add(buffer.remove());
 		}
 
+        block.setLen(blockLen);
 		// Create a new packet.
 		for (DataNodeDescriptor location : locations) {
 			ClientPacket packet = new ClientPacket();
@@ -237,7 +246,12 @@ public class ClientOutputStream {
 	 * Listen for acks from data node.
 	 */
 	private class AckListener implements Runnable {
+        private Socket socket;
 		private boolean isRunning = true;
+
+        public AckListener(Socket socket) {
+            this.socket = socket;
+        }
 
 		public boolean isRunning() {
 			return isRunning;
@@ -253,37 +267,37 @@ public class ClientOutputStream {
 
 		@Override
 		public void run() {
-			ServerSocket srvSock = null;
-			Socket sock = null;
 			ObjectInputStream dis = null;
 			DataNodePacket packet = null;
 
 			while (this.isRunning) {
 				try {
-					srvSock = new ServerSocket(listenPort);
-					sock = srvSock.accept();
-					dis = new ObjectInputStream(sock.getInputStream());
+					dis = new ObjectInputStream(socket.getInputStream());
 					packet = (DataNodePacket) dis.readObject();
 
 					int ackID = packet.getAckPacketID();
 					System.out.println("ACK ID: " + ackID);
 
-					/* TODO Remove ACKed Block from ackQueue */
-
-					dis.close();
-					sock.close();
+                    for (ClientPacket clientPacket : ackQueue) {
+                        if (clientPacket.getPacketID() == ackID) {
+                            ackQueue.remove(clientPacket);
+                            this.isRunning = false;
+                            break;
+                        }
+                    }
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
 			}
+            try {
+                socket.close();
+                ackListeners.remove(this);
+            } catch (IOException e) {
+                System.err.println("Error: AckListener close socket wrong");
+            }
 
-			try {
-				srvSock.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 }

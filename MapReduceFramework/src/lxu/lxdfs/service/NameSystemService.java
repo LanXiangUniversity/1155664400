@@ -18,7 +18,7 @@ import java.util.*;
 public class NameSystemService implements INameSystemService {
 	// Index of DataNode to be allocated.
 	private int dataAllocId = 0;
-    private int nextDataNodeID = 1;
+    private int nextDataNodeID = 0;
 	// Path of root of the DFS
 	private String rootPath;
 	private int replicaNum = 2;
@@ -209,11 +209,12 @@ public class NameSystemService implements INameSystemService {
      * Data Node register to the NameNode.
      */
     @Override
-    public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
+    public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
 	    if (this.nameNodeState == NameNodeState.OUT_OF_SAFE_MODE) {
 		    this.nameNodeState = NameNodeState.IN_SAFE_MODE;
 	    }
 
+        this.nextDataNodeID++;
         DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
                                                              dataNodeHostName,
                                                              port,
@@ -229,11 +230,10 @@ public class NameSystemService implements INameSystemService {
             dataNodeDescriptorSet.add(dataNode);
             blockToLocationsMap.put(block, dataNodeDescriptorSet);
         }
-        this.nextDataNodeID++;
 
 		// Exit safe mode.
 	    this.nameNodeState = NameNodeState.OUT_OF_SAFE_MODE;
 
-	    return true;
+	    return this.nextDataNodeID;
     }
 }

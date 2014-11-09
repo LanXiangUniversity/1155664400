@@ -11,6 +11,7 @@ import java.rmi.NotBoundException;
 public class DataNode implements Runnable {
 
 	private int port = 12345;
+    private int nodeID = 0;
 	private boolean isRunning = true;
 	private Thread dataNodeThread = null;
 	private BlockService blockService = null;
@@ -26,6 +27,7 @@ public class DataNode implements Runnable {
 		blockService = new BlockService(dataNodeServerSocket);
 		blockServiceThread = new Thread(blockService);
 		blockServiceThread.start();
+        nameNodeHostName = InetAddress.getLocalHost().getHostName();
 		register();
 	}
 
@@ -41,9 +43,8 @@ public class DataNode implements Runnable {
 	}
 
 	private void register() throws IOException, NotBoundException {
-		nameNodeHostName = "";
 		nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
-		nameNode.register(InetAddress.getLocalHost().getHostName(), port, blockService.getAllBlocks());
+		nodeID = nameNode.register(nameNodeHostName, port, blockService.getAllBlocks());
 	}
 
 	/**

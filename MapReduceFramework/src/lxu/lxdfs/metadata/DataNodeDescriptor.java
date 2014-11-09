@@ -1,7 +1,5 @@
 package lxu.lxdfs.metadata;
 
-import lxu.lxdfs.datanode.DataNode;
-
 /**
  * This class stores the meta-data of a Data Node.
  */
@@ -9,18 +7,18 @@ public class DataNodeDescriptor {
 	private int dataNodeID;
 	private String dataNodeIP;
 	private int dataNodePort;
-    // # Blocks in the Data Node
-    private int blockNum;
+	// # Blocks in the Data Node
+	private int blockNum;
 
-    public DataNodeDescriptor(int dataNodeID,
-                              String dataNodeIP,
-                              int dataNodePort,
-                              int blockNum) {
-        this.dataNodeID = dataNodeID;
-        this.dataNodeIP = dataNodeIP;
-        this.dataNodePort = dataNodePort;
-        this.blockNum = blockNum;
-    }
+	public DataNodeDescriptor(int dataNodeID,
+	                          String dataNodeIP,
+	                          int dataNodePort,
+	                          int blockNum) {
+		this.dataNodeID = dataNodeID;
+		this.dataNodeIP = dataNodeIP;
+		this.dataNodePort = dataNodePort;
+		this.blockNum = blockNum;
+	}
 
 	public int getBlockNum() {
 		return blockNum;

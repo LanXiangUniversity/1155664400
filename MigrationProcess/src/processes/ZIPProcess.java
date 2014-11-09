@@ -1,7 +1,7 @@
 /**
  * ZIPProcess.java
  * @author Tong Wei (twei1), Guoli Ma (guolim)
- * 
+ *
  * Description: This is a migratable process. Given an input file, this
  * 	 		    process will generate a zipped output file.
  */
@@ -19,9 +19,9 @@ public class ZIPProcess implements MigratableProcess {
 	private static final long serialVersionUID = -3881329126388008331L;
 	private TransactionalFileInputStream inFile;
 	private TransactionalFileOutputStream outFile;
-	
+
 	private volatile boolean suspending;
-	
+
 	public ZIPProcess(String[] args) throws Exception {
 		if (args.length != 1) {
 			System.out.println("usage: ZIPProcess <inputFile>");
@@ -63,7 +63,7 @@ public class ZIPProcess implements MigratableProcess {
 			in.close();
 			out.finish();
 			out.close();
-			
+
 		} catch (IOException e) {
 			System.out.println("ZIPProcess: Error: " + e);
 		}
@@ -73,7 +73,7 @@ public class ZIPProcess implements MigratableProcess {
 	@Override
 	public void suspend() {
 		suspending = true;
-		while (suspending);
+		while (suspending) ;
 	}
 
 }

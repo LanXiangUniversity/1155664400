@@ -1,12 +1,10 @@
 package lxu.lxdfs.client;
 
-import lxu.lxdfs.datanode.DataNode;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Created by Wei on 11/4/14.
@@ -22,7 +20,7 @@ public class ClientPacket implements Serializable {
 	private ArrayList<String> lines;
 	// Locations for each Block replica.
 	//private Set<DataNodeDescriptor> locations;
-    private DataNodeDescriptor location;
+	private DataNodeDescriptor location;
 	// ID of this replica.
 	private int replicaID;
 	// Total replication Num.
@@ -75,13 +73,13 @@ public class ClientPacket implements Serializable {
 		return locations;
 	}*/
 
-    public DataNodeDescriptor getLocation() {
-        return this.location;
-    }
+	public DataNodeDescriptor getLocation() {
+		return this.location;
+	}
 
-    public void setLocation(DataNodeDescriptor location) {
-        this.location = location;
-    }
+	public void setLocation(DataNodeDescriptor location) {
+		this.location = location;
+	}
 
 	/*public void setLocations(Set<DataNodeDescriptor> locations) {
 		this.locations = locations;

@@ -2,7 +2,6 @@ package test;
 
 import message.RemoteMsg;
 import message.RemoteMsgType;
-import org.jetbrains.annotations.NotNull;
 import registry.FileRegistry;
 import remote.ObjectTable;
 import remote.RemoteInterface;
@@ -23,9 +22,9 @@ import java.util.List;
  */
 public class Server {
 	public static final int LISTEN_PORT = 9901;
-	@NotNull
+
 	public static String REG_PATH = "/Users/parasitew/Documents/CMU/15640/lab/lab2/registry/reg.dat";
-	@NotNull
+
 	private String IPAddress = "localhost";
 	private int dispatcherPort = 12345;
 	private boolean isRunning;
@@ -73,8 +72,8 @@ public class Server {
 	}
 
 	// Parse remoteMsg, return result by calling local methods.
-	@NotNull
-	public RemoteMsg dispatch(@NotNull RemoteMsg msg) throws ClassNotFoundException, IllegalAccessException, InstantiationException, InvocationTargetException {
+	public RemoteMsg dispatch(RemoteMsg msg) throws ClassNotFoundException, IllegalAccessException,
+			InstantiationException, InvocationTargetException {
 		RemoteMsg rtnMsg = new RemoteMsg();
 
 		if (msg.getMsgType() == RemoteMsgType.MSG_INVOKE) {
@@ -141,7 +140,6 @@ public class Server {
 		return res;
 	}
 
-	@NotNull
 	public RemoteMsg marshallReturnValue(Object obj, Class c) throws ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException {
 		RemoteObjectRef ror = null;
 		RemoteMsg rtnMsg = new RemoteMsg(RemoteMsgType.MSG_RETURN);

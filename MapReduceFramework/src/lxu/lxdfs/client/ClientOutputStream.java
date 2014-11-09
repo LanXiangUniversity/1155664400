@@ -122,7 +122,7 @@ public class ClientOutputStream {
 	 * @return
 	 */
 	public int write(String data) {
-        AllocatedBlock allocatedBlock = null;
+		AllocatedBlock allocatedBlock = null;
 
 		// get data
 		String[] lines = data.split("\n");
@@ -140,23 +140,23 @@ public class ClientOutputStream {
 				e.printStackTrace();
 			}
 
-            Block block = allocatedBlock.getBlock();
-            HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
+			Block block = allocatedBlock.getBlock();
+			HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
 
 			// Update info about the first Data Node.
 
 			// Create packet.
 			List<ClientPacket> packets = this.getPacketsFromBuffer(locations, block);
 
-            for (ClientPacket packet : packets) {
-                // Send packet to the first Data Node.
-                this.dataQueue.add(packet);
-                this.sendPacket(packet);
+			for (ClientPacket packet : packets) {
+				// Send packet to the first Data Node.
+				this.dataQueue.add(packet);
+				this.sendPacket(packet);
 
-                // Wait for ack of this packet.
-                this.dataQueue.remove();
-                this.ackQueue.add(packet);
-            }
+				// Wait for ack of this packet.
+				this.dataQueue.remove();
+				this.ackQueue.add(packet);
+			}
 
 			this.blockOffset++;
 		}
@@ -168,12 +168,12 @@ public class ClientOutputStream {
 	 * Send packet (Block) to the first Data Node.
 	 */
 	public void sendPacket(ClientPacket packet) {
-        /*
+	    /*
 		String ip = packet.getLocations().get(0).getDataNodeIP();
 		int port = packet.getLocations().get(0).getDataNodePort();
 		*/
-        String ip = packet.getLocation().getDataNodeIP();
-        int port = packet.getLocation().getDataNodePort();
+		String ip = packet.getLocation().getDataNodeIP();
+		int port = packet.getLocation().getDataNodePort();
 
 		try {
 			Socket sock = new Socket(ip, port);
@@ -196,12 +196,12 @@ public class ClientOutputStream {
 	 * @return
 	 */
 	public List<ClientPacket> getPacketsFromBuffer(Set<DataNodeDescriptor> locations,
-                                                   Block block) {
+	                                               Block block) {
 		if (buffer.size() == 0) {
 			return null;
 		}
 
-        List<ClientPacket> packets = new ArrayList<ClientPacket>();
+		List<ClientPacket> packets = new ArrayList<ClientPacket>();
 
 		ArrayList<String> lines = new ArrayList<String>();
 
@@ -213,16 +213,16 @@ public class ClientOutputStream {
 		}
 
 		// Create a new packet.
-        for (DataNodeDescriptor location : locations) {
-            ClientPacket packet = new ClientPacket();
-            packet.setLines(lines);
-            packet.setBlock(block);
-            //packet.setLocations(locations);
-            packet.setLocation(location);
-            packet.setReplicaID(1);
-            packet.setReplicaNum(2);
-            packets.add(packet);
-        }
+		for (DataNodeDescriptor location : locations) {
+			ClientPacket packet = new ClientPacket();
+			packet.setLines(lines);
+			packet.setBlock(block);
+			//packet.setLocations(locations);
+			packet.setLocation(location);
+			packet.setReplicaID(1);
+			packet.setReplicaNum(2);
+			packets.add(packet);
+		}
 
 		return packets;
 	}

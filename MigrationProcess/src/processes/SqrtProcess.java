@@ -1,7 +1,7 @@
 /**
  * SqrtProcess.java
  * @author Tong Wei (twei1), Guoli Ma (guolim)
- * 
+ *
  * Description: This is a migratable process. Given a number n, the process
  * 				tries to calculate the square root of n.
  */
@@ -19,8 +19,8 @@ public class SqrtProcess implements MigratableProcess {
 
 	@Override
 	public void run() {
-		while (!this.suspending && Math.abs(k*k-n) > 1e-9) {
-			k=(k+n/k)/2;
+		while (!this.suspending && Math.abs(k * k - n) > 1e-9) {
+			k = (k + n / k) / 2;
 
 			try {
 				Thread.sleep(1000);
@@ -37,6 +37,8 @@ public class SqrtProcess implements MigratableProcess {
 	@Override
 	public void suspend() {
 		this.suspending = true;
-		while(this.suspending) {};
+		while (this.suspending) {
+		}
+		;
 	}
 }

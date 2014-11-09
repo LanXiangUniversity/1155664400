@@ -8,10 +8,8 @@ import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -50,7 +48,7 @@ public class ClientInputStream extends ClientStream {
 		String res = "";
 
 		// Get the content of each block sequentially.
-		for (AllocatedBlock allocatedBlock: blockToDataNodeMap) {
+		for (AllocatedBlock allocatedBlock : blockToDataNodeMap) {
 			Block block = allocatedBlock.getBlock();
 
 			Socket sock = null;
@@ -62,7 +60,7 @@ public class ClientInputStream extends ClientStream {
 
 			// Connect to the first DataNode.
 			sock = new Socket(dataNodeDescriptor.getDataNodeIP(),
-								dataNodeDescriptor.getDataNodePort());
+					dataNodeDescriptor.getDataNodePort());
 
 			// Read a Block from DataNode
 			ois = new ObjectInputStream(sock.getInputStream());

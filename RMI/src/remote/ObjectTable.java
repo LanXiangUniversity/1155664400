@@ -1,6 +1,5 @@
 package remote;
 
-import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ public class ObjectTable implements Serializable {
 
 	}
 
-	@Nullable
 	public Object findObject(int objKey) {
 		if (this.entries.containsKey(objKey)) {
 			System.out.println("Find " + objKey + " in ROR table.");

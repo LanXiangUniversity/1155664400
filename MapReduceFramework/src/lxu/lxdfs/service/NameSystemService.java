@@ -15,6 +15,7 @@ import java.util.*;
  * Created by Wei on 11/3/14.
  */
 public class NameSystemService implements INameSystemService {
+	// Index of DataNode to be allocated.
 	private int dataAllocId = 0;
     private int nextDataNodeID = 1;
 	// Path of root of the DFS
@@ -52,33 +53,45 @@ public class NameSystemService implements INameSystemService {
 	 */
 	@Override
 	public AllocatedBlock allocateBlock(String fileName, int offset) throws RemoteException {
-        this.blockID++;
-		int blockId = this.blockID;
+		// Set unique global block ID.
+		int blockId = this.blockID++;
         Block block = new Block(blockId, offset, 0L);
 		HashSet<DataNodeDescriptor> locations = new HashSet<DataNodeDescriptor>();
 
+		// Allocate DataNodes to store Block replicas.
 		for (int i = 0; i < this.replicaNum; i++) {
 			locations.add(this.dataNodes.get(i));
 		}
 
-		// Register blocks
+		// Register Blocks in NameNode.
 		this.fileNameToBlocksMap.get(fileName).add(block);
 		this.IDToBlockMap.put(blockId, block);
-		// Store Blocks locations
-		this.blockToLocationsMap.put(block, locations);
 
-		//this.blockID++;
+		// Register Blocks locations
+		this.blockToLocationsMap.put(block, locations);
 
 		return new AllocatedBlock(block, locations);
 	}
 
+	/**
+	 * Open a file and get the its outputStream.
+	 * @param path
+	 * @return
+	 * @throws RemoteException
+	 */
 	@Override
 	public ClientOutputStream open(Path path) throws RemoteException {
-		/*
-			To be implemented
-		 */
+		String fileName = path.toString();
 
-		return null;
+		// File doesn't exist.
+		if (this.fileNames.contains(fileName)) {
+			return null;
+		}
+
+		ClientOutputStream cos = new ClientOutputStream();
+		cos.setFileName(fileName);
+
+		return cos;
 	}
 
 
@@ -106,7 +119,7 @@ public class NameSystemService implements INameSystemService {
 		ClientOutputStream cos = new ClientOutputStream();
 		cos.setFileName(fileName);
 
-		return new ClientOutputStream();
+		return cos;
 	}
 
 	@Override
@@ -116,12 +129,12 @@ public class NameSystemService implements INameSystemService {
 
 	@Override
 	public boolean exists(Path path) throws RemoteException {
-		return false;
+		return this.fileNames.contains(path.toString());
 	}
 
 	@Override
     /**
-     * Return the locations<datanode, filename> of a Block
+     * Return the replicas' locations of a Block
      *
      * @param blockID
      * @return locations that store the Block
@@ -153,9 +166,11 @@ public class NameSystemService implements INameSystemService {
 	 */
 	@Override
 	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException {
+		// Get the Blocks of a file.
 		List<Block> blocks = this.fileNameToBlocksMap.get(fileName);
 		ArrayList<AllocatedBlock> result = new ArrayList<AllocatedBlock>();
 
+		// Get the replicas' locations for each Block.
 		for (Block block : blocks) {
 			HashSet <DataNodeDescriptor> dataNodes = this.blockToLocationsMap.get(block);
 
@@ -166,7 +181,7 @@ public class NameSystemService implements INameSystemService {
 	}
 
 	/**
-     * Data Node
+     * Data Node register to the NameNode.
      */
     @Override
     public boolean register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
@@ -175,14 +190,16 @@ public class NameSystemService implements INameSystemService {
                                                              port,
                                                              blocks.size());
         // update dataNodes list
-        dataNodes.add(dataNode);
+        this.dataNodes.add(dataNode);
+
         // update blockToLocationsMap
         for (Block block : blocks) {
             HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
             dataNodeDescriptorSet.add(dataNode);
             blockToLocationsMap.put(block, dataNodeDescriptorSet);
         }
-        nextDataNodeID++;
-        return true;
+        this.nextDataNodeID++;
+
+	    return true;
     }
 }

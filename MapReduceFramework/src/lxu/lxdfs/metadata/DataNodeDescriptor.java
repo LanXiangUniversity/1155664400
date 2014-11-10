@@ -1,9 +1,11 @@
 package lxu.lxdfs.metadata;
 
+import java.io.Serializable;
+
 /**
  * This class stores the meta-data of a Data Node.
  */
-public class DataNodeDescriptor {
+public class DataNodeDescriptor implements Serializable {
 	private int dataNodeID;
 	private String dataNodeIP;
 	private int dataNodePort;

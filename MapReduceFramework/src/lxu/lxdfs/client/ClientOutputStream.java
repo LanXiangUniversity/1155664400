@@ -26,7 +26,8 @@ public class ClientOutputStream {
 	private int blockOffset;
 	private int listenPort;
 	private INameSystemService nameSystem;
-	private int blockSize = 10;
+	private int blockSize = 2;
+    private int nextPacketID = 0;
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
 	// Packets to be sent.
@@ -141,7 +142,7 @@ public class ClientOutputStream {
 		AllocatedBlock allocatedBlock = null;
 
 		// get data
-		String[] lines = data.split("\n");
+		String[] lines = data.split(";");
 
 		// Buffer
 		for (String line : lines) {
@@ -151,7 +152,7 @@ public class ClientOutputStream {
 		while (buffer.size() > 0) {
 			System.out.println("iter");
 
-			writeSize += buffer.size() < 10 ? buffer.size() : 10;
+			writeSize += buffer.size() < blockSize ? buffer.size() : blockSize;
 
 			// Allocate new Blocks through RPC and get the locations.
 			try {
@@ -240,15 +241,18 @@ public class ClientOutputStream {
 		// Create a new packet.
 		for (DataNodeDescriptor location : locations) {
 			ClientPacket packet = new ClientPacket();
+            packet.setPacketID(this.nextPacketID);
 			packet.setLines(lines);
 			packet.setBlock(block);
-
+            packet.setOperation(ClientPacket.BLOCK_WRITE);
 			//packet.setLocations(locations);
 			packet.setLocation(location);
 			packet.setReplicaID(1);
 			packet.setReplicaNum(2);
 			packets.add(packet);
 		}
+
+        this.nextPacketID++;
 
 		return packets;
 	}

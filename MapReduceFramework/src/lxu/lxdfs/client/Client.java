@@ -18,7 +18,7 @@ public class Client {
 				new InputStreamReader(System.in));
 	}
 
-	public static void main(String[] args) throws IOException, NotBoundException {
+	public static void main(String[] args) throws IOException, NotBoundException, ClassNotFoundException {
 		Client client = new Client();
 
 		while (client.getState() == ClientState.RUNNING) {
@@ -41,7 +41,7 @@ public class Client {
 	 *
 	 * @throws IOException
 	 */
-	public void parseInput() throws IOException, NotBoundException {
+	public void parseInput() throws IOException, NotBoundException, ClassNotFoundException {
 		String cmd = this.consoleReader.readLine();
 
 		String[] args = cmd.split(" ");
@@ -55,12 +55,16 @@ public class Client {
 		} else if ("rm".equals(args[0])) {
 
 		} else if ("write".equals(args[0])) {
-			String fileName = args[1];
-			String content = args[2];
+            String fileName = args[1];
+            String content = args[2];
 
-			ClientOutputStream cos = new ClientOutputStream();
-			cos.setFileName(fileName);
-			cos.write(content);
+            ClientOutputStream cos = new ClientOutputStream();
+            cos.setFileName(fileName);
+            cos.write(content);
+        } else if ("read".equals(args[0])) {
+            ClientInputStream clientInputStream = new ClientInputStream(args[1]);
+            String content = clientInputStream.read();
+            System.out.println("Received content = " + content);
 		} else {
 			this.showHelpInfo(args[0]);
 		}

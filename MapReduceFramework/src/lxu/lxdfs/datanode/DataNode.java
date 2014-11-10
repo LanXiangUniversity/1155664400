@@ -49,6 +49,7 @@ public class DataNode implements Runnable {
 		//nameNode = (INameSystemService) Naming.lookup("rmi://localhost:56789/NameSystemService");
         nameNode = (INameSystemService) registry.lookup("NameSystemService");
 		nodeID = nameNode.register(nameNodeHostName, port, blockService.getAllBlocks());
+        System.out.println("Data Node registered. Node ID = " + nodeID);
 	}
 
 	/**

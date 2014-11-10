@@ -4,11 +4,17 @@ import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.metadata.AllocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,10 +24,12 @@ import java.util.Iterator;
  */
 public class ClientInputStream extends ClientStream {
 	private String fileName;
-	private NameSystemService nameSystemService;
+	private INameSystemService nameSystemService;
 
-	public ClientInputStream(String fileName) {
+	public ClientInputStream(String fileName) throws RemoteException, NotBoundException {
 		this.fileName = fileName;
+        Registry registry = LocateRegistry.getRegistry();
+        this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
 	}
 
 	public String getFileName() {
@@ -32,11 +40,11 @@ public class ClientInputStream extends ClientStream {
 		this.fileName = fileName;
 	}
 
-	public NameSystemService getNameSystemService() {
+	public INameSystemService getNameSystemService() {
 		return nameSystemService;
 	}
 
-	public void setNameSystemService(NameSystemService nameSystemService) {
+	public void setNameSystemService(INameSystemService nameSystemService) {
 		this.nameSystemService = nameSystemService;
 	}
 
@@ -52,6 +60,7 @@ public class ClientInputStream extends ClientStream {
 			Block block = allocatedBlock.getBlock();
 
 			Socket sock = null;
+            ObjectOutputStream oos = null;
 			ObjectInputStream ois = null;
 
 			HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
@@ -63,7 +72,12 @@ public class ClientInputStream extends ClientStream {
 					dataNodeDescriptor.getDataNodePort());
 
 			// Read a Block from DataNode
-			ois = new ObjectInputStream(sock.getInputStream());
+            oos = new ObjectOutputStream(sock.getOutputStream());
+
+            oos.writeObject(generateReadPacket(block));
+            System.out.println("here");
+
+            ois = new ObjectInputStream(sock.getInputStream());
 			DataNodePacket packet = (DataNodePacket) ois.readObject();
 			ois.close();
 			sock.close();
@@ -77,4 +91,11 @@ public class ClientInputStream extends ClientStream {
 
 		return res.substring(1);
 	}
+
+    public ClientPacket generateReadPacket(Block block) {
+        ClientPacket packet = new ClientPacket();
+        packet.setOperation(ClientPacket.BLOCK_READ);
+        packet.setBlock(block);
+        return packet;
+    }
 }

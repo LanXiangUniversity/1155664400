@@ -22,7 +22,7 @@ public class NameSystemService implements INameSystemService {
     private int nextDataNodeID = 0;
 	// Path of root of the DFS
 	private String rootPath;
-	private int replicaNum = 2;
+	private int replicaNum = 1;
 	private int blockID = 0;
 	// List of Data Nodes available.
 	private List<DataNodeDescriptor> dataNodes;
@@ -93,6 +93,11 @@ public class NameSystemService implements INameSystemService {
 		}
 
 		// Register Blocks in NameNode.
+        List<Block> fileBlocks = fileNameToBlocksMap.get(fileName);
+        if (fileBlocks == null) {
+            fileBlocks = new ArrayList<Block>();
+            fileNameToBlocksMap.put(fileName, fileBlocks);
+        }
 		this.fileNameToBlocksMap.get(fileName).add(block);
 		this.IDToBlockMap.put(blockId, block);
 

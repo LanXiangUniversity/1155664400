@@ -38,6 +38,7 @@ public class JobTracker implements IJobTracker {
         jobs.put(jobID, job);
 
         // TODO: add job to taskScheduler Listener
+        job.initTasks();
 
         return job.getJobStatus();
     }

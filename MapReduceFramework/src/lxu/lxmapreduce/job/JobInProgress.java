@@ -1,5 +1,10 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxmapreduce.task.TaskInProgress;
+import lxu.lxmapreduce.task.TaskTracker;
+
+import java.util.Map;
+
 /**
  * Created by magl on 14/11/10.
  */
@@ -9,8 +14,8 @@ public class JobInProgress {
     private JobTracker jobTracker = null;
     // static job information:
     // map tasks, reduce tasks, etc
-    //private TaskInProcess[] maps = new TaskInProcess[0];
-    //private TaskInProcess[] reduces = new TaskInProcess[0];
+    private TaskInProgress[] maps = new TaskInProgress[0];
+    private TaskInProgress[] reduces = new TaskInProgress[0];
     private int numMapTasks = 0;
     private int numReduceTasks = 0;
 
@@ -21,14 +26,34 @@ public class JobInProgress {
     private int finishedReduceTasks = 0;
     private int failedMapTask = 0;
     private int failedReduceTask = 0;
+    // private Map<?, TaskInProgress> nonRunningMapTaskMap;
 
     public JobInProgress(int jobID, JobTracker jobTracker) {
         this.jobID = jobID;
         this.jobTracker = jobTracker;
         this.jobStatus = new JobStatus(jobID, JobStatus.PREP);
         // TODO: Use configuration to initialize
-        this.numMapTasks = 2;
-        this.numReduceTasks = 2;
+        this.numMapTasks = 10;
+        this.numReduceTasks = 10;
+    }
+
+    public void initTasks() {
+        System.out.println("Initializing job: " + jobID);
+        // TODO: Set numMapTasks according to splits
+        // Init Map Tasks
+        this.maps = new TaskInProgress[numMapTasks];
+        for (int i = 0; i < numMapTasks; i++) {
+            // TODO: Change to map task constructor
+            this.maps[i] = new TaskInProgress();
+        }
+        // TODO: Add each task to nonRunningMapTaskMap
+
+        // Init Reduce Tasks
+        this.reduces = new TaskInProgress[numReduceTasks];
+        for (int i = 0; i < numReduceTasks; i++) {
+            // TODO: Change to reduce task constructor
+            this.reduces[i] = new TaskInProgress();
+        }
     }
 
     public int getJobID() {

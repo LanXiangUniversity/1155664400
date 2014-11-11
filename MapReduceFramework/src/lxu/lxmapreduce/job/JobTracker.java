@@ -7,20 +7,29 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 
 /**
  * Created by magl on 14/11/10.
  */
 public class JobTracker implements IJobTracker {
+    private int nextJobID = 0;
     private TaskScheduler taskScheduler = null;
+    private HashMap<Integer, JobInProcess> jobs;
 
     public JobTracker() {
+        this.jobs = new HashMap<Integer, JobInProcess>();
         this.taskScheduler = new TaskScheduler();
     }
 
     @Override
-    public void submitJob() {
+    public int getNewJobID() {
+        return this.nextJobID++;
+    }
 
+    @Override
+    public JobStatus submitJob(int jobID) {
+        return null;
     }
 
     @Override

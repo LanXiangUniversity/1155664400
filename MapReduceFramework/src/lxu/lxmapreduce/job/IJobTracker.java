@@ -12,8 +12,8 @@ import java.rmi.RemoteException;
 public interface IJobTracker extends Remote {
     // for job client
     // TODO: change prototype
-    public int getNewJobID();
-    public JobStatus submitJob(int jobID);
+    public int getNewJobID() throws RemoteException;
+    public JobStatus submitJob(int jobID) throws RemoteException;
 
     // for TaskTracker
     public HeartbeatResponse heartbeat(TaskTrackerStatus status, short responseID) throws RemoteException;

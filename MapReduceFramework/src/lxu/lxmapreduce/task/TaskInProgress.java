@@ -3,7 +3,7 @@ package lxu.lxmapreduce.task;
 /**
  * Created by magl on 14/11/10.
  */
-public class TaskInProcess {
+public class TaskInProgress {
     // int numMaps
     // JobTracker jobTracker
     // JobInProcess job

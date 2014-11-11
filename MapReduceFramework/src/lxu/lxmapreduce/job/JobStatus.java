@@ -10,6 +10,7 @@ public class JobStatus implements Serializable {
     public static final int SUCCEEDED = 2;
     public static final int FAILED = 3;
     public static final int KILLED = 4;
+    public static final int PREP = 5;
 
     private int jobID;
     private int runState;

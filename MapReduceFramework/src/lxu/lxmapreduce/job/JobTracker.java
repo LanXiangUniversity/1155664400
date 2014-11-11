@@ -15,10 +15,10 @@ import java.util.HashMap;
 public class JobTracker implements IJobTracker {
     private int nextJobID = 0;
     private TaskScheduler taskScheduler = null;
-    private HashMap<Integer, JobInProcess> jobs;
+    private HashMap<Integer, JobInProgress> jobs;
 
     public JobTracker() {
-        this.jobs = new HashMap<Integer, JobInProcess>();
+        this.jobs = new HashMap<Integer, JobInProgress>();
         this.taskScheduler = new TaskScheduler();
     }
 
@@ -29,7 +29,17 @@ public class JobTracker implements IJobTracker {
 
     @Override
     public JobStatus submitJob(int jobID) {
-        return null;
+        if (jobs.containsKey(jobID)) {
+            return jobs.get(jobID).getJobStatus();
+        }
+
+        JobInProgress job = new JobInProgress(jobID, this);
+
+        jobs.put(jobID, job);
+
+        // TODO: add job to taskScheduler Listener
+
+        return job.getJobStatus();
     }
 
     @Override

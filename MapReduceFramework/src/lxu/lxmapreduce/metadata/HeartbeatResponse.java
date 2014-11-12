@@ -9,5 +9,6 @@ import java.io.Serializable;
  */
 public class HeartbeatResponse implements Serializable {
     private short responseID;
+    private String trackerName;
     private TaskTrackerAction[] actions;
 }

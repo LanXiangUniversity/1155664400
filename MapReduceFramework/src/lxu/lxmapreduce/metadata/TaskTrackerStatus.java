@@ -1,6 +1,9 @@
 package lxu.lxmapreduce.metadata;
 
+import lxu.lxmapreduce.task.TaskStatus;
+
 import java.io.Serializable;
+import java.util.LinkedList;
 
 /**
  * Created by magl on 14/11/10.
@@ -8,6 +11,6 @@ import java.io.Serializable;
 public class TaskTrackerStatus implements Serializable {
     private String trackerName;
     private String hostIP;
-    private int hostPort;
     // Task Status List
+    private LinkedList<TaskStatus> taskStatuses;
 }

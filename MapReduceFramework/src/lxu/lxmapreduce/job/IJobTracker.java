@@ -16,5 +16,8 @@ public interface IJobTracker extends Remote {
     public JobStatus submitJob(int jobID) throws RemoteException;
 
     // for TaskTracker
-    public HeartbeatResponse heartbeat(TaskTrackerStatus status, short responseID) throws RemoteException;
+    public HeartbeatResponse heartbeat(TaskTrackerStatus status,
+                                       boolean initialContact,
+                                       boolean acceptNewTasks,
+                                       short responseID) throws RemoteException;
 }

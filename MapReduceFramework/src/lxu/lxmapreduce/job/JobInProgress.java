@@ -3,6 +3,7 @@ package lxu.lxmapreduce.job;
 import lxu.lxmapreduce.task.TaskInProgress;
 import lxu.lxmapreduce.task.TaskTracker;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +27,7 @@ public class JobInProgress {
     private int finishedReduceTasks = 0;
     private int failedMapTask = 0;
     private int failedReduceTask = 0;
-    // private Map<?, TaskInProgress> nonRunningMapTaskMap;
+    private Map<String, List<TaskInProgress>> nonRunningMapTasksMap;
 
     public JobInProgress(int jobID, JobTracker jobTracker) {
         this.jobID = jobID;
@@ -41,12 +42,13 @@ public class JobInProgress {
         System.out.println("Initializing job: " + jobID);
         // TODO: Set numMapTasks according to splits
         // Init Map Tasks
+        // TODO: getBlockLocations
         this.maps = new TaskInProgress[numMapTasks];
         for (int i = 0; i < numMapTasks; i++) {
             // TODO: Change to map task constructor
             this.maps[i] = new TaskInProgress();
         }
-        // TODO: Add each task to nonRunningMapTaskMap
+        nonRunningMapTasksMap = createCache();
 
         // Init Reduce Tasks
         this.reduces = new TaskInProgress[numReduceTasks];
@@ -54,6 +56,13 @@ public class JobInProgress {
             // TODO: Change to reduce task constructor
             this.reduces[i] = new TaskInProgress();
         }
+    }
+
+    /*
+     * TODO: 1. getBlockLocations
+     */
+    public Map<String, List<TaskInProgress>> createCache() {
+        return null;
     }
 
     public int getJobID() {

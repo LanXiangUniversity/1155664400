@@ -15,10 +15,13 @@ import java.util.HashMap;
 public class JobTracker implements IJobTracker {
     private int nextJobID = 0;
     private TaskScheduler taskScheduler = null;
+    // All known jobs (jobID -> JobInProgreee)
     private HashMap<Integer, JobInProgress> jobs;
+    private HashMap<String, TaskTrackerStatus> taskTrackers;
 
     public JobTracker() {
         this.jobs = new HashMap<Integer, JobInProgress>();
+        this.taskTrackers = new HashMap<String, TaskTrackerStatus>();
         this.taskScheduler = new TaskScheduler();
     }
 
@@ -44,7 +47,11 @@ public class JobTracker implements IJobTracker {
     }
 
     @Override
-    public HeartbeatResponse heartbeat(TaskTrackerStatus status, short responseID) {
+    public HeartbeatResponse heartbeat(TaskTrackerStatus status,
+                                       boolean initialContact,
+                                       boolean acceptNewTasks,
+                                       short responseID) {
+        short newResponseID = (short)(responseID + 1);
         // TODO: Update TaskTracker, Job, Task information
         // TODO: Generate HeartbeatResponse (including task tracker action)
         // Change heartbeat interval (may not be implemented)

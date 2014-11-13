@@ -4,7 +4,10 @@ import lxu.lxmapreduce.io.LineRecordReader;
 import lxu.lxmapreduce.io.LineRecordWriter;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.format.InputFormat;
 import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.tmp.JobConf;
+import lxu.lxmapreduce.tmp.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
 
 import java.io.IOException;
@@ -17,29 +20,35 @@ import java.lang.reflect.InvocationTargetException;
 public class MapTask extends Task {
 
 	@Override
-	public void run() throws IOException {
+	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		// start thread that will handle communication with parent
 //		TaskReporter reporter = new TaskReporter();
 //		reporter.startCommunicationThread();
 //
-//		runNewMapper();
+		this.runMapper(jobConf);
 //		done();
 	}
 
 	private <KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-	void runNewMapper() throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-		// Make task context.
+	void runMapper(JobConf jobConf) throws IOException, NoSuchMethodException, IllegalAccessException,
+			InvocationTargetException,
+			InstantiationException, ClassNotFoundException {
+		// Create taskContext.
+		TaskAttemptContext taskContext = new TaskAttemptContext(jobConf, this.getTaskID());
 
-		// Make a mapper
-		//Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> mapper =
-		//		(Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>) ReflectionUtils.loadClassFromJar();
+		// Create InputFormat (Lin).
+		InputFormat<KEYIN, VALUEIN> inputFormat = (InputFormat<KEYIN, VALUEIN>)
+				ReflectionUtils.newInstance(taskContext.getInputFormatClass());
 
+		// Create mapper
+		Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> mapper = (Mapper<KEYIN, VALUEIN, KEYOUT,
+				VALUEOUT>) ReflectionUtils.newInstance(jobConf.getMapperClass());
 
-		LineRecordReader<KEYIN, VALUEIN> reader = new LineRecordReader<KEYIN, VALUEIN>();
-		LineRecordWriter<KEYOUT, VALUEOUT> writer = new LineRecordWriter<KEYOUT, VALUEOUT>("fasf");
-		Configuration conf = new Configuration();
+		/* TODO Init form input block files. */
+		LineRecordReader<KEYIN, VALUEIN> input = new LineRecordReader<KEYIN, VALUEIN>();
+		LineRecordWriter<KEYOUT, VALUEOUT> output = new LineRecordWriter<KEYOUT, VALUEOUT>("fasf");
 
-
+		// Create mapperContext
 		Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context mapperContext = null;
 		Constructor<Mapper.Context> contextConstructor = Mapper.Context.class.getConstructor
 				(new Class[]{Mapper.class,
@@ -47,15 +56,11 @@ public class MapTask extends Task {
 						RecordReader.class,
 						RecordWriter.class});
 
-		RecordReader<KEYIN, VALUEIN> input = null;
-		RecordWriter<KEYIN, VALUEIN> output = null;
-
-		//mapperContext = contextConstructor.newInstance(mapper, input, output);
-		// Create MapperContext.
-		// Construct Mapper.Context
+		mapperContext = contextConstructor.newInstance(mapper, jobConf, input, output);
 
 		input.initialize();
-		//mapper.run(mapperContext);
-
+		mapper.run(mapperContext);
+		input.close();
+		output.close();
 	}
 }

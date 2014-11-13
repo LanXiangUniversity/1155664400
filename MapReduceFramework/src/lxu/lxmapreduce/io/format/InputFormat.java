@@ -8,5 +8,5 @@ import lxu.lxmapreduce.io.RecordReader;
 public abstract class InputFormat<K, V> {
 	//public abstract
 
-	//public abstract RecordReader<K, V> createRecordReader();
+	public abstract RecordReader<K, V> createRecordReader();
 }

@@ -62,6 +62,10 @@ public class ReflectionUtils {
 	public static <T> T newInstance(String className) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
 		Class<T> theClass = (Class<T>) Class.forName(className);
 
-		return theClass.newInstance();
+		return (T) theClass.newInstance();
+	}
+
+	public static <T> T newInstance(Class<T> theClass) throws IllegalAccessException, InstantiationException {
+		return (T) theClass.newInstance();
 	}
 }

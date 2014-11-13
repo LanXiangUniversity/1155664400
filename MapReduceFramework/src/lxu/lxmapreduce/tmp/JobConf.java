@@ -71,6 +71,14 @@ public class JobConf extends Configuration {
 		return null;
 	}
 
+	public Class<?> getInputputFormatClass() {
+		return null;
+	}
+
+	public Class<?> getOutputFormatClass() {
+		return null;
+	}
+
 	public Class<?> getMapOutputKeyClass() {
 		return null;
 	}

@@ -2,18 +2,21 @@ package lxu.lxmapreduce.io;
 
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
+import lxu.lxmapreduce.task.Test;
+import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
  * Treats keys as offset in file and value as line.
  * Created by Wei on 11/11/14.
  */
-public class LineRecordReader<K, V> extends RecordReader<K, V> {
+public class LineRecordReader extends RecordReader<LongWritable, Text> {
 	private int lineNum = 0;
 	private LineReader in;
-	private K key = null;
-	private V value = null;
+	private LongWritable key = null;
+	private Text value = null;
 
 	public LineRecordReader() {
 		/* TODO Init LineReader */
@@ -27,26 +30,27 @@ public class LineRecordReader<K, V> extends RecordReader<K, V> {
 	}
 
 	@Override
-	public void initialize() {
-
+	public void initialize(TaskAttemptContext taskContext) throws FileNotFoundException {
+		/* TODO get filename from taskContext */
+		this.in = new LineReader("filename");
 	}
 
 	@Override
-	public V getCurrentValue() {
-		return null;//this.value;
+	public Text getCurrentValue() {
+		return this.value;
 	}
 
 	@Override
-	public K getCurrentKey() {
-		return null;//this.key;
+	public LongWritable getCurrentKey() {
+		return this.key;
 	}
 
 	@Override
 	public boolean nextKeyValue() throws IOException {
 		int res = 0;
 
-		//this.key.set(this.lineNum++);
-		//res = in.readLine(this.value);
+		this.key.set(this.lineNum++);
+		res = in.readLine(this.value);
 
 		return (res != 0);
 	}

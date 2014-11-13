@@ -4,6 +4,9 @@ package lxu.lxmapreduce.io;
  * Created by Wei on 11/11/14.
  */
 
+import lxu.lxmapreduce.tmp.TaskAttemptContext;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -13,7 +16,7 @@ import java.io.IOException;
  */
 public abstract class RecordReader<KEYIN, VALUEIN> {
 
-	public abstract void initialize();
+	public abstract void initialize(TaskAttemptContext textContext) throws FileNotFoundException;
 
 	/**
 	 * Get the current value.

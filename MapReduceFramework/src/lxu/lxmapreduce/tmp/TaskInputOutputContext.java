@@ -1,6 +1,5 @@
 package lxu.lxmapreduce.tmp;
 
-import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 
 import java.io.IOException;
@@ -9,7 +8,7 @@ import java.io.IOException;
  * Created by Wei on 11/12/14.
  */
 public abstract class TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-	extends TaskAttemptContext {
+		extends TaskAttemptContext {
 
 	private RecordWriter<KEYOUT, VALUEOUT> out;
 

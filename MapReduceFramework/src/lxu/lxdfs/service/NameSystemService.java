@@ -2,9 +2,9 @@ package lxu.lxdfs.service;
 
 
 import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.namenode.NameNodeState;
 
 import java.nio.file.Path;
@@ -19,7 +19,7 @@ import java.util.*;
 public class NameSystemService implements INameSystemService {
 	// Index of DataNode to be allocated.
 	private int dataAllocId = 0;
-    private int nextDataNodeID = 0;
+	private int nextDataNodeID = 0;
 	// Path of root of the DFS
 	private String rootPath;
 	private int replicaNum = 1;
@@ -37,11 +37,11 @@ public class NameSystemService implements INameSystemService {
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 
 	public NameSystemService() {
-        dataNodes = new LinkedList<DataNodeDescriptor>();
-        fileNameToBlocksMap = new HashMap<String, List<Block>>();
-        blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
-        IDToBlockMap = new HashMap<Integer, Block>();
-        fileNames = new HashSet<String>();
+		dataNodes = new LinkedList<DataNodeDescriptor>();
+		fileNameToBlocksMap = new HashMap<String, List<Block>>();
+		blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
+		IDToBlockMap = new HashMap<Integer, Block>();
+		fileNames = new HashSet<String>();
 	}
 
 	public boolean isSafeMode() {
@@ -55,7 +55,7 @@ public class NameSystemService implements INameSystemService {
 	/**
 	 * Block write operations.
 	 */
-	public void enterSafeMode () {
+	public void enterSafeMode() {
 		this.nameNodeState = NameNodeState.IN_SAFE_MODE;
 	}
 
@@ -79,12 +79,14 @@ public class NameSystemService implements INameSystemService {
 	 */
 	@Override
 	public LocatedBlock allocateBlock(String fileName, int offset) throws RemoteException {
-		if (this.isSafeMode()) {return null;}
-		System.out.println("allocate blocks for client filname: " + fileName );
+		if (this.isSafeMode()) {
+			return null;
+		}
+		System.out.println("allocate blocks for client filname: " + fileName);
 
 		// Set unique global block ID.
 		int blockId = this.blockID++;
-        Block block = new Block(blockId, offset, 0L);
+		Block block = new Block(blockId, offset, 0L);
 		HashSet<DataNodeDescriptor> locations = new HashSet<DataNodeDescriptor>();
 
 		// Allocate DataNodes to store Block replicas.
@@ -93,11 +95,11 @@ public class NameSystemService implements INameSystemService {
 		}
 
 		// Register Blocks in NameNode.
-        List<Block> fileBlocks = fileNameToBlocksMap.get(fileName);
-        if (fileBlocks == null) {
-            fileBlocks = new ArrayList<Block>();
-            fileNameToBlocksMap.put(fileName, fileBlocks);
-        }
+		List<Block> fileBlocks = fileNameToBlocksMap.get(fileName);
+		if (fileBlocks == null) {
+			fileBlocks = new ArrayList<Block>();
+			fileNameToBlocksMap.put(fileName, fileBlocks);
+		}
 		this.fileNameToBlocksMap.get(fileName).add(block);
 		this.IDToBlockMap.put(blockId, block);
 
@@ -109,6 +111,7 @@ public class NameSystemService implements INameSystemService {
 
 	/**
 	 * Open a file and get the its outputStream.
+	 *
 	 * @param path
 	 * @return
 	 * @throws RemoteException
@@ -130,7 +133,6 @@ public class NameSystemService implements INameSystemService {
 
 
 	/**
-	 *
 	 * @param path
 	 * @return
 	 * @throws RemoteException
@@ -158,7 +160,9 @@ public class NameSystemService implements INameSystemService {
 
 	@Override
 	public boolean delete(Path path) throws RemoteException {
-		if (this.isSafeMode()) {return false;}
+		if (this.isSafeMode()) {
+			return false;
+		}
 
 		return false;
 	}
@@ -169,12 +173,12 @@ public class NameSystemService implements INameSystemService {
 	}
 
 	@Override
-    /**
-     * Return the replicas' locations of a Block
-     *
-     * @param blockID
-     * @return locations that store the Block
-     */
+	/**
+	 * Return the replicas' locations of a Block
+	 *
+	 * @param blockID
+	 * @return locations that store the Block
+	 */
 	public HashSet<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException {
 		HashSet<DataNodeDescriptor> blockLocations = new HashSet<DataNodeDescriptor>();
 
@@ -196,6 +200,7 @@ public class NameSystemService implements INameSystemService {
 
 	/**
 	 * Get the allocated Blocks of the file.
+	 *
 	 * @param fileName
 	 * @return
 	 * @throws RemoteException
@@ -208,7 +213,7 @@ public class NameSystemService implements INameSystemService {
 
 		// Get the replicas' locations for each Block.
 		for (Block block : blocks) {
-			HashSet <DataNodeDescriptor> dataNodes = this.blockToLocationsMap.get(block);
+			HashSet<DataNodeDescriptor> dataNodes = this.blockToLocationsMap.get(block);
 
 			result.add(new LocatedBlock(block, dataNodes));
 		}
@@ -217,38 +222,38 @@ public class NameSystemService implements INameSystemService {
 	}
 
 	/**
-     * Data Node register to the NameNode.
-     */
-    @Override
-    public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
-	    if (this.nameNodeState == NameNodeState.OUT_OF_SAFE_MODE) {
-		    this.nameNodeState = NameNodeState.IN_SAFE_MODE;
-	    }
+	 * Data Node register to the NameNode.
+	 */
+	@Override
+	public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
+		if (this.nameNodeState == NameNodeState.OUT_OF_SAFE_MODE) {
+			this.nameNodeState = NameNodeState.IN_SAFE_MODE;
+		}
 
-        this.nextDataNodeID++;
-        System.out.println(dataNodeHostName + " registered");
-        DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
-                                                             dataNodeHostName,
-                                                             port,
-                                                             blocks.size());
-        // update dataNodes list
-        this.dataNodes.add(dataNode);
+		this.nextDataNodeID++;
+		System.out.println(dataNodeHostName + " registered");
+		DataNodeDescriptor dataNode = new DataNodeDescriptor(nextDataNodeID,
+				dataNodeHostName,
+				port,
+				blocks.size());
+		// update dataNodes list
+		this.dataNodes.add(dataNode);
 
 	    /* TODO return <**fileName**, blocksID, replicas> */
 
-        // update blockToLocationsMap
-        for (Block block : blocks) {
-            HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
-            if (dataNodeDescriptorSet == null) {
-                dataNodeDescriptorSet = new HashSet<DataNodeDescriptor>();
-            }
-            dataNodeDescriptorSet.add(dataNode);
-            blockToLocationsMap.put(block, dataNodeDescriptorSet);
-        }
+		// update blockToLocationsMap
+		for (Block block : blocks) {
+			HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
+			if (dataNodeDescriptorSet == null) {
+				dataNodeDescriptorSet = new HashSet<DataNodeDescriptor>();
+			}
+			dataNodeDescriptorSet.add(dataNode);
+			blockToLocationsMap.put(block, dataNodeDescriptorSet);
+		}
 
 		// Exit safe mode.
-	    this.nameNodeState = NameNodeState.OUT_OF_SAFE_MODE;
+		this.nameNodeState = NameNodeState.OUT_OF_SAFE_MODE;
 
-	    return this.nextDataNodeID;
-    }
+		return this.nextDataNodeID;
+	}
 }

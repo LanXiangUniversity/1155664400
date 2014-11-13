@@ -11,6 +11,7 @@ import java.io.IOException;
 
 /**
  * Break the records into key/value pairs for input to the Mapper.
+ *
  * @param <KEYIN>
  * @param <VALUEIN>
  */
@@ -24,12 +25,13 @@ public abstract class RecordReader<KEYIN, VALUEIN> {
 	public abstract VALUEIN getCurrentValue();
 
 	/**
-	 * 	Get the current key.
+	 * Get the current key.
 	 */
 	public abstract KEYIN getCurrentKey();
 
 	/**
 	 * Read the next key value pair.
+	 *
 	 * @return
 	 */
 	public abstract boolean nextKeyValue() throws IOException;

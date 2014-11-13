@@ -2,7 +2,6 @@ package lxu.lxmapreduce.io;
 
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
-import lxu.lxmapreduce.task.Test;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
 import java.io.FileNotFoundException;

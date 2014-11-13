@@ -2,7 +2,6 @@ package lxu.lxmapreduce.job;
 
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.Task;
-import lxu.lxmapreduce.task.TaskTracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,39 +11,39 @@ import java.util.List;
  * Created by magl on 14/11/10.
  */
 public class TaskScheduler {
-    // use job tracker to get job information
-    private JobTracker jobTracker = null;
+	// use job tracker to get job information
+	private JobTracker jobTracker = null;
 
-    public void setJobTracker(JobTracker jobTracker) {
-        this.jobTracker = jobTracker;
-    }
+	public void setJobTracker(JobTracker jobTracker) {
+		this.jobTracker = jobTracker;
+	}
 
-    public List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) {
-        List<Task> assignedTasks = new ArrayList<Task>();
+	public List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) {
+		List<Task> assignedTasks = new ArrayList<Task>();
 
-        // Get map reduce count for current taskTracker
-        final int trackerMapCapacity = taskTrackerStatus.getMaxMapTasks();
-        final int trackerReduceCapacity = taskTrackerStatus.getMaxReduceTasks();
-        final int trackerRunningMaps = taskTrackerStatus.countRunningMapTask();
-        final int trackerRunningReduces = taskTrackerStatus.countRunningReduceTask();
+		// Get map reduce count for current taskTracker
+		final int trackerMapCapacity = taskTrackerStatus.getMaxMapTasks();
+		final int trackerReduceCapacity = taskTrackerStatus.getMaxReduceTasks();
+		final int trackerRunningMaps = taskTrackerStatus.countRunningMapTask();
+		final int trackerRunningReduces = taskTrackerStatus.countRunningReduceTask();
 
-        Collection<JobInProgress> jobs = jobTracker.jobs.values();
-        JobInProgress job = jobs.iterator().next();
+		Collection<JobInProgress> jobs = jobTracker.jobs.values();
+		JobInProgress job = jobs.iterator().next();
 
-        int remainingMapLoad = job.getNumMapTasks() - job.getRunningMapTasks() - job.getFinishedMapTasks();
-        int remainingReduceLoad = job.getNumReduceTasks() - job.getRunningReduceTasks() - job.getFailedReduceTask();
+		int remainingMapLoad = job.getNumMapTasks() - job.getRunningMapTasks() - job.getFinishedMapTasks();
+		int remainingReduceLoad = job.getNumReduceTasks() - job.getRunningReduceTasks() - job.getFailedReduceTask();
 
-        // assign map tasks
-        for (int i = 0; i < remainingMapLoad; ++i) {
-            Task task = job.obtainNewLocalMapTask(taskTrackerStatus);
-            if (task != null) {
-                assignedTasks.add(task);
-            } else {
-                task = job.obtainNewNonLocalMapTask(taskTrackerStatus);
-                assignedTasks.add(task);
-            }
-        }
+		// assign map tasks
+		for (int i = 0; i < remainingMapLoad; ++i) {
+			Task task = job.obtainNewLocalMapTask(taskTrackerStatus);
+			if (task != null) {
+				assignedTasks.add(task);
+			} else {
+				task = job.obtainNewNonLocalMapTask(taskTrackerStatus);
+				assignedTasks.add(task);
+			}
+		}
 
-        return assignedTasks;
-    }
+		return assignedTasks;
+	}
 }

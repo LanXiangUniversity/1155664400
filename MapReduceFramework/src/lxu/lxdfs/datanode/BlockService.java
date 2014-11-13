@@ -29,7 +29,7 @@ public class BlockService implements Runnable {
 				Socket socket = serverSocket.accept();
 				ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 				ClientPacket packet = (ClientPacket) input.readObject();
-                System.out.println(packet.getBlock().getBlockID());
+				System.out.println(packet.getBlock().getBlockID());
 				switch (packet.getOperation()) {
 					case ClientPacket.BLOCK_READ:
 						(new Thread(new BlockReader(packet, socket))).start();
@@ -95,7 +95,7 @@ public class BlockService implements Runnable {
 				System.err.println("Error: DataNode writing packet to client error");
 				System.err.println(e.getMessage());
 			}
-            System.out.println("Read block " + block.getBlockID() + "from file " + fileName);
+			System.out.println("Read block " + block.getBlockID() + "from file " + fileName);
 		}
 	}
 
@@ -126,7 +126,7 @@ public class BlockService implements Runnable {
 				operationState = true;
 				// record blockID -> fileName
 				blockFiles.put(block, fileName);
-                writer.close();
+				writer.close();
 			} catch (IOException e) {
 				System.err.println("Error: Data Node writing file " + fileName + " error");
 			}
@@ -139,11 +139,11 @@ public class BlockService implements Runnable {
 				System.err.println("Error: DataNode writing packet to client error");
 				System.err.println(e.getMessage());
 			}
-            System.out.println("Write block " + block.getBlockID() + " to file " + fileName);
-            System.out.println("Content");
-            for (String line : lines) {
-                System.out.println(line);
-            }
+			System.out.println("Write block " + block.getBlockID() + " to file " + fileName);
+			System.out.println("Content");
+			for (String line : lines) {
+				System.out.println(line);
+			}
 		}
 	}
 }

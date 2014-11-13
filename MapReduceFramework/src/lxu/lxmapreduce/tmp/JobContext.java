@@ -1,8 +1,5 @@
 package lxu.lxmapreduce.tmp;
 
-import lxu.lxmapreduce.io.format.InputFormat;
-import lxu.lxmapreduce.task.Mapper;
-
 /**
  * A read-only view of the job that is provided to the tasks while they
  * are running.
@@ -19,16 +16,15 @@ public class JobContext {
 			"mapreduce.outputformat.class";
 	protected static final String PARTITIONER_CLASS_ATTR =
 			"mapreduce.partitioner.class";
-
-	private final int jobId;
 	protected final JobConf conf;
+	private final String jobId;
 
-	public JobContext(JobConf conf, int jobId) {
+	public JobContext(JobConf conf, String jobId) {
 		this.conf = conf;
 		this.jobId = jobId;
 	}
 
-	public JobContext(Configuration conf, int jobId) {
+	public JobContext(Configuration conf, String jobId) {
 		this.conf = new JobConf(conf);
 		this.jobId = jobId;
 	}
@@ -43,7 +39,7 @@ public class JobContext {
 	}
 
 
-	public int getJobId() {
+	public String getJobId() {
 		return this.jobId;
 	}
 

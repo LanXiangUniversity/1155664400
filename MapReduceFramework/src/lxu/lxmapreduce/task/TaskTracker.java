@@ -10,8 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,7 +23,7 @@ public class TaskTracker implements Runnable {
 	private int maxMapTasks;
 	private int maxReduceTasks;
 	private JobConf jobConf;
-	private List<TaskRunner> taskPool;
+	private Map<TaskID, TaskRunner> taskPool;
 	private short responseID;           // Last response ID received from JobTracker.
 
 	public TaskTracker(JobConf jobConf,
@@ -36,7 +34,7 @@ public class TaskTracker implements Runnable {
 		this.tasks = new HashMap<TaskID, TaskInProgress>();
 		this.maxMapTasks = maxMapTasks;
 		this.maxReduceTasks = maxReduceTasks;
-		this.taskPool = new LinkedList<TaskRunner>();
+		this.taskPool = new HashMap<TaskID, TaskRunner>();
 	}
 
 	public static void main(String[] args) {

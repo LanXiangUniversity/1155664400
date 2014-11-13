@@ -1,9 +1,9 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.datanode.DataNodePacket;
-import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
 
@@ -26,7 +26,7 @@ public class ClientOutputStream {
 	private int listenPort;
 	private INameSystemService nameSystem;
 	private int blockSize = 2;
-    private int nextPacketID = 0;
+	private int nextPacketID = 0;
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
 	// Packets to be sent.
@@ -38,22 +38,22 @@ public class ClientOutputStream {
 
 	public ClientOutputStream() throws RemoteException, NotBoundException {
 		this.listenPort = 15998;
-        this.locations = new LinkedList<DataNodeDescriptor>();
-        this.dataQueue = new LinkedList<ClientPacket>();
-        this.ackQueue = new LinkedList<ClientPacket>();
+		this.locations = new LinkedList<DataNodeDescriptor>();
+		this.dataQueue = new LinkedList<ClientPacket>();
+		this.ackQueue = new LinkedList<ClientPacket>();
 		this.ackListeners = new LinkedList<AckListener>();
 		this.buffer = new LinkedList<String>();
 
 		Registry registry = LocateRegistry.getRegistry();
-		this.nameSystem = (INameSystemService)registry.lookup("NameSystemService");
+		this.nameSystem = (INameSystemService) registry.lookup("NameSystemService");
 	}
 
 	public void close() {
-        for (AckListener ackListener : ackListeners) {
-            if (ackListener.isRunning()) {
-                ackListener.stop();
-            }
-        }
+		for (AckListener ackListener : ackListeners) {
+			if (ackListener.isRunning()) {
+				ackListener.stop();
+			}
+		}
 	}
 
 	public int getListenPort() {
@@ -155,7 +155,7 @@ public class ClientOutputStream {
 
 			// Allocate new Blocks through RPC and get the locations.
 			try {
-				System.out.println("get blocks for "+this.fileName);
+				System.out.println("get blocks for " + this.fileName);
 				locatedBlock = nameSystem.allocateBlock(this.fileName, this.blockOffset);
 			} catch (RemoteException e) {
 				e.printStackTrace();
@@ -202,9 +202,9 @@ public class ClientOutputStream {
 			Socket sock = new Socket(ip, port);
 			ObjectOutputStream oos = new ObjectOutputStream(sock.getOutputStream());
 			oos.writeObject(packet);
-            AckListener ackListener = new AckListener(sock);
-            ackListeners.add(ackListener);
-            (new Thread(ackListener)).start();
+			AckListener ackListener = new AckListener(sock);
+			ackListeners.add(ackListener);
+			(new Thread(ackListener)).start();
 
 			// Log
 			System.out.println("Succeed to write to DataNode " +
@@ -236,14 +236,14 @@ public class ClientOutputStream {
 			lines.add(buffer.remove());
 		}
 
-        block.setLen(blockLen);
+		block.setLen(blockLen);
 		// Create a new packet.
 		for (DataNodeDescriptor location : locations) {
 			ClientPacket packet = new ClientPacket();
-            packet.setPacketID(this.nextPacketID);
+			packet.setPacketID(this.nextPacketID);
 			packet.setLines(lines);
 			packet.setBlock(block);
-            packet.setOperation(ClientPacket.BLOCK_WRITE);
+			packet.setOperation(ClientPacket.BLOCK_WRITE);
 			//packet.setLocations(locations);
 			packet.setLocation(location);
 			packet.setReplicaID(1);
@@ -251,7 +251,7 @@ public class ClientOutputStream {
 			packets.add(packet);
 		}
 
-        this.nextPacketID++;
+		this.nextPacketID++;
 
 		return packets;
 	}
@@ -260,12 +260,12 @@ public class ClientOutputStream {
 	 * Listen for acks from data node.
 	 */
 	private class AckListener implements Runnable {
-        private Socket socket;
+		private Socket socket;
 		private boolean isRunning = true;
 
-        public AckListener(Socket socket) {
-            this.socket = socket;
-        }
+		public AckListener(Socket socket) {
+			this.socket = socket;
+		}
 
 		public boolean isRunning() {
 			return isRunning;
@@ -292,25 +292,25 @@ public class ClientOutputStream {
 					int ackID = packet.getAckPacketID();
 					System.out.println("ACK ID: " + ackID);
 
-                    for (ClientPacket clientPacket : ackQueue) {
-                        if (clientPacket.getPacketID() == ackID) {
-                            ackQueue.remove(clientPacket);
-                            this.isRunning = false;
-                            break;
-                        }
-                    }
+					for (ClientPacket clientPacket : ackQueue) {
+						if (clientPacket.getPacketID() == ackID) {
+							ackQueue.remove(clientPacket);
+							this.isRunning = false;
+							break;
+						}
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
 			}
-            try {
-                socket.close();
-                ackListeners.remove(this);
-            } catch (IOException e) {
-                System.err.println("Error: AckListener close socket wrong");
-            }
+			try {
+				socket.close();
+				ackListeners.remove(this);
+			} catch (IOException e) {
+				System.err.println("Error: AckListener close socket wrong");
+			}
 
 		}
 	}

@@ -1,9 +1,9 @@
 package lxu.lxdfs.service;
 
 import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.metadata.LocatedBlock;
 
 import java.nio.file.Path;
 import java.rmi.NotBoundException;
@@ -34,14 +34,14 @@ public interface INameSystemService extends Remote {
 
 	public ArrayList<LocatedBlock> getFileBlocks(String fileName) throws RemoteException;
 
-    public boolean isSafeMode() throws RemoteException;
+	public boolean isSafeMode() throws RemoteException;
 
-    public void setSafeMode(boolean isSafeMode) throws RemoteException;
+	public void setSafeMode(boolean isSafeMode) throws RemoteException;
 
-    public void enterSafeMode() throws RemoteException;
+	public void enterSafeMode() throws RemoteException;
 
-    public void exitSafeMode() throws RemoteException;
+	public void exitSafeMode() throws RemoteException;
 
-    // Services for Data Node
+	// Services for Data Node
 	public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) throws RemoteException;
 }

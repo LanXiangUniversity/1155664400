@@ -2,7 +2,10 @@ package lxu.lxmapreduce.io;
 
 import lxu.lxmapreduce.io.format.Text;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Read lines form inputStream
@@ -23,6 +26,7 @@ public class LineReader {
 
 	/**
 	 * Read a line into Text
+	 *
 	 * @param str
 	 * @return 0 if reach the end of file.
 	 * @throws IOException

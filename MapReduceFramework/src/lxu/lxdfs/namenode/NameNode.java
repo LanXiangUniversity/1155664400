@@ -3,8 +3,6 @@ package lxu.lxdfs.namenode;
 import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
 
-import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -37,7 +35,6 @@ public class NameNode {
 		/* TODO exit safe mode. */
 
 		nameNode.nameSystem.exitSafeMode();
-
 
 
 	}
@@ -129,12 +126,12 @@ public class NameNode {
 		try {
 			INameSystemService nameSystem = new NameSystemService();
 			//Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
-            INameSystemService stub =
-                    (INameSystemService) UnicastRemoteObject.exportObject(nameSystem, 0);
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("NameSystemService", stub);
+			INameSystemService stub =
+					(INameSystemService) UnicastRemoteObject.exportObject(nameSystem, 0);
+			Registry registry = LocateRegistry.getRegistry();
+			registry.rebind("NameSystemService", stub);
 			this.nameSystem = nameSystem;
-            System.out.println("NameNode Start!");
+			System.out.println("NameNode Start!");
 		} catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 			e.printStackTrace();

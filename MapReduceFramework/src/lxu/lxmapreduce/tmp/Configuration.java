@@ -7,18 +7,16 @@ import java.util.HashMap;
  */
 public class Configuration {
 	protected HashMap<String, Object> entries = null;
-
-	public Configuration(Configuration conf) {
-		this.entries = conf.entries;
-	}
-
 	private ClassLoader classLoader;
-
 	{
 		classLoader = Thread.currentThread().getContextClassLoader();
 		if (classLoader == null) {
 			classLoader = Configuration.class.getClassLoader();
 		}
+	}
+
+	public Configuration(Configuration conf) {
+		this.entries = conf.entries;
 	}
 
 	public Class<?> getClassByName(String name) throws ClassNotFoundException {

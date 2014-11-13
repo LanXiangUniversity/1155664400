@@ -10,14 +10,14 @@ import java.io.IOException;
  * Created by Wei on 11/11/14.
  */
 public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-	extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+		extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	private RecordReader<KEYIN, VALUEIN> reader;
 
 	public MapContext(Configuration conf,
 	                  TaskID taskId,
 	                  RecordWriter<KEYOUT, VALUEOUT> out,
 	                  RecordReader<KEYIN, VALUEIN> reader
-	                  ) {
+	) {
 		super(conf, taskId, out);
 		this.reader = reader;
 	}

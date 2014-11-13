@@ -1,9 +1,9 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.datanode.DataNodePacket;
-import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.service.INameSystemService;
 
 import java.io.IOException;
@@ -27,8 +27,8 @@ public class ClientInputStream extends ClientStream {
 
 	public ClientInputStream(String fileName) throws RemoteException, NotBoundException {
 		this.fileName = fileName;
-        Registry registry = LocateRegistry.getRegistry();
-        this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
+		Registry registry = LocateRegistry.getRegistry();
+		this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
 	}
 
 	public String getFileName() {
@@ -59,7 +59,7 @@ public class ClientInputStream extends ClientStream {
 			Block block = locatedBlock.getBlock();
 
 			Socket sock = null;
-            ObjectOutputStream oos = null;
+			ObjectOutputStream oos = null;
 			ObjectInputStream ois = null;
 
 			HashSet<DataNodeDescriptor> locations = locatedBlock.getLocations();
@@ -71,12 +71,12 @@ public class ClientInputStream extends ClientStream {
 					dataNodeDescriptor.getDataNodePort());
 
 			// Read a Block from DataNode
-            oos = new ObjectOutputStream(sock.getOutputStream());
+			oos = new ObjectOutputStream(sock.getOutputStream());
 
-            oos.writeObject(generateReadPacket(block));
-            System.out.println("here");
+			oos.writeObject(generateReadPacket(block));
+			System.out.println("here");
 
-            ois = new ObjectInputStream(sock.getInputStream());
+			ois = new ObjectInputStream(sock.getInputStream());
 			DataNodePacket packet = (DataNodePacket) ois.readObject();
 			ois.close();
 			sock.close();
@@ -91,10 +91,10 @@ public class ClientInputStream extends ClientStream {
 		return res.substring(1);
 	}
 
-    public ClientPacket generateReadPacket(Block block) {
-        ClientPacket packet = new ClientPacket();
-        packet.setOperation(ClientPacket.BLOCK_READ);
-        packet.setBlock(block);
-        return packet;
-    }
+	public ClientPacket generateReadPacket(Block block) {
+		ClientPacket packet = new ClientPacket();
+		packet.setOperation(ClientPacket.BLOCK_READ);
+		packet.setBlock(block);
+		return packet;
+	}
 }

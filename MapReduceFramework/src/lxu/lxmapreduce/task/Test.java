@@ -1,17 +1,9 @@
 package lxu.lxmapreduce.task;
 
 import lxu.utils.ReflectionUtils;
-import sun.reflect.Reflection;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.*;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 /**
  * Created by Wei on 11/11/14.

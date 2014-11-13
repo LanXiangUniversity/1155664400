@@ -20,7 +20,15 @@ public class TaskTrackerStatus implements Serializable {
     private int maxMapTasks;
     private int maxReduceTasks;
 
-    public String getTrackerName() {
+	public TaskTrackerStatus(String trackerName, String hostIP, long lastSeen, int maxMapTasks, int maxReduceTasks) {
+		this.trackerName = trackerName;
+		this.hostIP = hostIP;
+		this.lastSeen = lastSeen;
+		this.maxMapTasks = maxMapTasks;
+		this.maxReduceTasks = maxReduceTasks;
+	}
+
+	public String getTrackerName() {
         return trackerName;
     }
 
@@ -99,6 +107,11 @@ public class TaskTrackerStatus implements Serializable {
         }
         return count;
     }
+
+	public boolean hasFreeSlots() {
+		return this.countRunningMapTask() < this.maxMapTasks
+				|| this.countRunningReduceTask() < this.maxReduceTasks;
+	}
 
     /**
      * Static class which encapsulates the Node health

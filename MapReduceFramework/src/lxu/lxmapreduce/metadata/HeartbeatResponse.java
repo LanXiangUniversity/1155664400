@@ -1,6 +1,5 @@
 package lxu.lxmapreduce.metadata;
 
-import lxu.lxmapreduce.task.TaskTracker;
 import lxu.lxmapreduce.task.TaskTrackerAction;
 import lxu.lxmapreduce.tmp.Configuration;
 
@@ -16,11 +15,43 @@ public class HeartbeatResponse implements Serializable {
     private String trackerName;
     private ArrayList<TaskTrackerAction> actions;
 
-    public HeartbeatResponse(short responseID,
-                             Configuration configuration,
+	public HeartbeatResponse(short responseID,
+	                         Configuration configuration,
                              ArrayList<TaskTrackerAction> actions) {
         this.responseID = responseID;
         this.configuration = configuration;
         this.actions = actions;
     }
+
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
+	public short getResponseID() {
+		return responseID;
+	}
+
+	public void setResponseID(short responseID) {
+		this.responseID = responseID;
+	}
+
+	public String getTrackerName() {
+		return trackerName;
+	}
+
+	public void setTrackerName(String trackerName) {
+		this.trackerName = trackerName;
+	}
+
+	public ArrayList<TaskTrackerAction> getActions() {
+		return actions;
+	}
+
+	public void setActions(ArrayList<TaskTrackerAction> actions) {
+		this.actions = actions;
+	}
 }

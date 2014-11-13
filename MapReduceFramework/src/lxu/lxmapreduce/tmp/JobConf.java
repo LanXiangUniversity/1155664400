@@ -1,6 +1,7 @@
 package lxu.lxmapreduce.tmp;
 
 import lxu.lxmapreduce.io.format.InputFormat;
+import lxu.lxmapreduce.io.format.OutputFormat;
 import lxu.utils.ReflectionUtils;
 
 /**

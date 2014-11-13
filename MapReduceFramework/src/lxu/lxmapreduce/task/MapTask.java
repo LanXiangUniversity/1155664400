@@ -1,7 +1,5 @@
 package lxu.lxmapreduce.task;
 
-import lxu.lxmapreduce.io.LineRecordReader;
-import lxu.lxmapreduce.io.LineRecordWriter;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
@@ -19,6 +17,10 @@ import java.lang.reflect.InvocationTargetException;
  * Created by Wei on 11/12/14.
  */
 public class MapTask extends Task {
+
+	public static void main(String[] args) {
+
+	}
 
 	@Override
 	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
@@ -41,7 +43,7 @@ public class MapTask extends Task {
 		InputFormat inputFormat = (InputFormat)
 				ReflectionUtils.newInstance(taskContext.getInputFormatClass());
 
-		OutputFormat<KEYIN, VALUEIN> outputFormat = (OutputFormat)
+		OutputFormat outputFormat = (OutputFormat)
 				ReflectionUtils.newInstance(taskContext.getOutputFormatClass());
 
 		// Create mapper
@@ -63,8 +65,12 @@ public class MapTask extends Task {
 
 		mapperContext = contextConstructor.newInstance(mapper, jobConf, input, output);
 
+		// Set input file and output file.
 		input.initialize(taskContext);
+		output.initialize(taskContext);
+
 		mapper.run(mapperContext);
+
 		input.close();
 		output.close();
 	}

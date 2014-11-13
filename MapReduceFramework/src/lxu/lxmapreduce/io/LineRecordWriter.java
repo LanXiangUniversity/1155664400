@@ -3,7 +3,9 @@ package lxu.lxmapreduce.io;
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.io.format.TextInputFormat;
+import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -12,13 +14,13 @@ import java.io.IOException;
 public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
 	private LineWriter out;
 
-	public LineRecordWriter(String s) {
-
+	public LineRecordWriter() {
 	}
 
 	@Override
-	public void initialize() {
-		/* TODO Init LineWrite */
+	public void initialize(TaskAttemptContext taskContext) throws FileNotFoundException {
+		/* TODO get filename from taskContext */
+		this.out = new LineWriter("filename");
 	}
 
 	@Override

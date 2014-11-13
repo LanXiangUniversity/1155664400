@@ -1,5 +1,6 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.Task;
 import lxu.lxmapreduce.task.TaskTracker;
 
@@ -16,9 +17,7 @@ public class TaskScheduler {
         this.jobTracker = jobTracker;
     }
 
-    /*
-    public List<Task> assignTasks(TaskTracker taskTracker) {
-
+    public List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) {
+        return null;
     }
-    */
 }

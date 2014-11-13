@@ -1,15 +1,19 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxdfs.metadata.LocatedBlocks;
 import lxu.lxmapreduce.task.TaskInProgress;
+import lxu.lxmapreduce.task.TaskStatus;
+import lxu.lxmapreduce.task.TaskTracker;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by magl on 14/11/10.
  */
 public class JobInProgress {
-    private int jobID;
+    private String jobID;
     private JobStatus jobStatus = null;
     private JobTracker jobTracker = null;
     // static job information:
@@ -27,17 +31,24 @@ public class JobInProgress {
     private int failedMapTask = 0;
     private int failedReduceTask = 0;
     private Map<String, List<TaskInProgress>> nonRunningMapTasksMap;
+    private Map<String, Set<TaskInProgress>> runningMapTasksMap;
 
-    public JobInProgress(int jobID, JobTracker jobTracker) {
+    private boolean tasksInited = false;
+
+    public JobInProgress(String jobID, JobTracker jobTracker) {
         this.jobID = jobID;
         this.jobTracker = jobTracker;
-        this.jobStatus = new JobStatus(jobID, JobStatus.PREP);
+        this.jobStatus = new JobStatus(jobID, JobStatus.PREP, JobStatus.PREP);
         // TODO: Use configuration to initialize
         this.numMapTasks = 10;
         this.numReduceTasks = 10;
     }
 
     public void initTasks() {
+        if (tasksInited || isComplete()) {
+            return;
+        }
+
         System.out.println("Initializing job: " + jobID);
         // TODO: Set numMapTasks according to splits
         // Init Map Tasks
@@ -55,6 +66,55 @@ public class JobInProgress {
             // TODO: Change to reduce task constructor
             this.reduces[i] = new TaskInProgress();
         }
+
+        tasksInited = true;
+    }
+
+    // TODO: connect to namenode to get all blocks of given file
+    public LocatedBlocks getFileBlocks(String fileName) {
+        return null;
+    }
+
+    public void updateTaskStatus(TaskInProgress tip, TaskStatus status) {
+        // if task has complete and status is succeed, ignore status
+        /*
+        if (tip.isComplete() && status.getState() == SUCCEED) {
+            return;
+        }
+         */
+        boolean changed = tip.updateStatus(status);
+        if (changed) {
+            int state = status.getState();
+
+            if (state == TaskStatus.SUCCEEDED) {
+                handleSucceedTask(tip, status);
+            } else if (state == TaskStatus.FAILED) {
+                // TODO: handle failed task
+            }
+        }
+    }
+
+    public void handleSucceedTask(TaskInProgress tip, TaskStatus status) {
+        String taskID = status.getTaskID();
+        System.out.println("Task '" + taskID + "' has completed!");
+        tip.setTaskCompleted(taskID);
+        if (tip.isMapTask()) {
+            runningMapTasks--;
+            finishedMapTasks++;
+            if (finishedMapTasks == numMapTasks) {
+                this.jobStatus.setMapState(JobStatus.SUCCEEDED);
+            } else {
+                this.jobStatus.setMapState(JobStatus.RUNNING);
+            }
+        } else {
+            runningReduceTasks--;
+            finishedReduceTasks++;
+            if (finishedReduceTasks == numReduceTasks) {
+                this.jobStatus.setReduceState(JobStatus.SUCCEEDED);
+            } else {
+                this.jobStatus.setReduceState(JobStatus.RUNNING);
+            }
+        }
     }
 
     /*
@@ -64,11 +124,11 @@ public class JobInProgress {
         return null;
     }
 
-    public int getJobID() {
+    public String getJobID() {
         return jobID;
     }
 
-    public void setJobID(int jobID) {
+    public void setJobID(String jobID) {
         this.jobID = jobID;
     }
 
@@ -142,5 +202,9 @@ public class JobInProgress {
 
     public void setJobStatus(JobStatus jobStatus) {
         this.jobStatus = jobStatus;
+    }
+
+    public boolean isComplete() {
+        return this.jobStatus.isJobComplete();
     }
 }

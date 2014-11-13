@@ -12,33 +12,49 @@ public class JobStatus implements Serializable {
     public static final int KILLED = 4;
     public static final int PREP = 5;
 
-    private int jobID;
-    private int runState;
+    private String jobID;
+    private int mapState;
+    private int reduceState;
 
-    public JobStatus(int jobID, int runState) {
+    public JobStatus(String jobID, int mapState, int reduceState) {
         this.jobID = jobID;
-        this.runState = runState;
+        this.mapState = mapState;
+        this.reduceState = reduceState;
     }
 
-    public int getRunState() {
-        return runState;
+    public int getMapState() {
+        return mapState;
     }
 
-    public void setRunState(int runState) {
-        this.runState = runState;
+    public void setMapState(int mapState) {
+        this.mapState = mapState;
     }
 
-    public int getJobID() {
+    public int getReduceState() {
+        return reduceState;
+    }
+
+    public void setReduceState(int reduceState) {
+        this.reduceState = reduceState;
+    }
+
+    public String getJobID() {
         return jobID;
     }
 
-    public void setJobID(int jobID) {
+    public void setJobID(String jobID) {
         this.jobID = jobID;
     }
 
+    public boolean isMapComplete() {
+        return mapState == JobStatus.SUCCEEDED;
+    }
+
+    public boolean isReduceComplete() {
+        return reduceState == JobStatus.SUCCEEDED;
+    }
+
     public boolean isJobComplete() {
-        return (runState == JobStatus.SUCCEEDED ||
-                runState == JobStatus.FAILED ||
-                runState == JobStatus.KILLED);
+        return isMapComplete() && isReduceComplete();
     }
 }

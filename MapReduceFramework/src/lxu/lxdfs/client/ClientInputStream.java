@@ -1,11 +1,10 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.datanode.DataNodePacket;
-import lxu.lxdfs.metadata.AllocatedBlock;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.INameSystemService;
-import lxu.lxdfs.service.NameSystemService;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -51,19 +50,19 @@ public class ClientInputStream extends ClientStream {
 	// Read the content of file.
 	public String read() throws IOException, ClassNotFoundException {
 		// Get  AllocatedBlocks of the file from NameNode.
-		ArrayList<AllocatedBlock> blockToDataNodeMap = null;
+		ArrayList<LocatedBlock> blockToDataNodeMap = null;
 		blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName);
 		String res = "";
 
 		// Get the content of each block sequentially.
-		for (AllocatedBlock allocatedBlock : blockToDataNodeMap) {
-			Block block = allocatedBlock.getBlock();
+		for (LocatedBlock locatedBlock : blockToDataNodeMap) {
+			Block block = locatedBlock.getBlock();
 
 			Socket sock = null;
             ObjectOutputStream oos = null;
 			ObjectInputStream ois = null;
 
-			HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
+			HashSet<DataNodeDescriptor> locations = locatedBlock.getLocations();
 			Iterator<DataNodeDescriptor> iterator = locations.iterator();
 			DataNodeDescriptor dataNodeDescriptor = iterator.next();
 

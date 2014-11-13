@@ -1,7 +1,9 @@
 package lxu.lxmapreduce.task;
 
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.job.JobInProgress;
 import lxu.lxmapreduce.job.JobTracker;
+import lxu.lxmapreduce.tmp.TaskID;
 
 import java.util.Map;
 import java.util.Set;
@@ -10,14 +12,41 @@ import java.util.Set;
  * Created by magl on 14/11/10.
  */
 public class TaskInProgress {
-    // int numMaps
+    private int numMaps;
+    private TaskID taskID;
+    private String jobID;
     private JobTracker jobTracker;
     private JobInProgress job;
+    private String successfulTaskID;
+    private LocatedBlock locatedBlock;
+    private int partition;
     // TaskID -> TaskStatus
     private Map<String, TaskStatus> taskStatuses;
-    private String successfulTaskID;
 
-    public TaskInProgress() {
+    /**
+     * Constructor for MapTask
+     */
+    public TaskInProgress(String jobID, LocatedBlock locatedBlock,
+                          JobTracker jobTracker, JobInProgress job, int partition) {
+        this.jobID = jobID;
+        this.locatedBlock = locatedBlock;
+        this.jobTracker = jobTracker;
+        this.job = job;
+        this.partition = partition;
+        this.taskID = new TaskID(jobID, true, partition);
+    }
+
+    /**
+     * Constructor for ReduceTask
+     */
+    public TaskInProgress(String jobID, int numMaps, int partition,
+                          JobTracker jobTracker, JobInProgress job) {
+        this.jobID = jobID;
+        this.numMaps = numMaps;
+        this.partition = partition;
+        this.jobTracker = jobTracker;
+        this.job = job;
+        this.taskID = new TaskID(jobID, false, partition);
     }
 
     public boolean updateStatus(TaskStatus status) {
@@ -37,8 +66,7 @@ public class TaskInProgress {
         successfulTaskID = taskID;
     }
 
-    // TODO:
     public boolean isMapTask() {
-        return false;
+        return locatedBlock != null;
     }
 }

@@ -2,7 +2,7 @@ package lxu.lxdfs.service;
 
 
 import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.AllocatedBlock;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.namenode.NameNodeState;
@@ -78,7 +78,7 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public AllocatedBlock allocateBlock(String fileName, int offset) throws RemoteException {
+	public LocatedBlock allocateBlock(String fileName, int offset) throws RemoteException {
 		if (this.isSafeMode()) {return null;}
 		System.out.println("allocate blocks for client filname: " + fileName );
 
@@ -104,7 +104,7 @@ public class NameSystemService implements INameSystemService {
 		// Register Blocks locations
 		this.blockToLocationsMap.put(block, locations);
 
-		return new AllocatedBlock(block, locations);
+		return new LocatedBlock(block, locations);
 	}
 
 	/**
@@ -201,16 +201,16 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException {
+	public ArrayList<LocatedBlock> getFileBlocks(String fileName) throws RemoteException {
 		// Get the Blocks of a file.
 		List<Block> blocks = this.fileNameToBlocksMap.get(fileName);
-		ArrayList<AllocatedBlock> result = new ArrayList<AllocatedBlock>();
+		ArrayList<LocatedBlock> result = new ArrayList<LocatedBlock>();
 
 		// Get the replicas' locations for each Block.
 		for (Block block : blocks) {
 			HashSet <DataNodeDescriptor> dataNodes = this.blockToLocationsMap.get(block);
 
-			result.add(new AllocatedBlock(block, dataNodes));
+			result.add(new LocatedBlock(block, dataNodes));
 		}
 
 		return result;

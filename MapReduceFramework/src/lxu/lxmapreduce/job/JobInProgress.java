@@ -1,13 +1,15 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxdfs.metadata.DataNodeDescriptor;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.LocatedBlocks;
+import lxu.lxmapreduce.metadata.TaskTrackerStatus;
+import lxu.lxmapreduce.task.Task;
 import lxu.lxmapreduce.task.TaskInProgress;
 import lxu.lxmapreduce.task.TaskStatus;
 import lxu.lxmapreduce.task.TaskTracker;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by magl on 14/11/10.
@@ -50,28 +52,26 @@ public class JobInProgress {
         }
 
         System.out.println("Initializing job: " + jobID);
-        // TODO: Set numMapTasks according to splits
+        LocatedBlock[] allBlocks = getFileBlocks("fileName");
+        numMapTasks = allBlocks.length;
         // Init Map Tasks
-        // TODO: getBlockLocations
         this.maps = new TaskInProgress[numMapTasks];
         for (int i = 0; i < numMapTasks; i++) {
-            // TODO: Change to map task constructor
-            this.maps[i] = new TaskInProgress();
+            this.maps[i] = new TaskInProgress(jobID, allBlocks[i], jobTracker, this, i);
         }
-        nonRunningMapTasksMap = createCache();
+        nonRunningMapTasksMap = createCache(allBlocks);
 
         // Init Reduce Tasks
         this.reduces = new TaskInProgress[numReduceTasks];
         for (int i = 0; i < numReduceTasks; i++) {
-            // TODO: Change to reduce task constructor
-            this.reduces[i] = new TaskInProgress();
+            this.reduces[i] = new TaskInProgress(jobID, numMapTasks, i, jobTracker, this);
         }
 
         tasksInited = true;
     }
 
     // TODO: connect to namenode to get all blocks of given file
-    public LocatedBlocks getFileBlocks(String fileName) {
+    public LocatedBlock[] getFileBlocks(String fileName) {
         return null;
     }
 
@@ -117,11 +117,82 @@ public class JobInProgress {
         }
     }
 
-    /*
-     * TODO: 1. getBlockLocations
-     */
-    public Map<String, List<TaskInProgress>> createCache() {
+    public Map<String, List<TaskInProgress>> createCache(LocatedBlock[] blocks) {
+        Map<String, List<TaskInProgress>> cache = new HashMap<String, List<TaskInProgress>>();
+
+        // for each block
+        for (int i = 0; i < blocks.length; i++) {
+            HashSet<DataNodeDescriptor> locations = blocks[i].getLocations();
+            // for each location
+            for (DataNodeDescriptor location : locations) {
+                String host = location.getDataNodeIP();
+                List<TaskInProgress> tasksInHost = cache.get(host);
+                if (tasksInHost == null) {
+                    tasksInHost = new ArrayList<TaskInProgress>();
+                    tasksInHost.add(maps[i]);
+                    cache.put(host, tasksInHost);
+                }
+                //check whether the hostMaps already contains an entry for a TIP
+                //This will be true for nodes that are racks and multiple nodes in
+                //the rack contain the input for a tip. Note that if it already
+                //exists in the hostMaps, it must be the last element there since
+                //we process one TIP at a time sequentially in the split-size order
+                if (tasksInHost.get(tasksInHost.size() - 1) != maps[i]) {
+                    tasksInHost.add(maps[i]);
+                }
+            }
+        }
+
+        return cache;
+    }
+
+    public Task obtainNewLocalMapTask(TaskTrackerStatus taskTrackerStatus) {
+        return obtainNewMapTask(taskTrackerStatus);
+    }
+
+    public Task obtainNewNonLocalMapTask(TaskTrackerStatus taskTrackerStatus) {
         return null;
+    }
+
+    public Task obtainNewMapTask(TaskTrackerStatus taskTrackerStatus) {
+        return null;
+    }
+
+    private int findNewMapTask(TaskTrackerStatus taskTrackerStatus) {
+        if (numMapTasks == 0) {
+            System.out.println("No maps to schedule for " + this.jobID);
+            return -1;
+        }
+
+        String taskTrackerName = taskTrackerStatus.getTrackerName();
+        TaskInProgress taskInProgress = null;
+
+        //
+        // TODO:
+        // Check if too many tasks of this job have failed on this
+        // tasktracker prior to assigning it a new one.
+        //
+        /*
+        if (!shouldRunOnTaskTracker(taskTracker)) {
+            return -1;
+        }
+        */
+
+        // When scheduling a map task:
+        //  0) Schedule a failed task without considering locality
+        //  1) Schedule non-running tasks
+        //  2) Schedule speculative tasks
+        //  3) Schedule tasks with no location information
+
+        // First a look up is done on the non-running cache and on a miss, a look
+        // up is done on the running cache. The order for lookup within the cache:
+        //   1. from local node to root [bottom up]
+        //   2. breadth wise for all the parent nodes at max level
+        // We fall to linear scan of the list ((3) above) if we have misses in the
+        // above caches
+
+        // 0) Schedule the task with the most failures, unless failure was on this
+        //    machine
     }
 
     public String getJobID() {

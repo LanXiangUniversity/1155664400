@@ -1,11 +1,9 @@
 package lxu.lxmapreduce.task;
 
-import com.sun.tools.corba.se.idl.StringGen;
-
 /**
  * Created by magl on 14/11/11.
  */
-public class TaskStatus {
+public abstract class TaskStatus {
     public static final int RUNNING = 1;
     public static final int SUCCEEDED = 2;
     public static final int FAILED = 3;
@@ -15,6 +13,8 @@ public class TaskStatus {
     private String taskID;
     private int state;
     private int attemptFailedTime;
+
+    public abstract boolean isMapTask();
 
     public String getJobID() {
         return JobID;

@@ -6,11 +6,11 @@ import java.util.HashSet;
 /**
  * Created by magl on 14/11/8.
  */
-public class AllocatedBlock implements Serializable {
+public class LocatedBlock implements Serializable {
 	private Block block;
 	private HashSet<DataNodeDescriptor> locations;
 
-	public AllocatedBlock(Block block, HashSet<DataNodeDescriptor> locations) {
+	public LocatedBlock(Block block, HashSet<DataNodeDescriptor> locations) {
 		this.block = block;
 		this.locations = locations;
 	}

@@ -3,6 +3,7 @@ package lxu.lxmapreduce.job;
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
+import lxu.lxmapreduce.tmp.Configuration;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -19,10 +20,10 @@ import java.util.Set;
 public class JobTracker implements IJobTracker {
     private int nextJobID = 0;
     private TaskScheduler taskScheduler = null;
-    private Configuration jobConf = null;
+    private Configuration jobConf;
 
     // All known jobs (jobID -> JobInProgress)
-    private HashMap<String, JobInProgress> jobs;
+    public HashMap<String, JobInProgress> jobs;
 
     // All known tasks (taskID -> TaskInProgress)
     private HashMap<String, TaskInProgress> taskIDToTIPMap;
@@ -110,7 +111,7 @@ public class JobTracker implements IJobTracker {
     public void updateTaskStatuses(TaskTrackerStatus status) {
         String trackerName = status.getTrackerName();
 
-        for (TaskStatus report : status.getTaskReport()) {
+        for (TaskStatus report : status.getTaskReports()) {
             report.setTaskTracker(trackerName);
             String taskID = report.getTaskID();
 

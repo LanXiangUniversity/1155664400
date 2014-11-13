@@ -2,7 +2,7 @@ package lxu.lxmapreduce.job;
 
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
-import lxu.lxmapreduce.task.Configuration;
+import lxu.lxmapreduce.tmp.Configuration;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

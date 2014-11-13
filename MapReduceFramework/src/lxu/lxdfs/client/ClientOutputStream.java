@@ -1,7 +1,7 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.datanode.DataNodePacket;
-import lxu.lxdfs.metadata.AllocatedBlock;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.service.INameSystemService;
@@ -10,7 +10,6 @@ import lxu.lxdfs.service.NameSystemService;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -139,7 +138,7 @@ public class ClientOutputStream {
 	 */
 	public int write(String data) {
 		int writeSize = 0;
-		AllocatedBlock allocatedBlock = null;
+		LocatedBlock locatedBlock = null;
 
 		// get data
 		String[] lines = data.split(";");
@@ -157,13 +156,13 @@ public class ClientOutputStream {
 			// Allocate new Blocks through RPC and get the locations.
 			try {
 				System.out.println("get blocks for "+this.fileName);
-				allocatedBlock = nameSystem.allocateBlock(this.fileName, this.blockOffset);
+				locatedBlock = nameSystem.allocateBlock(this.fileName, this.blockOffset);
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
 
-			Block block = allocatedBlock.getBlock();
-			HashSet<DataNodeDescriptor> locations = allocatedBlock.getLocations();
+			Block block = locatedBlock.getBlock();
+			HashSet<DataNodeDescriptor> locations = locatedBlock.getLocations();
 
 			// Update info about the first Data Node.
 

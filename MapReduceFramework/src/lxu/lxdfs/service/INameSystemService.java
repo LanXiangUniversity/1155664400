@@ -1,7 +1,7 @@
 package lxu.lxdfs.service;
 
 import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.AllocatedBlock;
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 
@@ -28,11 +28,11 @@ public interface INameSystemService extends Remote {
 
 	public boolean exists(Path path) throws RemoteException;
 
-	public AllocatedBlock allocateBlock(String fileName, int offset) throws RemoteException;
+	public LocatedBlock allocateBlock(String fileName, int offset) throws RemoteException;
 
 	public HashSet<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException;
 
-	public ArrayList<AllocatedBlock> getFileBlocks(String fileName) throws RemoteException;
+	public ArrayList<LocatedBlock> getFileBlocks(String fileName) throws RemoteException;
 
     public boolean isSafeMode() throws RemoteException;
 

@@ -3,6 +3,7 @@ package lxu.lxmapreduce.task;
 /**
  * Created by Wei on 11/12/14.
  */
-public class TaskTracker {
-
+public enum TaskType {
+	MAP,
+	REDUCE
 }

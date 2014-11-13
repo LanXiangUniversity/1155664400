@@ -1,7 +1,6 @@
 package lxu.lxmapreduce.job;
 
 import lxu.lxmapreduce.task.TaskInProgress;
-import lxu.lxmapreduce.task.TaskTracker;
 
 import java.util.List;
 import java.util.Map;

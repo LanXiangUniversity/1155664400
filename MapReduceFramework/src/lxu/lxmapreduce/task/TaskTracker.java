@@ -1,6 +1,7 @@
 package lxu.lxmapreduce.task;
 
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
+import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.tmp.JobConf;
 import lxu.lxmapreduce.tmp.TaskID;

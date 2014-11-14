@@ -1,6 +1,5 @@
 package lxu.lxmapreduce.metadata;
 
-import lxu.lxmapreduce.task.TaskTrackerAction;
 import lxu.lxmapreduce.tmp.Configuration;
 
 import java.io.Serializable;

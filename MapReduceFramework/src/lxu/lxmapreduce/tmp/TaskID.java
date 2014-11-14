@@ -11,22 +11,15 @@ public class TaskID {
 		NUMBER_FORMAT.setMinimumIntegerDigits(5);
 		NUMBER_FORMAT.setGroupingUsed(false);
 	}
-	private String taskID;
+
+    private int partition;
 	private String jobID;
 	private boolean isMapTask;
 
 	public TaskID(String jobID, boolean isMapTask, int partition) {
 		this.jobID = jobID;
 		this.isMapTask = isMapTask;
-		this.taskID = jobID + (isMapTask ? "m-" : "r-") + NUMBER_FORMAT.format(partition);
-	}
-
-	public String getTaskID() {
-		return taskID;
-	}
-
-	public void setTaskID(String taskID) {
-		this.taskID = taskID;
+        this.partition = partition;
 	}
 
 	public String getJobID() {
@@ -44,4 +37,31 @@ public class TaskID {
 	public void setMapTask(boolean isMapTask) {
 		this.isMapTask = isMapTask;
 	}
+
+    @Override
+    public String toString() {
+        return jobID + (isMapTask ? "_m-" : "_r-") + NUMBER_FORMAT.format(partition);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TaskID taskID = (TaskID) o;
+
+        if (isMapTask != taskID.isMapTask) return false;
+        if (partition != taskID.partition) return false;
+        if (!jobID.equals(taskID.jobID)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = partition;
+        result = 31 * result + jobID.hashCode();
+        result = 31 * result + (isMapTask ? 1 : 0);
+        return result;
+    }
 }

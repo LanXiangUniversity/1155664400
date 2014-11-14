@@ -44,6 +44,8 @@ public class TaskScheduler {
 			}
 		}
 
+        // TODO: assign reduce tasks
+
 		return assignedTasks;
 	}
 }

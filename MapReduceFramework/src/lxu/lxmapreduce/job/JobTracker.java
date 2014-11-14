@@ -1,6 +1,7 @@
 package lxu.lxmapreduce.job;
 
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
+import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
 import lxu.lxmapreduce.tmp.Configuration;
@@ -9,10 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by magl on 14/11/10.
@@ -23,30 +21,30 @@ public class JobTracker implements IJobTracker {
 	private int nextJobID = 0;
 	private TaskScheduler taskScheduler = null;
 	private Configuration jobConf;
-	// All known tasks (taskID -> TaskInProgress)
-	private HashMap<String, TaskInProgress> taskIDToTIPMap;
+	// All known tasks (taskAttemptID -> TaskInProgress)
+	private HashMap<TaskAttemptID, TaskInProgress> taskIDToTIPMap;
 
-	// (taskID -> TaskTracker)
-	private HashMap<String, TaskTracker> taskIDToTrackerMap;
+	// (taskAttemptID -> TaskTrackerName)
+	private HashMap<TaskAttemptID, String> taskIDToTrackerMap;
 
-	// (TaskTrackerID -> Set<running tasks>)
-	private HashMap<String, Set<String>> taskTrackerToTaskmap;
+	// (TaskTrackerName -> Set<running tasks>)
+	private HashMap<String, Set<TaskAttemptID>> taskTrackerToTaskmap;
 
-	// (TaskTrackerID -> Set<completed tasks>)
-	private HashMap<String, Set<String>> taskTrackerToCompleteTaskMap;
+	// (TaskTrackerName -> Set<completed tasks>)
+	private HashMap<String, Set<TaskAttemptID>> taskTrackerToCompleteTaskMap;
 
-	// (TaskTrackerID -> HostIP)
+	// (TaskTrackerName -> HostIP)
 	private HashMap<String, String> taskTrackerToHostIPMap;
 
-	// (TaskTrackerID -> TaskTrackerStatus)
+	// (TaskTrackerName -> TaskTrackerStatus)
 	private HashMap<String, TaskTrackerStatus> taskTrackers;
 
 	public JobTracker() {
 		this.jobs = new HashMap<String, JobInProgress>();
-		this.taskIDToTIPMap = new HashMap<String, TaskInProgress>();
-		this.taskIDToTrackerMap = new HashMap<String, TaskTracker>();
-		this.taskTrackerToTaskmap = new HashMap<String, Set<String>>();
-		this.taskTrackerToCompleteTaskMap = new HashMap<String, Set<String>>();
+		this.taskIDToTIPMap = new HashMap<TaskAttemptID, TaskInProgress>();
+		this.taskIDToTrackerMap = new HashMap<TaskAttemptID, String>();
+		this.taskTrackerToTaskmap = new HashMap<String, Set<TaskAttemptID>>();
+		this.taskTrackerToCompleteTaskMap = new HashMap<String, Set<TaskAttemptID>>();
 		this.taskTrackerToHostIPMap = new HashMap<String, String>();
 		this.taskTrackers = new HashMap<String, TaskTrackerStatus>();
 		this.taskScheduler = new TaskScheduler();
@@ -78,6 +76,10 @@ public class JobTracker implements IJobTracker {
 
 		return job.getJobStatus();
 	}
+
+    public String getHost(String taskTrackerName) {
+        return taskTrackerToHostIPMap.get(taskTrackerName);
+    }
 
 	@Override
 	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
@@ -128,6 +130,21 @@ public class JobTracker implements IJobTracker {
 			}
 		}
 	}
+
+    public void createTaskEntry(TaskAttemptID attemptID,
+                                String taskTrackerName,
+                                TaskInProgress taskInProgress) {
+        taskIDToTrackerMap.put(attemptID, taskTrackerName);
+
+        Set<TaskAttemptID> taskSet = taskTrackerToTaskmap.get(taskTrackerName);
+        if (taskSet == null) {
+            taskSet = new HashSet<TaskAttemptID>();
+            taskTrackerToTaskmap.put(taskTrackerName, taskSet);
+        }
+        taskSet.add(attemptID);
+
+        taskIDToTIPMap.put(attemptID, taskInProgress);
+    }
 
 	public void startService() {
 		// set job tracker of task scheduler

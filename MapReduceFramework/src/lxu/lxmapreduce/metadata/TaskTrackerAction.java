@@ -9,8 +9,8 @@ public abstract class TaskTrackerAction implements Serializable {
     // Reinit Tracker
     // Launch Task
     // Kill Task
-    // Kill Job
     // Commit Task
+
     public static enum ActionType {
         LAUNCH_TASK, COMMIT_TASK
     }

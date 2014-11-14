@@ -1,21 +1,22 @@
 package lxu.lxmapreduce.tmp;
 
 import lxu.lxdfs.metadata.LocatedBlock;
+import lxu.lxmapreduce.task.TaskAttemptID;
 
 /**
  * Created by Wei on 11/12/14.
  */
 public class TaskAttemptContext extends JobContext {
-	private final TaskID taskId;
+	private final TaskAttemptID taskId;
 	private String status = "";
 	private LocatedBlock locatedBlock;
 
-	public TaskAttemptContext(Configuration conf, TaskID taskId) {
+	public TaskAttemptContext(Configuration conf, TaskAttemptID taskId) {
 		super(conf, taskId.getJobID());
 		this.taskId = taskId;
 	}
 
-	public TaskID getTaskId() {
+	public TaskAttemptID getTaskId() {
 		return taskId;
 	}
 
@@ -27,7 +28,7 @@ public class TaskAttemptContext extends JobContext {
 		this.locatedBlock = locatedBlock;
 	}
 
-	public TaskID getTaskAttemptID() {
+	public TaskAttemptID getTaskAttemptID() {
 		return taskId;
 	}
 

@@ -20,18 +20,18 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
 	public LineRecordReader() {
 		/* TODO Init LineReader */
 		if (this.key == null) {
-			//this.key = new LongWritable();
+			this.key = new LongWritable();
 		}
 
 		if (this.value == null) {
-			//this.value = new Text();
+			this.value = new Text();
 		}
 	}
 
 	@Override
 	public void initialize(TaskAttemptContext taskContext) throws FileNotFoundException {
 		/* TODO get filename from taskContext */
-		this.in = new LineReader("filename");
+		this.in = new LineReader("/Users/parasitew/Documents/testDir/1/test.txt");
 	}
 
 	@Override

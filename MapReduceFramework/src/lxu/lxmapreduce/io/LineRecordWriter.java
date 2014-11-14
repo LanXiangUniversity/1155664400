@@ -19,12 +19,12 @@ public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
 	@Override
 	public void initialize(TaskAttemptContext taskContext) throws FileNotFoundException {
 		/* TODO get filename from taskContext */
-		this.out = new LineWriter("filename");
+		this.out = new LineWriter("/Users/parasitew/Documents/testDir/1/out.txt");
 	}
 
 	@Override
 	public void write(LongWritable key, Text value) throws IOException {
-		this.out.write(key.toString() + " " + value.toString() + "\n");
+		this.out.write(key.getValue() + " " + value.getValue() + "\n");
 	}
 
 	@Override

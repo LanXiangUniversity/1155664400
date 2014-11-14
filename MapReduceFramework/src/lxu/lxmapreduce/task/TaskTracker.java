@@ -63,6 +63,8 @@ public class TaskTracker implements Runnable {
 		//taskTrackerStatus || justStarted || justInited || isFree || heartbeatResponseId
 		//HeartbeatResponse heartbeatResponse = jobClient.sendHeartBeat();
 
+		//processHeartBeatResponse(heartBeatResponse);
+
 		return null;
 	}
 
@@ -76,26 +78,26 @@ public class TaskTracker implements Runnable {
 		}
 
 	}
+
+	/**
+	 * Process actions received from JobTracker.
+	 * @param action
+	 * @param heartBeatResponse
+	 */
 	public void processAction(TaskTrackerAction action, HeartbeatResponse heartBeatResponse) {
 		Task task = null;
 
-		if (action instanceof LaunchAction) {
-			JobConf jobConf = new JobConf(heartBeatResponse.getConfiguration());
-
-			if () {
-				task = new MapTask();
-			} else {
-				task = new ReduceTask();
-			}
-
-			launchTask(jobConf, task);
-		} else if (action instanceof) {
-
-		} else if (action instanceof) {
-
-		} else if (action instanceof) {
-
-		}
+//		if (action instanceof LaunchTaskAction) {
+//			JobConf jobConf = new JobConf(heartBeatResponse.getConfiguration());
+//
+//			if () {
+//				task = new MapTask();
+//			} else {
+//				task = new ReduceTask();
+//			}
+//
+//			launchTask(jobConf, task);
+//		}
 	}
 
 	/**
@@ -105,7 +107,7 @@ public class TaskTracker implements Runnable {
 	 */
 	public void launchTask(JobConf jobCOnf, Task task) {
 		TaskRunner taskRunner = new TaskRunner(jobConf, task);
-		this.taskPool.add(taskRunner);
+		this.taskPool.put(task.getTaskID(), taskRunner);
 	}
 
 	/**
@@ -174,7 +176,9 @@ public class TaskTracker implements Runnable {
 		@Override
 		public void run() {
 			try {
+				this.status.setState(TaskStatus.RUNNING);
 				this.task.run(this.jobConf);
+				this.status.setState(TaskStatus.SUCCEEDED);
 			} catch (IOException
 					| InvocationTargetException
 					| NoSuchMethodException

@@ -15,6 +15,10 @@ public class Configuration {
 		}
 	}
 
+	public Configuration() {
+		this.entries = new HashMap<String, Object>();
+	}
+
 	public Configuration(Configuration conf) {
 		this.entries = conf.entries;
 	}

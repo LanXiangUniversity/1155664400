@@ -1,5 +1,6 @@
 package lxu.lxmapreduce.task;
 
+import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
@@ -17,6 +18,10 @@ import java.lang.reflect.InvocationTargetException;
  * Created by Wei on 11/12/14.
  */
 public class MapTask extends Task {
+
+	protected MapTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
+		super(attemptID, partition, locatedBlock);
+	}
 
 	public static void main(String[] args) {
 
@@ -36,8 +41,9 @@ public class MapTask extends Task {
 	void runMapper(JobConf jobConf) throws IOException, NoSuchMethodException, IllegalAccessException,
 			InvocationTargetException,
 			InstantiationException, ClassNotFoundException {
+
 		// Create taskContext.
-		TaskAttemptContext taskContext = new TaskAttemptContext(jobConf, this.getTaskID());
+		TaskAttemptContext taskContext = new TaskAttemptContext(jobConf, this.getTaskAttemptID());
 
 		// Create InputFormat (Lin).
 		InputFormat inputFormat = (InputFormat)
@@ -63,11 +69,12 @@ public class MapTask extends Task {
 						RecordReader.class,
 						RecordWriter.class});
 
-		mapperContext = contextConstructor.newInstance(mapper, jobConf, input, output);
 
 		// Set input file and output file.
 		input.initialize(taskContext);
 		output.initialize(taskContext);
+
+		mapperContext = contextConstructor.newInstance(mapper, jobConf, input, output);
 
 		mapper.run(mapperContext);
 

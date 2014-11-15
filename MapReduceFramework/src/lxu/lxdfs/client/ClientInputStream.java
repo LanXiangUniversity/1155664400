@@ -50,8 +50,8 @@ public class ClientInputStream extends ClientStream {
 	// Read the content of file.
 	public String read() throws IOException, ClassNotFoundException {
 		// Get  AllocatedBlocks of the file from NameNode.
-		ArrayList<LocatedBlock> blockToDataNodeMap = null;
-		blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName);
+		LocatedBlock[] blockToDataNodeMap = null;
+		blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName).getBlocks();
 		String res = "";
 
 		// Get the content of each block sequentially.

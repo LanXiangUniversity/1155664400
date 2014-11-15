@@ -6,6 +6,7 @@ import lxu.lxdfs.metadata.LocatedBlocks;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
 
+import java.rmi.RemoteException;
 import java.util.*;
 
 /**
@@ -66,11 +67,17 @@ public class JobInProgress {
         }
 
         tasksInited = true;
+        runningMapTasksMap = new HashMap<String, Set<TaskInProgress>>();
     }
 
     // TODO: connect to namenode to get all blocks of given file
     public LocatedBlock[] getFileBlocks(String fileName) {
-        return null;
+        try {
+            return jobTracker.getNameNode().getFileBlocks(fileName).getBlocks();
+        } catch (RemoteException e) {
+            System.out.println("Error: Remote Exception while Initing Tasks!" + e.getMessage());
+            return null;
+        }
     }
 
     public void updateTaskStatus(TaskInProgress tip, TaskStatus status) {
@@ -93,7 +100,7 @@ public class JobInProgress {
     }
 
     public void handleSucceedTask(TaskInProgress tip, TaskStatus status) {
-        String taskID = status.getTaskID();
+        TaskAttemptID taskID = status.getTaskID();
         System.out.println("Task '" + taskID + "' has completed!");
         tip.setTaskCompleted(taskID);
         if (tip.isMapTask()) {
@@ -103,6 +110,18 @@ public class JobInProgress {
                 this.jobStatus.setMapState(JobStatus.SUCCEEDED);
             } else {
                 this.jobStatus.setMapState(JobStatus.RUNNING);
+            }
+
+            if (runningMapTasksMap == null) {
+                System.err.println("Running cache for map missing!!");
+            }
+            String hostIP = jobTracker.getHost(status.getTaskTracker());
+            Set<TaskInProgress> hostMap = runningMapTasksMap.get(hostIP);
+            if (hostMap != null) {
+                hostMap.remove(tip);
+                if (hostMap.size() == 0) {
+                    runningMapTasksMap.remove(hostIP);
+                }
             }
         } else {
             runningReduceTasks--;
@@ -127,9 +146,9 @@ public class JobInProgress {
                 List<TaskInProgress> tasksInHost = cache.get(host);
                 if (tasksInHost == null) {
                     tasksInHost = new ArrayList<TaskInProgress>();
-                    tasksInHost.add(maps[i]);
                     cache.put(host, tasksInHost);
                 }
+                tasksInHost.add(maps[i]);
                 //check whether the hostMaps already contains an entry for a TIP
                 //This will be true for nodes that are racks and multiple nodes in
                 //the rack contain the input for a tip. Note that if it already
@@ -216,6 +235,7 @@ public class JobInProgress {
                 if (!task.isRunning()) {
                     allTasks.remove(task);
                     taskInProgress = task;
+                    break;
                 }
             }
         }

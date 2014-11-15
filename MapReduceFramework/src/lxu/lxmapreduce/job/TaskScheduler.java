@@ -27,14 +27,18 @@ public class TaskScheduler {
 		final int trackerRunningMaps = taskTrackerStatus.countRunningMapTask();
 		final int trackerRunningReduces = taskTrackerStatus.countRunningReduceTask();
 
+        // TODO: Change to listener
 		Collection<JobInProgress> jobs = jobTracker.jobs.values();
 		JobInProgress job = jobs.iterator().next();
 
 		int remainingMapLoad = job.getNumMapTasks() - job.getRunningMapTasks() - job.getFinishedMapTasks();
 		int remainingReduceLoad = job.getNumReduceTasks() - job.getRunningReduceTasks() - job.getFailedReduceTask();
 
+        int mapLoad = Math.min(trackerMapCapacity - trackerRunningMaps, remainingMapLoad);
+        int reduceLoad = Math.min(trackerReduceCapacity - trackerRunningReduces, remainingReduceLoad);
+
 		// assign map tasks
-		for (int i = 0; i < remainingMapLoad; ++i) {
+		for (int i = 0; i < mapLoad; ++i) {
 			Task task = job.obtainNewLocalMapTask(taskTrackerStatus);
 			if (task != null) {
 				assignedTasks.add(task);

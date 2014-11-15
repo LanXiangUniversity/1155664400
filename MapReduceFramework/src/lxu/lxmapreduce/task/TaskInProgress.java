@@ -19,7 +19,7 @@ public class TaskInProgress {
 	private String jobID;
 	private JobTracker jobTracker;
 	private JobInProgress job;
-	private String successfulTaskID;
+	private TaskAttemptID successfulTaskID;
 	private LocatedBlock locatedBlock;
 	private int partition;
 	// TaskAttemptID -> TaskStatus
@@ -60,7 +60,7 @@ public class TaskInProgress {
 	}
 
 	public boolean updateStatus(TaskStatus status) {
-		String taskID = status.getTaskID();
+		TaskAttemptID taskID = status.getTaskID();
 		TaskStatus oldStatus = taskStatuses.get(taskID);
 		if (oldStatus.getState() == status.getState()) {
 			return false;
@@ -71,17 +71,17 @@ public class TaskInProgress {
 		return true;
 	}
 
-	public void setTaskCompleted(String taskID) {
+	public void setTaskCompleted(TaskAttemptID taskID) {
 		taskStatuses.get(taskID).setState(TaskStatus.SUCCEEDED);
 		successfulTaskID = taskID;
+        activeTasks.remove(taskID);
 	}
 
     public Task getTaskToRun(String taskTrackerName) {
         TaskAttemptID attemptID = new TaskAttemptID(taskID, nextAttemptID++);
         Task newTask = null;
         if (isMapTask()) {
-            // TODO: Change constructor prototype
-            newTask = new MapTask();
+            newTask = new MapTask(attemptID, partition, locatedBlock);
         } else {
             // TODO: Change constructor prototype
             newTask = new ReduceTask();

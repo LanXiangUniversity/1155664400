@@ -318,6 +318,10 @@ public class TaskTracker implements Runnable {
 				out.writeObject(map);
 
 				System.err.println("Send data to reducer");
+
+				in.close();
+				out.close();
+				sock.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {

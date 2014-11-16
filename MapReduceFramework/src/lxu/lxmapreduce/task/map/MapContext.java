@@ -1,7 +1,11 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.task.map;
 
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.task.TaskAttemptID;
+import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.tmp.TaskID;
+import lxu.lxmapreduce.tmp.TaskInputOutputContext;
 
 import java.io.IOException;
 
@@ -14,7 +18,7 @@ public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
 	private RecordReader<KEYIN, VALUEIN> reader;
 
 	public MapContext(Configuration conf,
-	                  TaskID taskId,
+	                  TaskAttemptID taskId,
 	                  RecordWriter<KEYOUT, VALUEOUT> out,
 	                  RecordReader<KEYIN, VALUEIN> reader
 	) {

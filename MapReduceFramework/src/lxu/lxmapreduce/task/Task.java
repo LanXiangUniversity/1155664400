@@ -4,7 +4,6 @@ import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.tmp.JobConf;
 import lxu.lxmapreduce.tmp.JobContext;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
-import lxu.lxmapreduce.tmp.TaskID;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -32,13 +31,13 @@ public abstract class Task {
 	private String jobFile;                         // job configuration file
 	private TaskAttemptID taskAttemptID;                          // unique, includes job id
 	private int partition;                          // id within job
-    private LocatedBlock mapTaskBlock;
+	private LocatedBlock mapTaskBlock;
 
-    protected Task(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
-        this.taskAttemptID = attemptID;
-        this.partition = partition;
-        this.mapTaskBlock = locatedBlock;
-    }
+	protected Task(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
+		this.taskAttemptID = attemptID;
+		this.partition = partition;
+		this.mapTaskBlock = locatedBlock;
+	}
 
 	static synchronized String getOutputName(int partition) {
 		return "part-" + NUMBER_FORMAT.format(partition);
@@ -56,9 +55,9 @@ public abstract class Task {
 		return taskAttemptID;
 	}
 
-    public LocatedBlock getMapTaskBlock() {
-        return mapTaskBlock;
-    }
+	public LocatedBlock getMapTaskBlock() {
+		return mapTaskBlock;
+	}
 
-    public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException;
+	public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException;
 }

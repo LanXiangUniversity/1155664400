@@ -1,10 +1,12 @@
-package lxu.lxmapreduce.task;
+package lxu.lxmapreduce.task.map;
 
 import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
 import lxu.lxmapreduce.io.format.OutputFormat;
+import lxu.lxmapreduce.task.Task;
+import lxu.lxmapreduce.task.TaskAttemptID;
 import lxu.lxmapreduce.tmp.Configuration;
 import lxu.lxmapreduce.tmp.JobConf;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
@@ -13,14 +15,19 @@ import lxu.utils.ReflectionUtils;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
  * Created by Wei on 11/12/14.
  */
 public class MapTask extends Task {
+	private List<String> inputsplits;
 
-	protected MapTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
+	public MapTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
 		super(attemptID, partition, locatedBlock);
+
+		// TODO: Init inputsplits
+		inputsplits.add(locatedBlock.getBlock().getBlockID() + ".blk");
 	}
 
 	public static void main(String[] args) {
@@ -55,7 +62,6 @@ public class MapTask extends Task {
 		// Create mapper
 		Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> mapper = (Mapper<KEYIN, VALUEIN, KEYOUT,
 				VALUEOUT>) ReflectionUtils.newInstance(jobConf.getMapperClass());
-
 		/* TODO Init form input block files. */
 		// Create LineRecordReader.
 		RecordReader input = inputFormat.createRecordReader();
@@ -69,10 +75,9 @@ public class MapTask extends Task {
 						RecordReader.class,
 						RecordWriter.class});
 
-
 		// Set input file and output file.
-		input.initialize(taskContext);
-		output.initialize(taskContext);
+		input.initialize(this.inputsplits);
+		output.initialize(this.inputsplits);
 
 		mapperContext = contextConstructor.newInstance(mapper, jobConf, input, output);
 

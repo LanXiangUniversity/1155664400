@@ -1,5 +1,6 @@
 package lxu.lxmapreduce.io;
 
+import java.util.List;
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
@@ -17,9 +18,8 @@ public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
 	}
 
 	@Override
-	public void initialize(TaskAttemptContext taskContext) throws FileNotFoundException {
-		/* TODO get filename from taskContext */
-		this.out = new LineWriter("/Users/parasitew/Documents/testDir/1/out.txt");
+	public void initialize(List<String> outputFiles) throws FileNotFoundException {
+		this.out = new LineWriter(outputFiles.get(0));
 	}
 
 	@Override

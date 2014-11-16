@@ -1,4 +1,6 @@
-package lxu.lxmapreduce.task;
+package lxu.lxmapreduce.task.reduce;
+
+import lxu.lxmapreduce.task.TaskStatus;
 
 /**
  * Created by magl on 14/11/13.

@@ -3,6 +3,8 @@ package lxu.lxmapreduce.task;
 import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.job.JobInProgress;
 import lxu.lxmapreduce.job.JobTracker;
+import lxu.lxmapreduce.task.map.MapTask;
+import lxu.lxmapreduce.task.reduce.ReduceTask;
 import lxu.lxmapreduce.tmp.TaskID;
 
 import java.util.HashMap;
@@ -24,14 +26,14 @@ public class TaskInProgress {
 	private int partition;
 	// TaskAttemptID -> TaskStatus
 	private Map<TaskAttemptID, TaskStatus> taskStatuses
-            = new HashMap<TaskAttemptID, TaskStatus>();
-    // TaskAttemptID -> TaskTrackerID
-    private Map<TaskAttemptID, String> activeTasks
-            = new HashMap<TaskAttemptID, String>();
-    // All attempt ids of this task
-    private Set<TaskAttemptID> allTaskAttempts = new HashSet<TaskAttemptID>();
+			= new HashMap<TaskAttemptID, TaskStatus>();
+	// TaskAttemptID -> TaskTrackerID
+	private Map<TaskAttemptID, String> activeTasks
+			= new HashMap<TaskAttemptID, String>();
+	// All attempt ids of this task
+	private Set<TaskAttemptID> allTaskAttempts = new HashSet<TaskAttemptID>();
 
-    private int nextAttemptID = 0;
+	private int nextAttemptID = 0;
 
 	/**
 	 * Constructor for MapTask
@@ -76,34 +78,34 @@ public class TaskInProgress {
 		successfulTaskID = taskID;
 	}
 
-    public Task getTaskToRun(String taskTrackerName) {
-        TaskAttemptID attemptID = new TaskAttemptID(taskID, nextAttemptID++);
-        Task newTask = null;
-        if (isMapTask()) {
-            // TODO: Change constructor prototype
-            newTask = new MapTask();
-        } else {
-            // TODO: Change constructor prototype
-            newTask = new ReduceTask();
-        }
+	public Task getTaskToRun(String taskTrackerName) {
+		TaskAttemptID attemptID = new TaskAttemptID(taskID, nextAttemptID++);
+		Task newTask = null;
+		if (isMapTask()) {
+			// TODO: Change constructor prototype
+			newTask = new MapTask(attemptID, this.partition, locatedBlock);
+		} else {
+			// TODO: Change constructor prototype
+			newTask = new ReduceTask(attemptID, this.partition, locatedBlock);
+		}
 
-        activeTasks.put(attemptID, taskTrackerName);
-        allTaskAttempts.add(attemptID);
+		activeTasks.put(attemptID, taskTrackerName);
+		allTaskAttempts.add(attemptID);
 
-        jobTracker.createTaskEntry(attemptID, taskTrackerName, this);
+		jobTracker.createTaskEntry(attemptID, taskTrackerName, this);
 
-        return newTask;
-    }
+		return newTask;
+	}
 
 	public boolean isMapTask() {
 		return locatedBlock != null;
 	}
 
-    public boolean isRunning() {
-        return !activeTasks.isEmpty();
-    }
+	public boolean isRunning() {
+		return !activeTasks.isEmpty();
+	}
 
-    public int getIdWithinJob() {
-        return this.partition;
-    }
+	public int getIdWithinJob() {
+		return this.partition;
+	}
 }

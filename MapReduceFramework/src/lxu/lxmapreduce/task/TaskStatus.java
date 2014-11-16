@@ -1,5 +1,7 @@
 package lxu.lxmapreduce.task;
 
+import lxu.lxmapreduce.tmp.TaskID;
+
 /**
  * Created by magl on 14/11/11.
  */
@@ -10,7 +12,7 @@ public abstract class TaskStatus {
 
 	private String JobID;
 	private String taskTracker;
-	private String taskID;
+	private TaskAttemptID taskID;
 	private int state;
 	private int attemptFailedTime;
 
@@ -24,11 +26,11 @@ public abstract class TaskStatus {
 		JobID = jobID;
 	}
 
-	public String getTaskID() {
+	public TaskAttemptID getTaskID() {
 		return taskID;
 	}
 
-	public void setTaskID(String taskID) {
+	public void setTaskID(TaskAttemptID taskID) {
 		this.taskID = taskID;
 	}
 

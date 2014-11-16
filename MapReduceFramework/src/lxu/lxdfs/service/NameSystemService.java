@@ -5,6 +5,7 @@ import lxu.lxdfs.client.ClientOutputStream;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.metadata.LocatedBlock;
+import lxu.lxdfs.metadata.LocatedBlocks;
 import lxu.lxdfs.namenode.NameNodeState;
 
 import java.nio.file.Path;
@@ -206,7 +207,7 @@ public class NameSystemService implements INameSystemService {
 	 * @throws RemoteException
 	 */
 	@Override
-	public ArrayList<LocatedBlock> getFileBlocks(String fileName) throws RemoteException {
+	public LocatedBlocks getFileBlocks(String fileName) throws RemoteException {
 		// Get the Blocks of a file.
 		List<Block> blocks = this.fileNameToBlocksMap.get(fileName);
 		ArrayList<LocatedBlock> result = new ArrayList<LocatedBlock>();
@@ -218,7 +219,7 @@ public class NameSystemService implements INameSystemService {
 			result.add(new LocatedBlock(block, dataNodes));
 		}
 
-		return result;
+		return new LocatedBlocks(result.toArray(new LocatedBlock[result.size()]));
 	}
 
 	/**

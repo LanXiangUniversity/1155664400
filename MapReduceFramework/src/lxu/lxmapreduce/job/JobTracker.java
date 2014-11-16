@@ -1,11 +1,14 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxdfs.service.INameSystemService;
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
+import lxu.lxmapreduce.metadata.LaunchTaskAction;
 import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
 import lxu.lxmapreduce.tmp.Configuration;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -21,6 +24,7 @@ public class JobTracker implements IJobTracker {
 	private int nextJobID = 0;
 	private TaskScheduler taskScheduler = null;
 	private Configuration jobConf;
+    private INameSystemService nameNode = null;
 	// All known tasks (taskAttemptID -> TaskInProgress)
 	private HashMap<TaskAttemptID, TaskInProgress> taskIDToTIPMap;
 
@@ -39,7 +43,7 @@ public class JobTracker implements IJobTracker {
 	// (TaskTrackerName -> TaskTrackerStatus)
 	private HashMap<String, TaskTrackerStatus> taskTrackers;
 
-	public JobTracker() {
+	public JobTracker() throws RemoteException, NotBoundException {
 		this.jobs = new HashMap<String, JobInProgress>();
 		this.taskIDToTIPMap = new HashMap<TaskAttemptID, TaskInProgress>();
 		this.taskIDToTrackerMap = new HashMap<TaskAttemptID, String>();
@@ -48,11 +52,9 @@ public class JobTracker implements IJobTracker {
 		this.taskTrackerToHostIPMap = new HashMap<String, String>();
 		this.taskTrackers = new HashMap<String, TaskTrackerStatus>();
 		this.taskScheduler = new TaskScheduler();
-	}
 
-	public static void main(String[] args) {
-		JobTracker jobTracker = new JobTracker();
-		jobTracker.startService();
+        Registry registry = LocateRegistry.getRegistry();
+        nameNode = (INameSystemService)registry.lookup("NameSystemService");
 	}
 
 	@Override
@@ -96,7 +98,6 @@ public class JobTracker implements IJobTracker {
 		taskTrackers.put(trackerName, status);
 		updateTaskStatuses(status);
 
-		// TODO: Generate HeartbeatResponse (including task tracker action)
 		HeartbeatResponse heartbeatResponse =
 				new HeartbeatResponse(newResponseID, jobConf, null);
 		ArrayList<TaskTrackerAction> actions = new ArrayList<TaskTrackerAction>();
@@ -105,20 +106,27 @@ public class JobTracker implements IJobTracker {
 			List<Task> tasks = taskScheduler.assignTasks(taskTrackers.get(trackerName));
 			if (tasks != null) {
 				for (Task task : tasks) {
-					// TODO: Build LaunchTaskAction
+                    actions.add(new LaunchTaskAction(task));
 				}
 			}
 		}
+
+        heartbeatResponse.setActions(actions);
 
 		return heartbeatResponse;
 	}
 
 	public void updateTaskStatuses(TaskTrackerStatus status) {
 		String trackerName = status.getTrackerName();
+        LinkedList<TaskStatus> taskReports = status.getTaskReports();
 
-		for (TaskStatus report : status.getTaskReports()) {
+        if (taskReports == null || taskReports.size() == 0) {
+            return;
+        }
+
+		for (TaskStatus report : taskReports) {
 			report.setTaskTracker(trackerName);
-			String taskID = report.getTaskID();
+			TaskAttemptID taskID = report.getTaskID();
 
 			JobInProgress job = jobs.get(report.getJobID());
 			TaskInProgress taskInProgress = taskIDToTIPMap.get(taskID);
@@ -126,7 +134,7 @@ public class JobTracker implements IJobTracker {
 
 			if (job.isComplete()) {
 				System.out.println("Job " + job.getJobID() + " Completed");
-				jobs.remove(report.getJobID());
+				//jobs.remove(report.getJobID());
 			}
 		}
 	}
@@ -160,4 +168,18 @@ public class JobTracker implements IJobTracker {
 			System.err.println(e.getMessage());
 		}
 	}
+
+    public INameSystemService getNameNode() {
+        return this.nameNode;
+    }
+
+    public static void main(String[] args) {
+        try {
+            JobTracker jobTracker = new JobTracker();
+            jobTracker.startService();
+        } catch (Exception e) {
+            System.err.println("Error: Starting job tracker! " + e.getMessage());
+        }
+    }
+
 }

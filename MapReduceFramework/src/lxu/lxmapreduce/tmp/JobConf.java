@@ -1,100 +1,137 @@
 package lxu.lxmapreduce.tmp;
 
-import lxu.lxmapreduce.io.format.InputFormat;
-import lxu.lxmapreduce.io.format.OutputFormat;
-import lxu.utils.ReflectionUtils;
+import lxu.lxmapreduce.io.format.LongWritable;
+import lxu.lxmapreduce.io.format.Text;
+import lxu.lxmapreduce.task.map.Mapper;
+import lxu.lxmapreduce.task.reduce.Reducer;
 
 /**
  * Created by Wei on 11/12/14.
  */
 public class JobConf extends Configuration {
-	protected int jobId;
-	protected String jarName;
-	protected int numMapTasks;
-	protected int numReduceTasks;
-	protected int maxAttempts;
-	protected String jobName;
-	protected String inputFormat;
-	protected String mapClassName;
-	protected String reduceClassName;
-	protected String outputFormatName;
-	protected String inputFormatName;
+    public JobConf() {
+        super();
+    }
 
-	public JobConf(Configuration conf) {
+    public JobConf(Configuration conf) {
 		super(conf);
 	}
 
-	public Class<?> getMapperClass() throws ClassNotFoundException {
-		return getClassByName(this.mapClassName);
-	}
+    public String getJar() {
+        return get("mapreduce.job.jar");
+    }
 
-	public void setMapperClass(Class<?> theClass) {
-		this.mapClassName = theClass.getName();
-	}
+    public Class<?> getMapperClass() {
+        String name = "mapreduce.map.class";
+        return getMapperClass(name);
+    }
 
-	public Class<?> getReducerClass() throws ClassNotFoundException {
-		return getClassByName(this.reduceClassName);
-	}
+    public void setMapperClass(Class<?> mapperClass) {
+        setClass("mapreduce.map.class", mapperClass);
+    }
 
-	public void setReducerClass(Class<?> theClass) {
-		this.reduceClassName = theClass.getName();
-	}
+    public Class<?> getMapperClass(String name) {
+        return getClass(name, Mapper.class);
+    }
 
-	public OutputFormat getOutputFormat() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
-		return ReflectionUtils.newInstance(this.outputFormatName);
-	}
+    public Class<?> getReducerClass() {
+        String name = "mapreduce.reduce.class";
+        return getReducerClass(name);
+    }
 
-	public void setOutputFormat(Class<? extends OutputFormat> theClass) {
-		this.outputFormatName = theClass.getName();
-	}
+    public void setReducerClass(Class<?> reducerClass) {
+        setClass("mapreduce.reduce.class", reducerClass);
+    }
 
-	public InputFormat getInputFormat() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
-		return ReflectionUtils.newInstance(this.inputFormatName);
-	}
+    public Class<?> getReducerClass(String name) {
+        return getClass(name, Reducer.class);
+    }
 
-	public void setInputFormat(Class<? extends InputFormat> theClass) {
-		this.inputFormatName = theClass.getName();
-	}
+    public int getNumMapTasks() {
+        return getInt("mapreduce.mapper.number", 10);
+    }
 
-	public String getJar() {
-		return this.jarName;
-	}
+    public void setNumMapTasks(int numMapTasks) {
+        setInt("mapreduce.mapper.number", numMapTasks);
+    }
 
-	public void setJar(String jarName) {
-		this.jarName = jarName;
-	}
+    public int getNumReduceTasks() {
+        return getInt("mapreduce.reduce.number", 10);
+    }
 
-	public Class<?> getOutputValueClass() {
-		return null;
-	}
+    public void setNumReduceTasks(int numReduceTasks) {
+        setInt("mapreduce.reduce.number", numReduceTasks);
+    }
 
-	public Class<?> getOutputKeyClass() {
-		return null;
-	}
+    public String getJobName() {
+        return get("mapreduce.job.name");
+    }
 
-	public Class<?> getInputputFormatClass() {
-		return null;
-	}
+    public void setJobName(String jobName) {
+        set("mapreduce.job.name", jobName);
+    }
 
-	public Class<?> getOutputFormatClass() {
-		return null;
-	}
+    public Class<?> getOutputKeyClass() {
+        return getClass("mapreduce.output.key.class", LongWritable.class);
+    }
 
-	public Class<?> getMapOutputKeyClass() {
-		return null;
-	}
+    public void setOutputKeyClass(Class<?> outputKeyClass) {
+        setClass("mapreduce.output.key.class", outputKeyClass);
+    }
 
-	public Class<?> getMapOutputValueClass() {
-		return null;
-	}
+    public Class<?> getOutputValueClass() {
+        return getClass("mapreduce.output.value.class", Text.class);
+    }
 
-	public String getJobName() {
-		return null;
-	}
+    public void setOutputValueClass(Class<?> outputValueClass) {
+        setClass("mapreduce.output.value.class", outputValueClass);
+    }
 
-	public int getNumReduceTasks() {
-		return 0;
-	}
+    public Class<?> getMapOutputKeyClass() {
+        return getClass("mapreduce.map.output.key.class", LongWritable.class);
+    }
+
+    public void setMapOutputKeyClass(Class<?> mapOutputKeyClass) {
+        setClass("mapreduce.map.output.key.class", mapOutputKeyClass);
+    }
+
+    public Class<?> getMapOutputValueClass() {
+        return getClass("mapreduce.map.output.value.class", Object.class);
+    }
+
+    public void setMapOutputValueClass(Class<?> mapOutputValueClass) {
+        setClass("mapreduce.map.output.value.class", mapOutputValueClass);
+    }
+
+    public Class<?> getReduceOutputKeyClass() {
+        return getClass("mapreduce.reduce.output.key.class", LongWritable.class);
+    }
+
+    public void setReduceOutputKeyClass(Class<?> reduceOutputKeyClass) {
+        setClass("mapreduce.reduce.output.key.class", reduceOutputKeyClass);
+    }
+
+    public Class<?> getReduceOutputValueClass() {
+        return getClass("mapreduce.reduce.output.value.class", Object.class);
+    }
+
+    public void setReduceOutputValueClass(Class<?> reduceOutputValueClass) {
+        setClass("mapreduce.reduce.output.value.class", reduceOutputValueClass);
+    }
+
+    public Class<?> getInputFormatClass() {
+        return getClass("mapreduce.inputformat.class", Text.class);
+    }
+
+    public void setInputFormatClass(Class<?> inputFormatClass) {
+        setClass("mapreduce.inputformat.class", inputFormatClass);
+    }
+
+    public Class<?> getOutputFormatClass() {
+        return getClass("mapreduce.outputformat.class", Text.class);
+    }
+
+    public void setOutputFormatClass(Class<?> outputFormatClass) {
+        setClass("mapreduce.outputformat.class", outputFormatClass);
+    }
 }
-
-

@@ -6,37 +6,38 @@ import java.text.NumberFormat;
  * Created by Wei on 11/12/14.
  */
 public class TaskID {
-	private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
-	static {
-		NUMBER_FORMAT.setMinimumIntegerDigits(5);
-		NUMBER_FORMAT.setGroupingUsed(false);
-	}
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
+
+    static {
+        NUMBER_FORMAT.setMinimumIntegerDigits(5);
+        NUMBER_FORMAT.setGroupingUsed(false);
+    }
 
     private int partition;
-	private String jobID;
-	private boolean isMapTask;
+    private String jobID;
+    private boolean isMapTask;
 
-	public TaskID(String jobID, boolean isMapTask, int partition) {
-		this.jobID = jobID;
-		this.isMapTask = isMapTask;
+    public TaskID(String jobID, boolean isMapTask, int partition) {
+        this.jobID = jobID;
+        this.isMapTask = isMapTask;
         this.partition = partition;
-	}
+    }
 
-	public String getJobID() {
-		return jobID;
-	}
+    public String getJobID() {
+        return jobID;
+    }
 
-	public void setJobID(String jobID) {
-		this.jobID = jobID;
-	}
+    public void setJobID(String jobID) {
+        this.jobID = jobID;
+    }
 
-	public boolean isMapTask() {
-		return isMapTask;
-	}
+    public boolean isMapTask() {
+        return isMapTask;
+    }
 
-	public void setMapTask(boolean isMapTask) {
-		this.isMapTask = isMapTask;
-	}
+    public void setMapTask(boolean isMapTask) {
+        this.isMapTask = isMapTask;
+    }
 
     @Override
     public String toString() {

@@ -1,13 +1,17 @@
 package lxu.lxmapreduce.tmp;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
  * Created by Wei on 11/11/14.
  */
 public class Configuration {
-	protected HashMap<String, Object> entries = null;
-	private ClassLoader classLoader;
+    protected HashMap<String, String> entries = null;
+    private ClassLoader classLoader;
 	{
 		classLoader = Thread.currentThread().getContextClassLoader();
 		if (classLoader == null) {
@@ -16,20 +20,130 @@ public class Configuration {
 	}
 
 	public Configuration() {
-		this.entries = new HashMap<String, Object>();
-	}
+        this.entries = new HashMap<String, String>();
+        readAllConf("conf");
+    }
 
 	public Configuration(Configuration conf) {
 		this.entries = conf.entries;
 	}
 
-	public Class<?> getClassByName(String name) throws ClassNotFoundException {
+    public String get(String name) {
+        return entries.get(name);
+    }
+
+    public boolean getBoolean(String name, boolean defaultValue) {
+        String valueString = get(name);
+        if (valueString == null) {
+            return defaultValue;
+        }
+
+        valueString = valueString.toLowerCase();
+
+        if ("true".equals(valueString)) {
+            return true;
+        } else if ("false".equals(valueString)) {
+            return false;
+        } else {
+            return defaultValue;
+        }
+    }
+
+    public Class<?> getClassByName(String name) throws ClassNotFoundException {
 		return Class.forName(name, true, classLoader);
 	}
 
-	public Class<?> getClass(String className) {
-		/* TODO getclass */
+    public Class<?> getClass(String className, Class<?> defaultValue) {
+        String valueString = get(className);
+        if (valueString == null) {
+            return defaultValue;
+        }
 
-		return null;
-	}
+        try {
+            return getClassByName(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getInt(String name, int defaultValue) {
+        String valueString = get(name);
+        if (valueString == null) {
+            return defaultValue;
+        }
+
+        return Integer.parseInt(valueString);
+    }
+
+    public String getSocketAddr(String name, String defaultAddr) {
+        String valueString = get(name);
+        if (valueString == null) {
+            return defaultAddr;
+        }
+
+        return valueString;
+    }
+
+    public String[] getSocketAddrs(String name) {
+        String valueString = get(name);
+        if (valueString == null) {
+            return null;
+        }
+
+        return valueString.split(",");
+    }
+
+    public void set(String name, String value) {
+        this.entries.put(name, value);
+    }
+
+    public void setBoolean(String name, boolean value) {
+        set(name, Boolean.toString(value));
+    }
+
+    public void setClass(String name, Class<?> theClass) {
+        set(name, theClass.getName());
+    }
+
+    public void setInt(String name, int value) {
+        set(name, Integer.toString(value));
+    }
+
+    public void setSocketAddr(String name, String addr) {
+        set(name, addr);
+    }
+
+    public void setSocketAddrs(String name, String[] addrs) {
+        String delim = "";
+        StringBuilder joinedAddrs = new StringBuilder();
+        for (String addr : addrs) {
+            joinedAddrs.append(delim).append(addr);
+            delim = ",";
+        }
+        set(name, joinedAddrs.toString());
+    }
+
+    public void readAllConf(String fileName) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            String configLine = null;
+            while ((configLine = reader.readLine()) != null) {
+                String[] keyValues = configLine.split("=");
+                // skip wrong formatted configuration
+                if (keyValues.length != 2) {
+                    continue;
+                }
+                String key = keyValues[0];
+                String value = keyValues[1];
+                entries.put(key, value);
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("FATAL: Wrong Configuration file!");
+            System.exit(-1);
+        } catch (IOException e) {
+            System.err.println("FATAL: Reading Configuration file wrong!");
+            System.err.println(e.getMessage());
+            System.exit(-1);
+        }
+    }
 }

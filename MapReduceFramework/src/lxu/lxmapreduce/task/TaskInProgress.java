@@ -3,6 +3,8 @@ package lxu.lxmapreduce.task;
 import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.job.JobInProgress;
 import lxu.lxmapreduce.job.JobTracker;
+import lxu.lxmapreduce.task.map.MapTask;
+import lxu.lxmapreduce.task.reduce.ReduceTask;
 import lxu.lxmapreduce.tmp.TaskID;
 
 import java.util.HashMap;
@@ -83,8 +85,7 @@ public class TaskInProgress {
         if (isMapTask()) {
             newTask = new MapTask(attemptID, partition, locatedBlock);
         } else {
-            // TODO: Change constructor prototype
-            newTask = new ReduceTask();
+            newTask = new ReduceTask(attemptID, partition, locatedBlock);
         }
 
         activeTasks.put(attemptID, taskTrackerName);

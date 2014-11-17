@@ -95,6 +95,7 @@ public class JobTracker implements IJobTracker {
 	                                   boolean acceptNewTasks,
 	                                   short responseID) {
 		String trackerName = status.getTrackerName();
+        System.out.println("Received heartbeat from " + trackerName);
 		long now = System.currentTimeMillis();
 
 		short newResponseID = (short) (responseID + 1);
@@ -108,14 +109,16 @@ public class JobTracker implements IJobTracker {
 				new HeartbeatResponse(newResponseID, jobConf, null);
 		ArrayList<TaskTrackerAction> actions = new ArrayList<TaskTrackerAction>();
 
-		if (acceptNewTasks) {
-			List<Task> tasks = taskScheduler.assignTasks(taskTrackers.get(trackerName));
-			if (tasks != null) {
-				for (Task task : tasks) {
-                    actions.add(new LaunchTaskAction(task));
-				}
-			}
-		}
+        if (jobs.size() != 0) {
+            if (acceptNewTasks) {
+                List<Task> tasks = taskScheduler.assignTasks(taskTrackers.get(trackerName));
+                if (tasks != null) {
+                    for (Task task : tasks) {
+                        actions.add(new LaunchTaskAction(task));
+                    }
+                }
+            }
+        }
 
         heartbeatResponse.setActions(actions);
 
@@ -169,6 +172,7 @@ public class JobTracker implements IJobTracker {
 					(IJobTracker) UnicastRemoteObject.exportObject(this, 0);
 			Registry registry = LocateRegistry.getRegistry();
 			registry.rebind("JobTracker", stub);
+            System.out.println("JobTracker Started");
 		} catch (RemoteException e) {
 			System.err.println("Error: JobTracker start RMI service error");
 			System.err.println(e.getMessage());

@@ -6,9 +6,9 @@ import lxu.lxmapreduce.io.RecordWriter;
 /**
  * Created by Wei on 11/12/14.
  */
-public class TextOutputWriter extends OutputFormat<LongWritable, Text> {
+public class TextOutputWriter extends OutputFormat<Text, Text> {
 	@Override
-	public RecordWriter<LongWritable, Text> createRecordWriter() {
+	public RecordWriter<Text, Text> createRecordWriter() {
 		return new LineRecordWriter();
 	}
 }

@@ -1,11 +1,13 @@
 package lxu.lxmapreduce.tmp;
 
+import java.io.Serializable;
+
 /**
  * A read-only view of the job that is provided to the tasks while they
  * are running.
  * Created by Wei on 11/12/14.
  */
-public class JobContext {
+public class JobContext implements Serializable {
     public static final String INPUT_FORMAT_CLASS_ATTR = "mapreduce.job.inputformat.class";
     public static final String MAP_CLASS_ATTR = "mapreduce.job.map.class";
     public static final String REDUCE_CLASS_ATTR = "mapreduce.job.reduce.class";

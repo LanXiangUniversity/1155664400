@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by Wei on 11/11/14.
  */
-public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
+public class LineRecordWriter extends RecordWriter<Text, Text> {
 	private LineWriter out;
 
 	public LineRecordWriter() {
@@ -23,7 +23,7 @@ public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
 	}
 
 	@Override
-	public void write(LongWritable key, Text value) throws IOException {
+	public void write(Text key, Text value) throws IOException {
 		this.out.write(key.getValue() + " " + value.getValue() + "\n");
 	}
 

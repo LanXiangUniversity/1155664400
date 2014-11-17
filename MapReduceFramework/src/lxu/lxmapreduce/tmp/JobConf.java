@@ -5,10 +5,13 @@ import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.map.Mapper;
 import lxu.lxmapreduce.task.reduce.Reducer;
 
+import java.io.Serializable;
+
 /**
  * Created by Wei on 11/12/14.
  */
-public class JobConf extends Configuration {
+public class JobConf extends Configuration implements Serializable {
+    private static final long serialVersionUID = 1L;
     public JobConf() {
         super();
     }
@@ -36,7 +39,7 @@ public class JobConf extends Configuration {
 		return getSocketAddrs(name);
 	}
 
-		public Class<?> getMapperClass(String name) {
+    public Class<?> getMapperClass(String name) {
         return getClass(name, Mapper.class);
     }
 

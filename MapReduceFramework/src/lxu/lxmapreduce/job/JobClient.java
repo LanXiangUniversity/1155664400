@@ -17,20 +17,28 @@ public class JobClient {
 
     public JobClient() {
         this.jobConf = new JobConf();
+        locateJobTracker();
+    }
+
+    public JobClient(JobConf jobConf) {
+        this.jobConf = jobConf;
+        locateJobTracker();
+    }
+
+    public void locateJobTracker() {
         Registry registry = null;
         try {
             registry = LocateRegistry.getRegistry();
             jobTracker = (IJobTracker)registry.lookup("JobTracker");
+            if (jobTracker == null) {
+                System.out.println("Cannot lookup JobTracker");
+            }
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
             System.err.println("Error: JobClient getting JobTracker wrong!");
             System.err.println(e.getMessage());
             System.exit(-1);
         }
-    }
-
-    public JobClient(JobConf jobConf) {
-        this.jobConf = jobConf;
     }
 
     public JobStatus updateStatus(String jobID) {
@@ -57,7 +65,7 @@ public class JobClient {
             jobStatus = jobTracker.submitJob(jobID, jobConf);
         } catch (RemoteException e) {
             System.err.println("Error: JobClient submitting Job wrong!");
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             return null;
         }
         return jobStatus;

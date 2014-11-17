@@ -1,27 +1,18 @@
 package lxu.lxmapreduce.tmp;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 
 /**
  * Created by Wei on 11/11/14.
  */
-public class Configuration {
+public class Configuration implements Serializable {
+    private static final long serialVersionUID = 1L;
     protected HashMap<String, String> entries = null;
-    private ClassLoader classLoader;
-	{
-		classLoader = Thread.currentThread().getContextClassLoader();
-		if (classLoader == null) {
-			classLoader = Configuration.class.getClassLoader();
-		}
-	}
 
 	public Configuration() {
         this.entries = new HashMap<String, String>();
-        readAllConf("conf");
+        readAllConf("/Users/magl/Google Drive/cmu/14-fall/15640/1155664400/MapReduceFramework/conf");
     }
 
 	public Configuration(Configuration conf) {
@@ -50,6 +41,13 @@ public class Configuration {
     }
 
     public Class<?> getClassByName(String name) throws ClassNotFoundException {
+        ClassLoader classLoader;
+        {
+            classLoader = Thread.currentThread().getContextClassLoader();
+            if (classLoader == null) {
+                classLoader = Configuration.class.getClassLoader();
+            }
+        }
 		return Class.forName(name, true, classLoader);
 	}
 

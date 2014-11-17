@@ -12,7 +12,6 @@ import java.rmi.RemoteException;
  */
 public interface IJobTracker extends Remote {
 	// for job client
-	// TODO: change prototype
 	public String getNewJobID() throws RemoteException;
 
 	public JobStatus submitJob(String jobID, JobConf jobConf) throws RemoteException;

@@ -1,7 +1,7 @@
 package lxu.lxmapreduce.task;
 
 import lxu.lxmapreduce.io.format.Text;
-import lxu.lxmapreduce.job.JobTracker;
+import lxu.lxmapreduce.job.IJobTracker;
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
 import lxu.lxmapreduce.metadata.LaunchTaskAction;
 import lxu.lxmapreduce.metadata.TaskTrackerAction;
@@ -17,6 +17,11 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -35,7 +40,7 @@ public class TaskTracker implements Runnable {
 	private JobConf jobConf;
 	private Map<TaskAttemptID, TaskRunner> taskPool;
 	private short responseID;           // Last response ID received from JobTracker.
-	private JobTracker jobTrackerService;
+	private IJobTracker jobTrackerService;
 	private long lastHeartbeat;
 	private long heartbeatInterval;
 	private IntermediateListener interListener;
@@ -51,8 +56,17 @@ public class TaskTracker implements Runnable {
 		this.isInitialized = false;
 		this.heartbeatInterval = 3 * 1000;
 		// TODO get  JobTracker remote reference.
-		this.jobTrackerService = null;
-		this.interListener = new IntermediateListener();
+        Registry registry = null;
+        try {
+            registry = LocateRegistry.getRegistry();
+            this.jobTrackerService = (IJobTracker) registry.lookup("JobTracker");
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (NotBoundException e) {
+            e.printStackTrace();
+        }
+        this.interListener = new IntermediateListener();
+        this.isRunning = true;
 	}
 
 	public void startInterListener() {
@@ -78,19 +92,25 @@ public class TaskTracker implements Runnable {
 	}
 
 	public HeartbeatResponse sendHeartBeat() throws UnknownHostException {
+        System.out.println("Send heartbeat, id = " + responseID);
 
 		// Create TaskTrackerStatus.
 		TaskTrackerStatus taskTrackerStatus = buildTaskTrackerStatus();
 
 		boolean acceptNewTasks = taskTrackerStatus.hasFreeSlots();
 
-		HeartbeatResponse heartBeatResponse =
-				this.jobTrackerService.heartbeat(taskTrackerStatus,
-						this.isInitialized,
-						acceptNewTasks,
-						responseID);
+        HeartbeatResponse heartBeatResponse =
+                null;
+        try {
+            heartBeatResponse = this.jobTrackerService.heartbeat(taskTrackerStatus,
+                    this.isInitialized,
+                    acceptNewTasks,
+                    responseID);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
-		processHeartBeatResponse(heartBeatResponse);
+        processHeartBeatResponse(heartBeatResponse);
 
 		return heartBeatResponse;
 	}
@@ -98,6 +118,7 @@ public class TaskTracker implements Runnable {
 	public void processHeartBeatResponse(HeartbeatResponse heartBeatResponse) {
 		// Update last responseID.
 		this.responseID = heartBeatResponse.getResponseID();
+        System.out.println("Received heartBeatResponse, response ID = " + responseID);
 
 		// Handle JobTracker commands(TaskTrackerActions)
 		for (TaskTrackerAction action : heartBeatResponse.getActions()) {

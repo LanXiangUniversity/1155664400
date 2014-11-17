@@ -2,9 +2,9 @@ package lxu.lxmapreduce.job;
 
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxdfs.metadata.LocatedBlocks;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
+import lxu.lxmapreduce.tmp.JobConf;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -15,6 +15,7 @@ import java.util.*;
 public class JobInProgress {
     private String jobID;
     private JobStatus jobStatus = null;
+    private JobConf jobConf = null;
     private JobTracker jobTracker = null;
     // static job information:
     // map tasks, reduce tasks, etc
@@ -34,15 +35,20 @@ public class JobInProgress {
     private Map<String, List<TaskInProgress>> nonRunningMapTasksMap;
     private Map<String, Set<TaskInProgress>> runningMapTasksMap;
 
+    private Set<TaskInProgress> nonRunningReduceTaskSet;
+    private Set<TaskInProgress> runningReduceTaskSet;
+
     private boolean tasksInited = false;
 
-    public JobInProgress(String jobID, JobTracker jobTracker) {
+    public JobInProgress(String jobID, JobConf jobConf, JobTracker jobTracker) {
         this.jobID = jobID;
+        this.jobConf = jobConf;
         this.jobTracker = jobTracker;
         this.jobStatus = new JobStatus(jobID, JobStatus.PREP, JobStatus.PREP);
-        // TODO: Use configuration to initialize
-        this.numMapTasks = 10;
-        this.numReduceTasks = 10;
+        this.numMapTasks = jobConf.getNumMapTasks();
+        this.numReduceTasks = jobConf.getNumReduceTasks();
+        nonRunningReduceTaskSet = new HashSet<TaskInProgress>();
+        runningReduceTaskSet = new HashSet<TaskInProgress>();
     }
 
     public void initTasks() {
@@ -64,6 +70,7 @@ public class JobInProgress {
         this.reduces = new TaskInProgress[numReduceTasks];
         for (int i = 0; i < numReduceTasks; i++) {
             this.reduces[i] = new TaskInProgress(jobID, numMapTasks, i, jobTracker, this);
+            nonRunningReduceTaskSet.add(this.reduces[i]);
         }
 
         tasksInited = true;
@@ -75,7 +82,8 @@ public class JobInProgress {
         try {
             return jobTracker.getNameNode().getFileBlocks(fileName).getBlocks();
         } catch (RemoteException e) {
-            System.out.println("Error: Remote Exception while Initing Tasks!" + e.getMessage());
+            System.out.println("Error: Cannot get file blocks while initializing Tasks!");
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -86,7 +94,7 @@ public class JobInProgress {
         if (tip.isComplete() && status.getState() == SUCCEED) {
             return;
         }
-         */
+        */
         boolean changed = tip.updateStatus(status);
         if (changed) {
             int state = status.getState();
@@ -108,8 +116,6 @@ public class JobInProgress {
             finishedMapTasks++;
             if (finishedMapTasks == numMapTasks) {
                 this.jobStatus.setMapState(JobStatus.SUCCEEDED);
-            } else {
-                this.jobStatus.setMapState(JobStatus.RUNNING);
             }
 
             if (runningMapTasksMap == null) {
@@ -128,9 +134,8 @@ public class JobInProgress {
             finishedReduceTasks++;
             if (finishedReduceTasks == numReduceTasks) {
                 this.jobStatus.setReduceState(JobStatus.SUCCEEDED);
-            } else {
-                this.jobStatus.setReduceState(JobStatus.RUNNING);
             }
+            runningReduceTaskSet.remove(tip);
         }
     }
 
@@ -167,6 +172,7 @@ public class JobInProgress {
         return obtainNewMapTask(taskTrackerStatus);
     }
 
+    // TODO:
     public Task obtainNewNonLocalMapTask(TaskTrackerStatus taskTrackerStatus) {
         return null;
     }
@@ -181,6 +187,9 @@ public class JobInProgress {
 
         if (result != null) {
             runningMapTasks++;
+            if (jobStatus.getMapState() == JobStatus.PREP) {
+                jobStatus.setMapState(JobStatus.RUNNING);
+            }
         }
 
         return result;
@@ -267,6 +276,70 @@ public class JobInProgress {
             runningMapTasksMap.put(trackerHost, hostMaps);
         }
         hostMaps.add(taskInProgress);
+    }
+
+    public Task obtainNewReduceTask(TaskTrackerStatus taskTrackerStatus) {
+        if (jobStatus.getMapState() != JobStatus.SUCCEEDED) {
+            System.out.println("Error: Cannot assign reduce task before map finishing");
+            return null;
+        }
+
+        if (!shouldAssignReduceTask()) {
+            return null;
+        }
+
+        int target = findNewReduceTasks(taskTrackerStatus);
+
+        if (target == -1) {
+            return null;
+        }
+
+        Task task = reduces[target].getTaskToRun(taskTrackerStatus.getTrackerName());
+
+        if (task != null) {
+            runningReduceTasks++;
+            if (jobStatus.getReduceState() == JobStatus.PREP) {
+                jobStatus.setReduceState(JobStatus.RUNNING);
+            }
+        }
+
+        return null;
+    }
+
+    private int findNewReduceTasks(TaskTrackerStatus taskTrackerStatus) {
+        if (numReduceTasks == 0) {
+            System.out.println("No reduces to schedule for " + this.jobID);
+            return -1;
+        }
+
+        String taskTrackerName = taskTrackerStatus.getTrackerName();
+        TaskInProgress taskInProgress = null;
+
+        for (TaskInProgress reduceTask : nonRunningReduceTaskSet) {
+            if (!reduceTask.isRunning()) {
+                taskInProgress = reduceTask;
+                nonRunningReduceTaskSet.remove(reduceTask);
+            }
+        }
+
+        if (taskInProgress != null) {
+            scheduleReduce(taskInProgress);
+            return taskInProgress.getIdWithinJob();
+        }
+
+        return -1;
+    }
+
+    private boolean shouldAssignReduceTask() {
+        return finishedMapTasks == numMapTasks;
+    }
+
+    private void scheduleReduce(TaskInProgress taskInProgress) {
+        if (runningReduceTaskSet == null) {
+            System.err.println("Running cache for reducers missing!! Job details are missing");
+            return;
+        }
+        runningReduceTaskSet.add(taskInProgress);
     }
 
     public String getJobID() {

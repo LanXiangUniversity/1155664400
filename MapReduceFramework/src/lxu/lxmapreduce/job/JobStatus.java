@@ -47,14 +47,30 @@ public class JobStatus implements Serializable {
 	}
 
 	public boolean isMapComplete() {
-		return mapState == JobStatus.SUCCEEDED;
+		return mapState == JobStatus.SUCCEEDED ||
+               mapState == JobStatus.FAILED ||
+               mapState == JobStatus.KILLED;
 	}
 
 	public boolean isReduceComplete() {
-		return reduceState == JobStatus.SUCCEEDED;
+		return reduceState == JobStatus.SUCCEEDED ||
+               reduceState == JobStatus.FAILED ||
+               reduceState == JobStatus.KILLED;
 	}
 
 	public boolean isJobComplete() {
 		return isMapComplete() && isReduceComplete();
 	}
+
+    public boolean isMapSuccessful() {
+        return mapState == JobStatus.SUCCEEDED;
+    }
+
+    public boolean isReduceSuccessful() {
+        return reduceState == JobStatus.SUCCEEDED;
+    }
+
+    public boolean isSuccessful() {
+        return isMapSuccessful() && isReduceSuccessful();
+    }
 }

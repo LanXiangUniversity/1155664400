@@ -134,4 +134,20 @@ public class JobConf extends Configuration {
     public void setOutputFormatClass(Class<?> outputFormatClass) {
         setClass("mapreduce.outputformat.class", outputFormatClass);
     }
+
+    public String getInputPath() {
+        return get("mapreduce.input.path");
+    }
+
+    public void setInputPath(String path) {
+        set("mapreduce.input.path", path);
+    }
+
+    public String getOutputPath() {
+        return get("mapreduce.output.path");
+    }
+
+    public void setOutputPath(String path) {
+        set("mapreduce.output.path", path);
+    }
 }

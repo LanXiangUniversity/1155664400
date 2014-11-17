@@ -49,6 +49,11 @@ public class TaskScheduler {
 		}
 
         // TODO: assign reduce tasks
+        // Only assign reduce tasks when map is done
+        Task task = job.obtainNewReduceTask(taskTrackerStatus);
+        if (task != null) {
+            assignedTasks.add(task);
+        }
 
 		return assignedTasks;
 	}

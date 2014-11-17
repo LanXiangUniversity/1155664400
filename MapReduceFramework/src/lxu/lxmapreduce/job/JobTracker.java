@@ -6,7 +6,7 @@ import lxu.lxmapreduce.metadata.LaunchTaskAction;
 import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
-import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.tmp.JobConf;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -23,7 +23,7 @@ public class JobTracker implements IJobTracker {
 	public HashMap<String, JobInProgress> jobs;
 	private int nextJobID = 0;
 	private TaskScheduler taskScheduler = null;
-	private Configuration jobConf;
+	private JobConf jobConf;
     private INameSystemService nameNode = null;
 	// All known tasks (taskAttemptID -> TaskInProgress)
 	private HashMap<TaskAttemptID, TaskInProgress> taskIDToTIPMap;
@@ -63,13 +63,13 @@ public class JobTracker implements IJobTracker {
 	}
 
 	@Override
-	public JobStatus submitJob(String jobID, Configuration jobConf) {
+	public JobStatus submitJob(String jobID, JobConf jobConf) {
 		this.jobConf = jobConf;
 		if (jobs.containsKey(jobID)) {
 			return jobs.get(jobID).getJobStatus();
 		}
 
-		JobInProgress job = new JobInProgress(jobID, this);
+		JobInProgress job = new JobInProgress(jobID, jobConf, this);
 
 		jobs.put(jobID, job);
 
@@ -78,6 +78,12 @@ public class JobTracker implements IJobTracker {
 
 		return job.getJobStatus();
 	}
+
+    @Override
+    public JobStatus getJobStatus(String jobID) {
+        JobInProgress jobInProgress = jobs.get(jobID);
+        return jobInProgress.getJobStatus();
+    }
 
     public String getHost(String taskTrackerName) {
         return taskTrackerToHostIPMap.get(taskTrackerName);
@@ -178,7 +184,9 @@ public class JobTracker implements IJobTracker {
             JobTracker jobTracker = new JobTracker();
             jobTracker.startService();
         } catch (Exception e) {
-            System.err.println("Error: Starting job tracker! " + e.getMessage());
+            System.err.println("Error: Starting job tracker! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 

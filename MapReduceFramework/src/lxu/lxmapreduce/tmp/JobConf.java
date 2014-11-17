@@ -30,7 +30,13 @@ public class JobConf extends Configuration {
         setClass("mapreduce.map.class", mapperClass);
     }
 
-    public Class<?> getMapperClass(String name) {
+	public String[] getSocketAddrs() {
+		String name = "slave.address";
+
+		return getSocketAddrs(name);
+	}
+
+		public Class<?> getMapperClass(String name) {
         return getClass(name, Mapper.class);
     }
 

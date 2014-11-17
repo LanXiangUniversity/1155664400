@@ -19,6 +19,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.*;
 
@@ -37,20 +38,27 @@ public class ReduceTask extends Task {
 
 	public void runReducer(JobConf jobConf) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException {
+		int port = 19001;
+		String[] mapperAddrs = jobConf.getSocketAddrs();
 		// TODO:Init input file
 		Map<Text, Iterator<Text>> reduceInput = new HashMap<>();
 
 		// TODO:Init output file path
 		List<Text> reduceOutput = new ArrayList<Text>();
 
-		for (int i = 0; i < 0; i++) {
-			Socket sock = new Socket("", 0);
+		for (String addr : mapperAddrs) {
+			// TODO: is localhost?
+			Socket sock = new Socket(addr, port);
 			ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
 			out.writeObject(this.getTaskAttemptID());
 			System.err.println("R: Ask for input");
 			ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
 			reduceInput = (Map<Text, Iterator<Text>>) in.readObject();
 			System.err.println("R: Get input");
+
+			in.close();
+			out.close();
+			sock.close();
 		}
 
 		TaskAttemptContext taskConext = new TaskAttemptContext(jobConf, this.getTaskAttemptID());

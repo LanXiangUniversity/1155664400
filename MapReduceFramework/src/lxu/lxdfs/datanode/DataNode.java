@@ -1,5 +1,6 @@
 package lxu.lxdfs.datanode;
 
+import lxu.lxdfs.metadata.DataNodeCommand;
 import lxu.lxdfs.service.INameSystemService;
 
 import java.io.IOException;
@@ -8,9 +9,13 @@ import java.net.ServerSocket;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DataNode implements Runnable {
 
+    private long heartbeatInterval = 3 * 1000;
+    private long lastHeartbeatTime = 0;
 	private int port = 12345;
 	private int nodeID = 0;
 	private boolean isRunning = true;
@@ -23,13 +28,13 @@ public class DataNode implements Runnable {
 
 	public DataNode() throws Exception {
 		dataNodeServerSocket = new ServerSocket(port);
-		dataNodeThread = new Thread(this);
-		dataNodeThread.start();
+        nameNodeHostName = InetAddress.getLocalHost().getHostAddress();
 		blockService = new BlockService(dataNodeServerSocket);
 		blockServiceThread = new Thread(blockService);
 		blockServiceThread.start();
-		nameNodeHostName = InetAddress.getLocalHost().getHostAddress();
-		register();
+        register();
+        dataNodeThread = new Thread(this);
+        dataNodeThread.start();
 	}
 
 	public static void main(String[] args) {
@@ -58,10 +63,31 @@ public class DataNode implements Runnable {
 	 */
 	public void offerService() throws Exception {
 		while (isRunning) {
-		    /* TODO: heartbeat */
+            long now = System.currentTimeMillis();
+            long waitTime = this.heartbeatInterval - (now - this.lastHeartbeatTime);
+
+            if (waitTime > 0) {
+                try {
+                    Thread.sleep(waitTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+		    /* TODO: send heartbeat */
+            LinkedList<DataNodeCommand> commands = nameNode.heartbeat(this.nodeID);
+            processCommands(commands);
+            this.lastHeartbeatTime = System.currentTimeMillis();
             /* TODO: check newly received block. if true, send block report */
 		}
 	}
+
+    /**
+     * Process DataNodeCommands from NameNode
+     * @param commands
+     */
+    private void processCommands(List<DataNodeCommand> commands) {
+
+    }
 
 	@Override
 	public void run() {

@@ -2,10 +2,7 @@ package lxu.lxdfs.service;
 
 
 import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.Block;
-import lxu.lxdfs.metadata.DataNodeDescriptor;
-import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxdfs.metadata.LocatedBlocks;
+import lxu.lxdfs.metadata.*;
 import lxu.lxdfs.namenode.NameNodeState;
 
 import java.nio.file.Path;
@@ -26,7 +23,7 @@ public class NameSystemService implements INameSystemService {
 	private int replicaNum = 1;
 	private int blockID = 0;
 	// List of Data Nodes available.
-	private List<DataNodeDescriptor> dataNodes;
+	private Map<Integer, DataNodeDescriptor> dataNodes;
 	// Map from file name to Block.
 	private HashMap<String, List<Block>> fileNameToBlocksMap;
 	// Map from Block to Data Nodes.
@@ -38,7 +35,7 @@ public class NameSystemService implements INameSystemService {
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 
 	public NameSystemService() {
-		dataNodes = new LinkedList<DataNodeDescriptor>();
+		dataNodes = new HashMap<Integer, DataNodeDescriptor>();
 		fileNameToBlocksMap = new HashMap<String, List<Block>>();
 		blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
 		IDToBlockMap = new HashMap<Integer, Block>();
@@ -90,9 +87,11 @@ public class NameSystemService implements INameSystemService {
 		Block block = new Block(blockId, offset, 0L);
 		HashSet<DataNodeDescriptor> locations = new HashSet<DataNodeDescriptor>();
 
-		// Allocate DataNodes to store Block replicas.
-		for (int i = 0; i < this.replicaNum; i++) {
-			locations.add(this.dataNodes.get(i));
+		// TODO: Allocate DataNodes to store Block replicas.
+        for (DataNodeDescriptor dataNodeDescriptor : dataNodes.values()) {
+            locations.add(dataNodeDescriptor);
+		//for (int i = 0; i < this.replicaNum; i++) {
+			//locations.add(this.dataNodes.get(i));
 		}
 
 		// Register Blocks in NameNode.
@@ -238,7 +237,8 @@ public class NameSystemService implements INameSystemService {
 				port,
 				blocks.size());
 		// update dataNodes list
-		this.dataNodes.add(dataNode);
+        this.dataNodes.put(nextDataNodeID, dataNode);
+		//this.dataNodes.add(dataNode);
 
 	    /* TODO return <**fileName**, blocksID, replicas> */
 
@@ -257,4 +257,11 @@ public class NameSystemService implements INameSystemService {
 
 		return this.nextDataNodeID;
 	}
+
+    @Override
+    public LinkedList<DataNodeCommand> heartbeat(int dataNodeID) throws RemoteException {
+        LinkedList<DataNodeCommand> commands = new LinkedList<DataNodeCommand>();
+
+        return commands;
+    }
 }

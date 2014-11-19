@@ -1,10 +1,7 @@
 package lxu.lxdfs.service;
 
 import lxu.lxdfs.client.ClientOutputStream;
-import lxu.lxdfs.metadata.Block;
-import lxu.lxdfs.metadata.DataNodeDescriptor;
-import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxdfs.metadata.LocatedBlocks;
+import lxu.lxdfs.metadata.*;
 
 import java.nio.file.Path;
 import java.rmi.NotBoundException;
@@ -12,6 +9,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 /**
  * Remote Interface for NameSystem
@@ -45,4 +43,6 @@ public interface INameSystemService extends Remote {
 
 	// Services for Data Node
 	public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) throws RemoteException;
+
+    public LinkedList<DataNodeCommand> heartbeat(int dataNodeID) throws RemoteException;
 }

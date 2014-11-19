@@ -7,13 +7,6 @@ import java.text.NumberFormat;
  * Created by Wei on 11/12/14.
  */
 public class TaskID implements Serializable {
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
-
-    static {
-        NUMBER_FORMAT.setMinimumIntegerDigits(5);
-        NUMBER_FORMAT.setGroupingUsed(false);
-    }
-
     private int partition;
     private String jobID;
     private boolean isMapTask;
@@ -42,7 +35,7 @@ public class TaskID implements Serializable {
 
     @Override
     public String toString() {
-        return jobID + (isMapTask ? "_m-" : "_r-") + NUMBER_FORMAT.format(partition);
+        return jobID + (isMapTask ? "_m-" : "_r-") + partition;
     }
 
     @Override

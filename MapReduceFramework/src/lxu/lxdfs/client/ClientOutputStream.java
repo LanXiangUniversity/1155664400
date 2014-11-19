@@ -133,15 +133,15 @@ public class ClientOutputStream {
 	 * Store data in the buffer, and send to the DataNode
 	 * if the buffer size >= Block size.
 	 *
-	 * @param data
+	 * @param lines
 	 * @return
 	 */
-	public int write(String data) {
+	public int write(List<String> lines) {
 		int writeSize = 0;
 		LocatedBlock locatedBlock = null;
 
 		// get data
-		String[] lines = data.split(";");
+		//String[] lines = data.split(";");
 
 		// Buffer
 		for (String line : lines) {

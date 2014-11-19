@@ -15,6 +15,8 @@ public class JobStatus implements Serializable {
 	private String jobID;
 	private int mapState;
 	private int reduceState;
+    private double mapProgress = 0.0;
+    private double reduceProgress = 0.0;
 
 	public JobStatus(String jobID, int mapState, int reduceState) {
 		this.jobID = jobID;
@@ -46,7 +48,23 @@ public class JobStatus implements Serializable {
 		this.jobID = jobID;
 	}
 
-	public boolean isMapComplete() {
+    public double getMapProgress() {
+        return mapProgress;
+    }
+
+    public void setMapProgress(double mapProgress) {
+        this.mapProgress = mapProgress;
+    }
+
+    public double getReduceProgress() {
+        return reduceProgress;
+    }
+
+    public void setReduceProgress(double reduceProgress) {
+        this.reduceProgress = reduceProgress;
+    }
+
+    public boolean isMapComplete() {
 		return mapState == JobStatus.SUCCEEDED ||
                mapState == JobStatus.FAILED ||
                mapState == JobStatus.KILLED;

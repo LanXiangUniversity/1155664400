@@ -114,6 +114,7 @@ public class JobInProgress {
         if (tip.isMapTask()) {
             runningMapTasks--;
             finishedMapTasks++;
+            this.jobStatus.setMapProgress(100.0 * finishedMapTasks / numMapTasks);
             if (finishedMapTasks == numMapTasks) {
                 this.jobStatus.setMapState(JobStatus.SUCCEEDED);
             }
@@ -137,6 +138,7 @@ public class JobInProgress {
         } else {
             runningReduceTasks--;
             finishedReduceTasks++;
+            this.jobStatus.setReduceProgress(100.0 * finishedReduceTasks / numReduceTasks);
             if (finishedReduceTasks == numReduceTasks) {
                 this.jobStatus.setReduceState(JobStatus.SUCCEEDED);
             }
@@ -337,7 +339,7 @@ public class JobInProgress {
         return -1;
     }
 
-    private boolean shouldAssignReduceTask() {
+    public boolean shouldAssignReduceTask() {
         return finishedMapTasks == numMapTasks;
     }
 

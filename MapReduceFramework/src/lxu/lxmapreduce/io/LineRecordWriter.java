@@ -26,8 +26,7 @@ public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
 	@Override
 	//public void write(Text key, Text value) throws IOException {
     public void write(LongWritable key, Text value) throws IOException {
-        System.out.println(key.getValue() + " " + value.getValue());
-		this.out.write(key.getValue() + " " + value.getValue() + "\n");
+		this.out.write(key.getValue() + "\t" + value.getValue() + "\n");
 	}
 
 	@Override

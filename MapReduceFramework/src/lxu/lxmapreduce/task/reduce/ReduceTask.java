@@ -38,10 +38,16 @@ public class ReduceTask extends Task implements Serializable {
     }
 
     @Override
+    public void initialize() {
+        // TODO move connection here
+    }
+
+    @Override
 	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         this.runReducer(jobConf);
 	}
 
+    // TODO move initilization to initialize()
 	public void runReducer(JobConf jobConf) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException {
         System.out.println("reduce running");
@@ -51,10 +57,8 @@ public class ReduceTask extends Task implements Serializable {
 		Map<Text, Iterator<Text>> reduceInput = new HashMap<>();
 
 		// TODO:Init output file path
-		List<Text> reduceOutput = new ArrayList<Text>();
-        Text o = new Text();
-        o.set("reduceoutput.txt");
-        reduceOutput.add(o);
+		List<String> reduceOutput = new ArrayList<String>();
+        reduceOutput.add("part-" + partition);
 
 		for (String addr : mapperAddrs) {
 			// TODO: is localhost?
@@ -90,14 +94,15 @@ public class ReduceTask extends Task implements Serializable {
 				(new Class[]{Reducer.class,
 						Configuration.class,
                         TaskAttemptID.class,
-						RecordReader.class,
+						//RecordReader.class,
+                        ReduceReader.class,
 						RecordWriter.class});
 
 		// Set input file and output file.
 		input.initialize(reduceInput);
 		output.initialize(reduceOutput);
 
-		reducerContext = contextConstructor.newInstance(reducer, jobConf, input, output);
+		reducerContext = contextConstructor.newInstance(reducer, jobConf, taskAttemptID, input, output);
 
 		reducer.run(reducerContext);
 

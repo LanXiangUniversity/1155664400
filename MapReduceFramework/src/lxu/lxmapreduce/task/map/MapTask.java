@@ -34,12 +34,20 @@ public class MapTask extends Task implements Serializable {
 
 		// TODO: Init inputsplits
 		inputsplits.add("blk_" + locatedBlock.getBlock().getBlockID());
-        outputFiles.add("mapoutput.txt");
 	}
 
     @Override
     public boolean isMapTask() {
         return true;
+    }
+
+    @Override
+    public void initialize() {
+        int numReduceTasks = conf.getNumReduceTasks();
+        String jobID = taskAttemptID.getJobID();
+        for (int reduceID = 0; reduceID < numReduceTasks; reduceID++) {
+            outputFiles.add(jobID + "_r-" + reduceID);
+        }
     }
 
     public static void main(String[] args) {

@@ -10,10 +10,7 @@ import lxu.lxmapreduce.task.map.MapTaskStatus;
 import lxu.lxmapreduce.task.reduce.ReduceTaskStatus;
 import lxu.lxmapreduce.tmp.JobConf;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -94,7 +91,7 @@ public class TaskTracker implements Runnable {
 	}
 
 	public HeartbeatResponse sendHeartBeat() throws UnknownHostException {
-        System.out.println("Send heartbeat, id = " + responseID);
+        //System.out.println("Send heartbeat, id = " + responseID);
 
 		// Create TaskTrackerStatus.
 		TaskTrackerStatus taskTrackerStatus = buildTaskTrackerStatus();
@@ -124,7 +121,7 @@ public class TaskTracker implements Runnable {
 	public void processHeartBeatResponse(HeartbeatResponse heartBeatResponse) {
 		// Update last responseID.
 		this.responseID = heartBeatResponse.getResponseID();
-        System.out.println("Received heartBeatResponse, response ID = " + responseID);
+        //System.out.println("Received heartBeatResponse, response ID = " + responseID);
 
 		// Handle JobTracker commands(TaskTrackerActions)
 		for (TaskTrackerAction action : heartBeatResponse.getActions()) {
@@ -219,6 +216,7 @@ public class TaskTracker implements Runnable {
 	 */
 	@Override
 	public void run() {
+        System.out.println("Task tracker " + this.taskTrackerName + " started!");
 		while (this.isRunning) {
 			try {
 				offerService();
@@ -248,6 +246,7 @@ public class TaskTracker implements Runnable {
 		public TaskRunner(JobConf jobConf, Task task) {
 			this.task = task;
 			this.jobConf = jobConf;
+            task.setConf(jobConf);
             if (task.isMapTask()) {
                 this.status = new MapTaskStatus(task.getTaskAttemptID(),
                                                 taskTrackerName,
@@ -257,6 +256,7 @@ public class TaskTracker implements Runnable {
                                                    taskTrackerName,
                                                    TaskStatus.PREP);
             }
+            task.initialize();
 		}
 
 		public Task getTask() {
@@ -368,7 +368,30 @@ public class TaskTracker implements Runnable {
 
 		private HashMap<Text, Iterator<Text>> getReduceInput(TaskAttemptID taskID) {
 			// TODO: get input for reducer.
-			return null;
+            HashMap<Text, Iterator<Text>> map = new HashMap<Text, Iterator<Text>>();
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(taskID.getTaskID().toString()));
+                HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    String[] info = line.split("\t");
+                    Text key = new Text(info[0]);
+                    Text value = new Text(info[1]);
+                    LinkedList<Text> values = contents.get(key);
+                    if (values == null) {
+                        values = new LinkedList<Text>();
+                    }
+                    values.add(value);
+                }
+                for (Map.Entry<Text, LinkedList<Text>> entry : contents.entrySet()) {
+                    map.put(entry.getKey(), entry.getValue().iterator());
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return map;
 		}
 	}
 }

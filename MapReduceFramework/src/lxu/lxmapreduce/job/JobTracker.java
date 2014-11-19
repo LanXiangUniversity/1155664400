@@ -28,6 +28,9 @@ public class JobTracker implements IJobTracker {
 	// (taskAttemptID -> TaskTrackerName)
 	private HashMap<TaskAttemptID, String> taskIDToTrackerMap;
 
+    // (taskAttemptID -> jobID)
+    private Set<TaskAttemptID> runningTasks;
+
 	// (TaskTrackerName -> Set<running tasks>)
 	private HashMap<String, Set<TaskAttemptID>> taskTrackerToTaskmap;
 
@@ -44,6 +47,8 @@ public class JobTracker implements IJobTracker {
 		this.jobs = new HashMap<String, JobInProgress>();
 		this.taskIDToTIPMap = new HashMap<TaskAttemptID, TaskInProgress>();
 		this.taskIDToTrackerMap = new HashMap<TaskAttemptID, String>();
+        // TODO: No need
+        this.runningTasks = new HashSet<TaskAttemptID>();
 		this.taskTrackerToTaskmap = new HashMap<String, Set<TaskAttemptID>>();
 		this.taskTrackerToCompleteTaskMap = new HashMap<String, Set<TaskAttemptID>>();
 		this.taskTrackerToHostIPMap = new HashMap<String, String>();
@@ -70,8 +75,9 @@ public class JobTracker implements IJobTracker {
 
 		jobs.put(jobID, job);
 
-		// TODO: add job to taskScheduler Listener
 		job.initTasks();
+
+        taskScheduler.addJobToQueue(jobID);
 
 		return job.getJobStatus();
 	}
@@ -86,13 +92,17 @@ public class JobTracker implements IJobTracker {
         return taskTrackerToHostIPMap.get(taskTrackerName);
     }
 
+    public JobInProgress getJobInProgress(String jobID) {
+        return this.jobs.get(jobID);
+    }
+
 	@Override
 	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
 	                                   boolean initialContact,
 	                                   boolean acceptNewTasks,
 	                                   short responseID) {
 		String trackerName = status.getTrackerName();
-        System.out.println("Received heartbeat from " + trackerName);
+        //System.out.println("Received heartbeat from " + trackerName);
 		long now = System.currentTimeMillis();
 
 		short newResponseID = (short) (responseID + 1);
@@ -114,14 +124,15 @@ public class JobTracker implements IJobTracker {
                 List<Task> tasks = taskScheduler.assignTasks(taskTrackers.get(trackerName));
                 if (tasks != null) {
                     for (Task task : tasks) {
+                        runningTasks.add(task.getTaskAttemptID());
                         actions.add(new LaunchTaskAction(task));
                     }
                 }
             }
 
-            TaskTrackerAction action = getCommitMapAction(status);
+            List<TaskTrackerAction> action = getCommitMapAction(status);
             if (action != null) {
-                actions.add(action);
+                actions.addAll(action);
             }
         }
 
@@ -130,15 +141,16 @@ public class JobTracker implements IJobTracker {
 		return heartbeatResponse;
 	}
 
-    public TaskTrackerAction getCommitMapAction(TaskTrackerStatus status) {
-        // TODO: find job according to status
-        JobInProgress job = jobs.values().iterator().next();
-        JobStatus jobStatus = job.getJobStatus();
-        if (jobStatus.isMapComplete() && jobStatus.getReduceState() == JobStatus.PREP) {
-            return new CommitMapAction(job.getJobID(), TaskTrackerAction.ActionType.COMMIT_TASK);
-        } else {
-            return null;
+    public List<TaskTrackerAction> getCommitMapAction(TaskTrackerStatus status) {
+        List<TaskTrackerAction> commitActions = new LinkedList<TaskTrackerAction>();
+        for (TaskStatus taskStatus : status.getTaskReports()) {
+            String jobID = taskStatus.getTaskID().getJobID();
+            JobInProgress job = jobs.get(jobID);
+            if (job.shouldAssignReduceTask()) {
+                commitActions.add(new CommitMapAction(job.getJobID(), TaskTrackerAction.ActionType.COMMIT_TASK));
+            }
         }
+        return commitActions;
     }
 
 	public void updateTaskStatuses(TaskTrackerStatus status) {

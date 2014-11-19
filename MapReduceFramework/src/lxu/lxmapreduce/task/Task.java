@@ -62,5 +62,15 @@ public abstract class Task implements Serializable {
 
     public abstract boolean isMapTask();
 
-	public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException;
+    public JobConf getConf() {
+        return conf;
+    }
+
+    public void setConf(JobConf conf) {
+        this.conf = conf;
+    }
+
+    public abstract void initialize();
+
+    public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException;
 }

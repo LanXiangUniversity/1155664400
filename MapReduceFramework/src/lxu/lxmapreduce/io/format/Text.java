@@ -6,6 +6,14 @@ package lxu.lxmapreduce.io.format;
 public class Text {
 	private String value;
 
+    public Text() {
+        this.value = "";
+    }
+
+    public Text(String value) {
+        this.value = value;
+    }
+
 	public String getValue() {
 		return this.value;
 	}

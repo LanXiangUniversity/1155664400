@@ -13,13 +13,14 @@ public class LineWriter {
 
 	public LineWriter(String fileName) throws FileNotFoundException {
 		try {
-			out = new PrintWriter(new FileWriter(fileName));
+			out = new PrintWriter(new FileWriter(fileName, true));
 		} catch (IOException e) {
 			throw new FileNotFoundException("Can't find file: " + fileName);
 		}
 	}
 
 	public void write(String line) {
+        System.out.println("Line Writer write " + line);
 		this.out.write(line);
 	}
 

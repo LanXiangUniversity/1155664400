@@ -6,6 +6,8 @@ import lxu.lxmapreduce.metadata.HeartbeatResponse;
 import lxu.lxmapreduce.metadata.LaunchTaskAction;
 import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
+import lxu.lxmapreduce.task.map.MapTaskStatus;
+import lxu.lxmapreduce.task.reduce.ReduceTaskStatus;
 import lxu.lxmapreduce.tmp.JobConf;
 
 import java.io.IOException;
@@ -31,7 +33,7 @@ import java.util.Map;
  * Created by Wei on 11/12/14.
  */
 public class TaskTracker implements Runnable {
-	private boolean isInitialized;
+	private boolean initialContact;
 	private String taskTrackerName;
 	private TaskTrackerStatus status;
 	private boolean isRunning;
@@ -53,7 +55,7 @@ public class TaskTracker implements Runnable {
 		this.maxMapTasks = maxMapTasks;
 		this.maxReduceTasks = maxReduceTasks;
 		this.taskPool = new HashMap<>();
-		this.isInitialized = false;
+		this.initialContact = true;
 		this.heartbeatInterval = 3 * 1000;
 		// TODO get  JobTracker remote reference.
         Registry registry = null;
@@ -103,7 +105,7 @@ public class TaskTracker implements Runnable {
                 null;
         try {
             heartBeatResponse = this.jobTrackerService.heartbeat(taskTrackerStatus,
-                    this.isInitialized,
+                    this.initialContact,
                     acceptNewTasks,
                     responseID);
         } catch (RemoteException e) {
@@ -111,6 +113,10 @@ public class TaskTracker implements Runnable {
         }
 
         processHeartBeatResponse(heartBeatResponse);
+
+        if (this.initialContact == true) {
+            this.initialContact = false;
+        }
 
 		return heartBeatResponse;
 	}
@@ -176,6 +182,7 @@ public class TaskTracker implements Runnable {
 	public void launchTask(JobConf jobConf, Task task) {
 		TaskRunner taskRunner = new TaskRunner(jobConf, task);
 		this.taskPool.put(task.getTaskAttemptID(), taskRunner);
+        taskRunner.start();
 	}
 
 	/**
@@ -233,7 +240,7 @@ public class TaskTracker implements Runnable {
 	}
 
 	// Run a map/reduce task in a thread.
-	public class TaskRunner implements Runnable {
+	public class TaskRunner extends Thread {
 		private TaskStatus status;
 		private Task task;
 		private JobConf jobConf;
@@ -241,6 +248,15 @@ public class TaskTracker implements Runnable {
 		public TaskRunner(JobConf jobConf, Task task) {
 			this.task = task;
 			this.jobConf = jobConf;
+            if (task.isMapTask()) {
+                this.status = new MapTaskStatus(task.getTaskAttemptID(),
+                                                taskTrackerName,
+                                                TaskStatus.PREP);
+            } else {
+                this.status = new ReduceTaskStatus(task.getTaskAttemptID(),
+                                                   taskTrackerName,
+                                                   TaskStatus.PREP);
+            }
 		}
 
 		public Task getTask() {
@@ -282,7 +298,7 @@ public class TaskTracker implements Runnable {
 	// A thread that listen for reducers' request for input
 	// and send intermediate data to reducer.
 	public class IntermediateListener implements Runnable {
-		private int port;           // Listening port
+		private int port = 19001;           // Listening port
 		private String fileName;   // Path of intermediate files.
 
 		public String getFileName() {

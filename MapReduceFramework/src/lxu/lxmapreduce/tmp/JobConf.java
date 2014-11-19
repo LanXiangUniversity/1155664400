@@ -65,11 +65,11 @@ public class JobConf extends Configuration implements Serializable {
     }
 
     public int getNumReduceTasks() {
-        return getInt("mapreduce.reduce.number", 10);
+        return getInt("mapreduce.reducer.number", 10);
     }
 
     public void setNumReduceTasks(int numReduceTasks) {
-        setInt("mapreduce.reduce.number", numReduceTasks);
+        setInt("mapreduce.reducer.number", numReduceTasks);
     }
 
     public String getJobName() {

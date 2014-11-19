@@ -1,5 +1,7 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxmapreduce.metadata.CommitMapAction;
+import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.Task;
 
@@ -18,7 +20,7 @@ public class TaskScheduler {
 		this.jobTracker = jobTracker;
 	}
 
-	public List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) {
+	public synchronized List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) {
 		List<Task> assignedTasks = new ArrayList<Task>();
 
 		// Get map reduce count for current taskTracker
@@ -50,9 +52,13 @@ public class TaskScheduler {
 
         // TODO: assign reduce tasks
         // Only assign reduce tasks when map is done
-        Task task = job.obtainNewReduceTask(taskTrackerStatus);
-        if (task != null) {
-            assignedTasks.add(task);
+        if (job.getJobStatus().isMapComplete()) {
+            System.out.println("should assign reduce task");
+            Task task = job.obtainNewReduceTask(taskTrackerStatus);
+            if (task != null) {
+                assignedTasks.add(task);
+                System.out.println("assign reduce task");
+            }
         }
 
 		return assignedTasks;

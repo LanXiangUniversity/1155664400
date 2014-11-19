@@ -64,11 +64,13 @@ public class TaskInProgress {
 	public boolean updateStatus(TaskStatus status) {
 		TaskAttemptID taskID = status.getTaskID();
 		TaskStatus oldStatus = taskStatuses.get(taskID);
-		if (oldStatus.getState() == status.getState()) {
-			return false;
-		}
+        if (oldStatus != null) {
+            if (oldStatus.getState() == status.getState()) {
+                return false;
+            }
+        }
 
-		taskStatuses.get(taskID).update(status.getState());
+        taskStatuses.put(taskID, status);
 
 		return true;
 	}

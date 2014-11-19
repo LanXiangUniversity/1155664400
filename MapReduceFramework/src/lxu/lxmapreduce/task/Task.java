@@ -6,13 +6,14 @@ import lxu.lxmapreduce.tmp.JobContext;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 
 /**
  * Created by magl on 14/11/10.
  */
-public abstract class Task {
+public abstract class Task implements Serializable {
 	/**
 	 * Construct output file names so that, when an output directory listing is
 	 * sorted lexicographically, positions correspond to output partitions.
@@ -27,11 +28,11 @@ public abstract class Task {
 	protected JobConf conf;
 	protected JobContext jobContext;
 	protected TaskAttemptContext taskContext;
-	TaskStatus taskStatus;                          // current status of the task
-	private String jobFile;                         // job configuration file
-	private TaskAttemptID taskAttemptID;                          // unique, includes job id
-	private int partition;                          // id within job
-	private LocatedBlock mapTaskBlock;
+	protected TaskStatus taskStatus;                          // current status of the task
+	protected String jobFile;                         // job configuration file
+	protected TaskAttemptID taskAttemptID;                          // unique, includes job id
+	protected int partition;                          // id within job
+	protected LocatedBlock mapTaskBlock;
 
 	protected Task(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
 		this.taskAttemptID = attemptID;
@@ -58,6 +59,8 @@ public abstract class Task {
 	public LocatedBlock getMapTaskBlock() {
 		return mapTaskBlock;
 	}
+
+    public abstract boolean isMapTask();
 
 	public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException;
 }

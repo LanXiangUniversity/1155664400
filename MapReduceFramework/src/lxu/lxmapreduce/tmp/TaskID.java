@@ -1,11 +1,12 @@
 package lxu.lxmapreduce.tmp;
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 
 /**
  * Created by Wei on 11/12/14.
  */
-public class TaskID {
+public class TaskID implements Serializable {
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance();
 
     static {

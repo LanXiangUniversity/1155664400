@@ -58,7 +58,7 @@ public class Configuration implements Serializable {
         }
 
         try {
-            return getClassByName(className);
+            return getClassByName(valueString);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

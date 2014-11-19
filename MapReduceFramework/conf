@@ -17,5 +17,5 @@ mapreduce.heatbeat.interval=
 mapreduce.task.attemptnumber=
 mapreduce.job.jar=
 lxdfs.heartbeatinterval=
-slave.address=128.237.219.88
-master.address=128.237.219.88
+slave.address=128.237.223.118
+master.address=128.237.223.118

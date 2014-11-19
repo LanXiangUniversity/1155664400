@@ -19,7 +19,8 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	public static void main(String[] args) throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-		RecordWriter<Text, Text> output = new LineRecordWriter();
+		//RecordWriter<Text, Text> output = new LineRecordWriter();
+        RecordWriter<LongWritable, Text> output = new LineRecordWriter();
 		RecordReader<LongWritable, Text> input = new LineRecordReader();
 
 		input.initialize(null);
@@ -58,6 +59,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
 	public void run(Context context) throws IOException {
 		while (context.nextKeyValue()) {
+            System.out.println("context has nextKeyValue");
 			map(context.getCurrentKey(), context.getCurrentValue(), context);
 		}
 	}

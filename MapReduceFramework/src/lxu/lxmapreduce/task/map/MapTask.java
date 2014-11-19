@@ -4,7 +4,9 @@ import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
+import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.OutputFormat;
+import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.Task;
 import lxu.lxmapreduce.task.TaskAttemptID;
 import lxu.lxmapreduce.tmp.Configuration;
@@ -13,24 +15,34 @@ import lxu.lxmapreduce.tmp.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Created by Wei on 11/12/14.
  */
-public class MapTask extends Task {
-	private List<String> inputsplits;
+public class MapTask extends Task implements Serializable {
+	private List<String> inputsplits = new LinkedList<>();
+    private List<String> outputFiles = new LinkedList<>();
 
 	public MapTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
 		super(attemptID, partition, locatedBlock);
 
 		// TODO: Init inputsplits
-		inputsplits.add(locatedBlock.getBlock().getBlockID() + ".blk");
+		inputsplits.add("blk_" + locatedBlock.getBlock().getBlockID());
+        outputFiles.add("mapoutput.txt");
 	}
 
-	public static void main(String[] args) {
+    @Override
+    public boolean isMapTask() {
+        return true;
+    }
+
+    public static void main(String[] args) {
 
 	}
 
@@ -62,6 +74,10 @@ public class MapTask extends Task {
 		// Create mapper
 		Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> mapper = (Mapper<KEYIN, VALUEIN, KEYOUT,
 				VALUEOUT>) ReflectionUtils.newInstance(jobConf.getMapperClass());
+        /*
+        Mapper<LongWritable, Text, Text, Text> mapper = (Mapper<LongWritable, Text, Text,
+                Text>) ReflectionUtils.newInstance(jobConf.getMapperClass());
+                */
 		/* TODO Init form input block files. */
 		// Create LineRecordReader.
 		RecordReader input = inputFormat.createRecordReader();
@@ -72,14 +88,15 @@ public class MapTask extends Task {
 		Constructor<Mapper.Context> contextConstructor = Mapper.Context.class.getConstructor
 				(new Class[]{Mapper.class,
 						Configuration.class,
-						RecordReader.class,
-						RecordWriter.class});
+                        TaskAttemptID.class,
+						RecordWriter.class,
+						RecordReader.class});
 
 		// Set input file and output file.
 		input.initialize(this.inputsplits);
-		output.initialize(this.inputsplits);
+		output.initialize(this.outputFiles);
 
-		mapperContext = contextConstructor.newInstance(mapper, jobConf, input, output);
+		mapperContext = contextConstructor.newInstance(mapper, jobConf, taskAttemptID, output, input);
 
 		mapper.run(mapperContext);
 

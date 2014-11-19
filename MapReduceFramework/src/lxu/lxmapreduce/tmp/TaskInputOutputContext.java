@@ -27,6 +27,7 @@ public abstract class TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
     public abstract VALUEIN getCurrentValue() throws IOException;
 
     public void write(KEYOUT key, VALUEOUT value) throws IOException {
+        System.out.println("write in TaskInputOutputContext");
         out.write(key, value);
     }
 }

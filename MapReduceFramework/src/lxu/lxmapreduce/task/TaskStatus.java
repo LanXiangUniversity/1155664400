@@ -2,29 +2,29 @@ package lxu.lxmapreduce.task;
 
 import lxu.lxmapreduce.tmp.TaskID;
 
+import java.io.Serializable;
+
 /**
  * Created by magl on 14/11/11.
  */
-public abstract class TaskStatus {
-	public static final int RUNNING = 1;
-	public static final int SUCCEEDED = 2;
-	public static final int FAILED = 3;
+public abstract class TaskStatus implements Serializable {
+    public static final int PREP = 1;
+	public static final int RUNNING = 2;
+	public static final int SUCCEEDED = 3;
+	public static final int FAILED = 4;
 
-	private String JobID;
 	private String taskTracker;
 	private TaskAttemptID taskID;
 	private int state;
 	private int attemptFailedTime;
 
+    public TaskStatus(TaskAttemptID taskID, String taskTracker, int state) {
+        this.taskID = taskID;
+        this.taskTracker = taskTracker;
+        this.state = state;
+    }
+
 	public abstract boolean isMapTask();
-
-	public String getJobID() {
-		return JobID;
-	}
-
-	public void setJobID(String jobID) {
-		JobID = jobID;
-	}
 
 	public TaskAttemptID getTaskID() {
 		return taskID;

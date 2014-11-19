@@ -17,6 +17,7 @@ import lxu.utils.ReflectionUtils;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
@@ -26,18 +27,24 @@ import java.util.*;
 /**
  * Created by Wei on 11/13/14.
  */
-public class ReduceTask extends Task {
+public class ReduceTask extends Task implements Serializable {
 	public ReduceTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
 		super(attemptID, partition, locatedBlock);
 	}
 
-	@Override
-	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    @Override
+    public boolean isMapTask() {
+        return false;
+    }
 
+    @Override
+	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        this.runReducer(jobConf);
 	}
 
 	public void runReducer(JobConf jobConf) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException {
+        System.out.println("reduce running");
 		int port = 19001;
 		String[] mapperAddrs = jobConf.getSocketAddrs();
 		// TODO:Init input file
@@ -45,6 +52,9 @@ public class ReduceTask extends Task {
 
 		// TODO:Init output file path
 		List<Text> reduceOutput = new ArrayList<Text>();
+        Text o = new Text();
+        o.set("reduceoutput.txt");
+        reduceOutput.add(o);
 
 		for (String addr : mapperAddrs) {
 			// TODO: is localhost?
@@ -61,7 +71,7 @@ public class ReduceTask extends Task {
 			sock.close();
 		}
 
-		TaskAttemptContext taskConext = new TaskAttemptContext(jobConf, this.getTaskAttemptID());
+		taskContext = new TaskAttemptContext(jobConf, this.getTaskAttemptID());
 
 		Reducer reducer =
 				(Reducer) ReflectionUtils.newInstance(jobConf.getReducerClass());
@@ -79,6 +89,7 @@ public class ReduceTask extends Task {
 		Constructor<Reducer.Context> contextConstructor = Reducer.Context.class.getConstructor
 				(new Class[]{Reducer.class,
 						Configuration.class,
+                        TaskAttemptID.class,
 						RecordReader.class,
 						RecordWriter.class});
 
@@ -92,5 +103,6 @@ public class ReduceTask extends Task {
 
 		input.close();
 		output.close();
+        System.out.println("Reduce finished");
 	}
 }

@@ -57,7 +57,7 @@ public class JobInProgress {
         }
 
         System.out.println("Initializing job: " + jobID);
-        LocatedBlock[] allBlocks = getFileBlocks("fileName");
+        LocatedBlock[] allBlocks = getFileBlocks("hello");
         numMapTasks = allBlocks.length;
         // Init Map Tasks
         this.maps = new TaskInProgress[numMapTasks];
@@ -109,7 +109,7 @@ public class JobInProgress {
 
     public void handleSucceedTask(TaskInProgress tip, TaskStatus status) {
         TaskAttemptID taskID = status.getTaskID();
-        System.out.println("Task '" + taskID + "' has completed!");
+        System.out.println("Task '" + taskID.getTaskID() + "' has completed!");
         tip.setTaskCompleted(taskID);
         if (tip.isMapTask()) {
             runningMapTasks--;
@@ -129,6 +129,11 @@ public class JobInProgress {
                     runningMapTasksMap.remove(hostIP);
                 }
             }
+            /*
+            System.out.println(String.format("Map : %d%%, Reduce : %d%%",
+                    (finishedMapTasks / numMapTasks) * 100,
+                    (finishedReduceTasks / numReduceTasks) * 100));
+                    */
         } else {
             runningReduceTasks--;
             finishedReduceTasks++;
@@ -195,7 +200,7 @@ public class JobInProgress {
         return result;
     }
 
-    private int findNewMapTask(TaskTrackerStatus taskTrackerStatus) {
+    private synchronized int findNewMapTask(TaskTrackerStatus taskTrackerStatus) {
         if (numMapTasks == 0) {
             System.out.println("No maps to schedule for " + this.jobID);
             return -1;
@@ -278,7 +283,7 @@ public class JobInProgress {
         hostMaps.add(taskInProgress);
     }
 
-    public Task obtainNewReduceTask(TaskTrackerStatus taskTrackerStatus) {
+    public synchronized Task obtainNewReduceTask(TaskTrackerStatus taskTrackerStatus) {
         if (jobStatus.getMapState() != JobStatus.SUCCEEDED) {
             System.out.println("Error: Cannot assign reduce task before map finishing");
             return null;
@@ -303,22 +308,24 @@ public class JobInProgress {
             }
         }
 
-        return null;
+        return task;
     }
 
-    private int findNewReduceTasks(TaskTrackerStatus taskTrackerStatus) {
+    private synchronized int findNewReduceTasks(TaskTrackerStatus taskTrackerStatus) {
         if (numReduceTasks == 0) {
             System.out.println("No reduces to schedule for " + this.jobID);
             return -1;
         }
 
-        String taskTrackerName = taskTrackerStatus.getTrackerName();
         TaskInProgress taskInProgress = null;
 
-        for (TaskInProgress reduceTask : nonRunningReduceTaskSet) {
+        Iterator<TaskInProgress> iter = nonRunningReduceTaskSet.iterator();
+        while (iter.hasNext()) {
+            TaskInProgress reduceTask = iter.next();
             if (!reduceTask.isRunning()) {
                 taskInProgress = reduceTask;
-                nonRunningReduceTaskSet.remove(reduceTask);
+                iter.remove();
+                break;
             }
         }
 

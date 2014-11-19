@@ -2,10 +2,12 @@ package lxu.lxmapreduce.task;
 
 import lxu.lxmapreduce.tmp.TaskID;
 
+import java.io.Serializable;
+
 /**
  * Created by magl on 14/11/13.
  */
-public class TaskAttemptID {
+public class TaskAttemptID implements Serializable {
 	private TaskID taskID;
 	private int attemptID;
 

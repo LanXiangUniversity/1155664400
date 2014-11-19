@@ -1,10 +1,7 @@
 package lxu.lxmapreduce.job;
 
 import lxu.lxdfs.service.INameSystemService;
-import lxu.lxmapreduce.metadata.HeartbeatResponse;
-import lxu.lxmapreduce.metadata.LaunchTaskAction;
-import lxu.lxmapreduce.metadata.TaskTrackerAction;
-import lxu.lxmapreduce.metadata.TaskTrackerStatus;
+import lxu.lxmapreduce.metadata.*;
 import lxu.lxmapreduce.task.*;
 import lxu.lxmapreduce.tmp.JobConf;
 
@@ -102,6 +99,9 @@ public class JobTracker implements IJobTracker {
 
 		status.setLastSeen(now);
 		// Update TaskTracker, Job, Task information
+        if (initialContact) {
+            taskTrackerToHostIPMap.put(trackerName, status.getHostIP());
+        }
 		taskTrackers.put(trackerName, status);
 		updateTaskStatuses(status);
 
@@ -118,12 +118,27 @@ public class JobTracker implements IJobTracker {
                     }
                 }
             }
+
+            if (shouldCommitMap(status)) {
+                actions.add(new CommitMapAction(TaskTrackerAction.ActionType.COMMIT_TASK));
+            }
         }
 
         heartbeatResponse.setActions(actions);
 
 		return heartbeatResponse;
 	}
+
+    public boolean shouldCommitMap(TaskTrackerStatus status) {
+        // TODO: find job according to status
+        JobInProgress job = jobs.values().iterator().next();
+        JobStatus jobStatus = job.getJobStatus();
+        if (jobStatus.isMapComplete() && jobStatus.getReduceState() == JobStatus.PREP) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 	public void updateTaskStatuses(TaskTrackerStatus status) {
 		String trackerName = status.getTrackerName();
@@ -137,7 +152,7 @@ public class JobTracker implements IJobTracker {
 			report.setTaskTracker(trackerName);
 			TaskAttemptID taskID = report.getTaskID();
 
-			JobInProgress job = jobs.get(report.getJobID());
+			JobInProgress job = jobs.get(taskID.getJobID());
 			TaskInProgress taskInProgress = taskIDToTIPMap.get(taskID);
 			job.updateTaskStatus(taskInProgress, report);
 

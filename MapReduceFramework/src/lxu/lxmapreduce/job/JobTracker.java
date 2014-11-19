@@ -119,8 +119,9 @@ public class JobTracker implements IJobTracker {
                 }
             }
 
-            if (shouldCommitMap(status)) {
-                actions.add(new CommitMapAction(TaskTrackerAction.ActionType.COMMIT_TASK));
+            TaskTrackerAction action = getCommitMapAction(status);
+            if (action != null) {
+                actions.add(action);
             }
         }
 
@@ -129,14 +130,14 @@ public class JobTracker implements IJobTracker {
 		return heartbeatResponse;
 	}
 
-    public boolean shouldCommitMap(TaskTrackerStatus status) {
+    public TaskTrackerAction getCommitMapAction(TaskTrackerStatus status) {
         // TODO: find job according to status
         JobInProgress job = jobs.values().iterator().next();
         JobStatus jobStatus = job.getJobStatus();
         if (jobStatus.isMapComplete() && jobStatus.getReduceState() == JobStatus.PREP) {
-            return true;
+            return new CommitMapAction(job.getJobID(), TaskTrackerAction.ActionType.COMMIT_TASK);
         } else {
-            return false;
+            return null;
         }
     }
 

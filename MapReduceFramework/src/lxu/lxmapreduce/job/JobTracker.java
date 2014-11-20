@@ -110,6 +110,7 @@ public class JobTracker implements IJobTracker {
 		short newResponseID = (short) (responseID + 1);
 
 		status.setLastSeen(now);
+        System.out.println("Received heartbeat " + trackerName + " acceptNewTasks = " + acceptNewTasks);
 		// Update TaskTracker, Job, Task information
         if (initialContact) {
             taskTrackerToHostIPMap.put(trackerName, status.getHostIP());

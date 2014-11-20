@@ -12,7 +12,8 @@ public class Configuration implements Serializable {
 
 	public Configuration() {
         this.entries = new HashMap<String, String>();
-        readAllConf("/Users/magl/Google Drive/cmu/14-fall/15640/1155664400/MapReduceFramework/conf");
+        //readAllConf("/Users/magl/Google Drive/cmu/14-fall/15640/1155664400/MapReduceFramework/conf");
+        readAllConf("conf");
     }
 
 	public Configuration(Configuration conf) {

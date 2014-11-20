@@ -142,7 +142,7 @@ public class TaskTracker implements Runnable {
 
 			launchTask(jobConf, task);
 		} else if (action instanceof CommitMapAction) {
-			this.acceptNewTasks = false;
+			//this.acceptNewTasks = false;
 		}
 	}
 
@@ -283,6 +283,7 @@ public class TaskTracker implements Runnable {
 		public void run() {
 			try {
 				this.status.setState(TaskStatus.RUNNING);
+                System.out.println("Task " + task.taskAttemptID.toString() + " is running");
 				this.task.run(this.jobConf);
 				this.status.setState(TaskStatus.SUCCEEDED);
 			} catch (IOException
@@ -350,7 +351,7 @@ public class TaskTracker implements Runnable {
 
 				ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
 				TaskAttemptID taskID = (TaskAttemptID) in.readObject();
-                System.err.println("Read reducer id" + taskID.getTaskID());
+                System.err.println("Read reducer id " + taskID.getTaskID());
 				map = getReduceInput(taskID);
 				ObjectOutput out = new ObjectOutputStream(sock.getOutputStream());
 				out.writeObject(map);
@@ -368,7 +369,7 @@ public class TaskTracker implements Runnable {
 		}
 
 		private HashMap<Text, LinkedList<Text>> getReduceInput(TaskAttemptID taskID) {
-            File folder = new File("/Users/magl/Google Drive/cmu/14-fall/15640/1155664400");
+            File folder = new File(".");
             String namePrefix = taskID.getTaskID().toString();
             HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
             for (File fileEntry : folder.listFiles()) {

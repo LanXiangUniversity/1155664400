@@ -378,7 +378,6 @@ public class TaskTracker implements Runnable {
                         BufferedReader reader = new BufferedReader(new FileReader(fileEntry));
                         String line = null;
                         while ((line = reader.readLine()) != null) {
-                            System.out.println(line);
                             String[] info = line.split("\t");
                             Text key = new Text(info[0]);
                             Text value = new Text(info[1]);

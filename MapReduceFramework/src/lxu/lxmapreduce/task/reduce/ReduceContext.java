@@ -16,8 +16,10 @@ import java.util.Iterator;
 public class ReduceContext extends TaskInputOutputContext {
 	private ReduceReader reader;
 
-	public ReduceContext(Configuration conf, TaskAttemptID taskId, RecordWriter out) {
+	public ReduceContext(Configuration conf, TaskAttemptID taskId, ReduceReader reader, RecordWriter out) {
 		super(conf, taskId, out);
+
+		this.reader = reader;
 	}
 
 	@Override

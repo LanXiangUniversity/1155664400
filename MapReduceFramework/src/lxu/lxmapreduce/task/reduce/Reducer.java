@@ -2,6 +2,7 @@ package lxu.lxmapreduce.task.reduce;
 
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.format.ReduceReader;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.TaskAttemptID;
 import lxu.lxmapreduce.tmp.Configuration;
@@ -20,15 +21,16 @@ public class Reducer {
 	}
 
 	public void run(Context context) throws IOException {
+
 		while (context.nextKeyValue()) {
 			reduce(context.getCurrentKey(), context.getCurrentValue(), context);
 		}
 	}
 
-	public abstract class Context extends ReduceContext {
+	public class Context extends ReduceContext {
 
-		public Context(Configuration conf, TaskAttemptID taskId, RecordReader in, RecordWriter out) {
-			super(conf, taskId, out);
+		public Context(Configuration conf, TaskAttemptID taskId, ReduceReader in, RecordWriter out) {
+			super(conf, taskId, in, out);
 		}
 	}
 }

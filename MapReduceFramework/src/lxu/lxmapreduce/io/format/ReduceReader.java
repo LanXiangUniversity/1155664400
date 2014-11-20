@@ -1,5 +1,7 @@
 package lxu.lxmapreduce.io.format;
 
+import lxu.lxmapreduce.io.RecordReader;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
@@ -8,12 +10,13 @@ import java.util.*;
  * Created by Wei on 11/16/14.
  */
 public class ReduceReader {
-	private Map<Text, Iterator<Text>> data;
+	private HashMap<Text, Iterator<Text>> data;
 	private Iterator<Text> keys;
 	private Text key;
 	private Iterator<Text> value;
 
-	public void initialize(Map<Text, Iterator<Text>> input) throws FileNotFoundException {
+
+	public void initialize(HashMap<Text, Iterator<Text>> input) throws FileNotFoundException {
 		// Init input for reduce
 		this.data = input;
 		this.keys = data.keySet().iterator();

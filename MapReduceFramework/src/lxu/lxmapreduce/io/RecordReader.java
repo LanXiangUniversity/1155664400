@@ -4,11 +4,15 @@ package lxu.lxmapreduce.io;
  * Created by Wei on 11/11/14.
  */
 
+import java.util.Iterator;
 import java.util.List;
+
+import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Break the records into key/value pairs for input to the Mapper.
@@ -19,7 +23,6 @@ import java.io.IOException;
 public abstract class RecordReader<KEYIN, VALUEIN> {
 
 	public abstract void initialize(List<String> inputFiles) throws FileNotFoundException;
-
 	/**
 	 * Get the current value.
 	 */

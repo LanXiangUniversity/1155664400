@@ -1,9 +1,6 @@
 package lxu.lxdfs.client;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.rmi.NotBoundException;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,6 +61,7 @@ public class Client {
             String dfsFileName = args[2];
 
             List<String> content = new LinkedList<>();
+
             BufferedReader reader = new BufferedReader(new FileReader(localFileName));
             String line = null;
             while ((line = reader.readLine()) != null) {

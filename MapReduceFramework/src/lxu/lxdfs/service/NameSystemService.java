@@ -192,7 +192,6 @@ public class NameSystemService implements INameSystemService {
 		if (!blockToLocationsMap.containsKey(block)) {
 			return blockLocations;
 		}
-
 		HashSet<DataNodeDescriptor> locations = blockToLocationsMap.get(block);
 
 		return locations;
@@ -209,6 +208,7 @@ public class NameSystemService implements INameSystemService {
 	public LocatedBlocks getFileBlocks(String fileName) throws RemoteException {
 		// Get the Blocks of a file.
 		List<Block> blocks = this.fileNameToBlocksMap.get(fileName);
+
 		ArrayList<LocatedBlock> result = new ArrayList<LocatedBlock>();
 
 		// Get the replicas' locations for each Block.

@@ -13,6 +13,7 @@ import lxu.lxmapreduce.tmp.Configuration;
 import lxu.lxmapreduce.tmp.JobConf;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -54,7 +55,7 @@ public class ReduceTask extends Task implements Serializable {
 		int port = 19001;
 		String[] mapperAddrs = jobConf.getSocketAddrs();
 		// TODO:Init input file
-		Map<Text, Iterator<Text>> reduceInput = new HashMap<>();
+		HashMap<Text, Iterator<Text>> reduceInput = new HashMap<>();
 
 		// TODO:Init output file path
 		List<String> reduceOutput = new ArrayList<String>();
@@ -67,9 +68,9 @@ public class ReduceTask extends Task implements Serializable {
 			out.writeObject(this.getTaskAttemptID());
 			System.err.println("R: Ask for input");
 			ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-			reduceInput = (Map<Text, Iterator<Text>>) in.readObject();
+			reduceInput = (HashMap<Text, Iterator<Text>>) in.readObject();
 			System.err.println("R: Get input");
-
+			System.err.println("reduceinput size" + reduceInput.size());
 			in.close();
 			out.close();
 			sock.close();
@@ -94,7 +95,6 @@ public class ReduceTask extends Task implements Serializable {
 				(new Class[]{Reducer.class,
 						Configuration.class,
                         TaskAttemptID.class,
-						//RecordReader.class,
                         ReduceReader.class,
 						RecordWriter.class});
 

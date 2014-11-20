@@ -2,10 +2,7 @@ package lxu.lxmapreduce.task;
 
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.job.IJobTracker;
-import lxu.lxmapreduce.metadata.HeartbeatResponse;
-import lxu.lxmapreduce.metadata.LaunchTaskAction;
-import lxu.lxmapreduce.metadata.TaskTrackerAction;
-import lxu.lxmapreduce.metadata.TaskTrackerStatus;
+import lxu.lxmapreduce.metadata.*;
 import lxu.lxmapreduce.task.map.MapTaskStatus;
 import lxu.lxmapreduce.task.reduce.ReduceTaskStatus;
 import lxu.lxmapreduce.tmp.JobConf;
@@ -34,6 +31,7 @@ public class TaskTracker implements Runnable {
 	private String taskTrackerName;
 	private TaskTrackerStatus status;
 	private boolean isRunning;
+	private boolean acceptNewTasks;
 	private int maxMapTasks;
 	private int maxReduceTasks;
 	private JobConf jobConf;
@@ -54,6 +52,7 @@ public class TaskTracker implements Runnable {
 		this.taskPool = new HashMap<>();
 		this.initialContact = true;
 		this.heartbeatInterval = 3 * 1000;
+		this.acceptNewTasks = true;
 		// TODO get  JobTracker remote reference.
         Registry registry = null;
         try {
@@ -96,7 +95,7 @@ public class TaskTracker implements Runnable {
 		// Create TaskTrackerStatus.
 		TaskTrackerStatus taskTrackerStatus = buildTaskTrackerStatus();
 
-		boolean acceptNewTasks = taskTrackerStatus.hasFreeSlots();
+		acceptNewTasks = acceptNewTasks && taskTrackerStatus.hasFreeSlots();
 
         HeartbeatResponse heartBeatResponse =
                 null;
@@ -142,6 +141,8 @@ public class TaskTracker implements Runnable {
 			Task task = ((LaunchTaskAction) action).getTask();
 
 			launchTask(jobConf, task);
+		} else if (action instanceof CommitMapAction) {
+			this.acceptNewTasks = false;
 		}
 	}
 
@@ -370,10 +371,12 @@ public class TaskTracker implements Runnable {
 			// TODO: get input for reducer.
             HashMap<Text, Iterator<Text>> map = new HashMap<Text, Iterator<Text>>();
             try {
-                BufferedReader reader = new BufferedReader(new FileReader(taskID.getTaskID().toString()));
+                //BufferedReader reader = new BufferedReader(new FileReader(taskID.getTaskID().toString()));
+                BufferedReader reader = new BufferedReader(new FileReader("job_0_r-0"));
                 HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
                 String line = null;
                 while ((line = reader.readLine()) != null) {
+	                System.out.println(line);
                     String[] info = line.split("\t");
                     Text key = new Text(info[0]);
                     Text value = new Text(info[1]);

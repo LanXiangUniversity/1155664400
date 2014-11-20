@@ -88,7 +88,7 @@ public class ReduceTask extends Task implements Serializable {
 				ReflectionUtils.newInstance(taskContext.getOutputFormatClass());
 
 		ReduceReader input = new ReduceReader();
-		RecordWriter output = outputFormat.createRecordWriter();
+		RecordWriter output = outputFormat.createReduceWriter();
 
 		Reducer.Context reducerContext = null;
 		Constructor<Reducer.Context> contextConstructor = Reducer.Context.class.getConstructor

@@ -7,4 +7,6 @@ import lxu.lxmapreduce.io.RecordWriter;
  */
 public abstract class OutputFormat<K, V> {
 	public abstract RecordWriter<K, V> createRecordWriter();
+
+	public abstract ReduceWriter createReduceWriter();
 }

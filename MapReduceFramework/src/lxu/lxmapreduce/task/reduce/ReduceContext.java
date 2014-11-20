@@ -1,6 +1,7 @@
 package lxu.lxmapreduce.task.reduce;
 
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.format.NullWritable;
 import lxu.lxmapreduce.io.format.ReduceReader;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.TaskAttemptID;
@@ -28,8 +29,8 @@ public class ReduceContext extends TaskInputOutputContext {
 	}
 
 	@Override
-	public Text getCurrentKey() {
-		return this.reader.getCurrentKey();
+	public NullWritable getCurrentKey() {
+		return new NullWritable();
 	}
 
 	@Override

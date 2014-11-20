@@ -2,6 +2,7 @@ package lxu.lxmapreduce.task.reduce;
 
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.format.NullWritable;
 import lxu.lxmapreduce.io.format.ReduceReader;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.TaskAttemptID;
@@ -14,9 +15,9 @@ import java.util.Iterator;
  * Created by Wei on 11/15/14.
  */
 public class Reducer {
-	protected void reduce(Text key, Iterator<Text> values, Context context) throws IOException {
+	protected void reduce(NullWritable key, Iterator<Text> values, Context context) throws IOException {
 		while (values.hasNext()) {
-			context.write((Text) key, (Text) values.next());
+			context.write((NullWritable) key, (Text) values.next());
 		}
 	}
 

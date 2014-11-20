@@ -15,9 +15,9 @@ import java.util.Iterator;
  * Created by Wei on 11/15/14.
  */
 public class Reducer {
-	protected void reduce(NullWritable key, Iterator<Text> values, Context context) throws IOException {
+	protected void reduce(Text key, Iterator<Text> values, Context context) throws IOException {
 		while (values.hasNext()) {
-			context.write((NullWritable) key, (Text) values.next());
+			context.write(NullWritable.get(), new Text(key.toString() + "\t" + values.next().toString()));
 		}
 	}
 

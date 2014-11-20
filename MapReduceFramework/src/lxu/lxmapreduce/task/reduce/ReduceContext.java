@@ -29,8 +29,8 @@ public class ReduceContext extends TaskInputOutputContext {
 	}
 
 	@Override
-	public NullWritable getCurrentKey() {
-		return new NullWritable();
+	public Text getCurrentKey() {
+		return this.reader.getCurrentKey();
 	}
 
 	@Override

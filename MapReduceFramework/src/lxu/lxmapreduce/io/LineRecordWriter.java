@@ -12,8 +12,7 @@ import java.io.IOException;
 /**
  * Created by Wei on 11/11/14.
  */
-//public class LineRecordWriter extends RecordWriter<Text, Text> {
-public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
+public class LineRecordWriter extends RecordWriter<Text, Text> {
 	private LinkedList<LineWriter> out;
 
 	public LineRecordWriter() {
@@ -28,8 +27,7 @@ public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
 	}
 
 	@Override
-	//public void write(Text key, Text value) throws IOException {
-    public void write(LongWritable key, Text value) throws IOException {
+	public void write(Text key, Text value) throws IOException {
         int index = key.hashCode() % out.size();
 		this.out.get(index).write(key.getValue() + "\t" + value.getValue() + "\n");
 	}

@@ -8,11 +8,9 @@ import java.io.File;
 /**
  * Created by magl on 14/11/17.
  */
-//public class TextOutputFormat extends OutputFormat<Text, Text> {
-public class TextOutputFormat extends OutputFormat<LongWritable, Text> {
+public class TextOutputFormat extends OutputFormat<Text, Text> {
     @Override
-    //public RecordWriter<Text, Text> createRecordWriter() {
-    public RecordWriter<LongWritable, Text> createRecordWriter() {
+    public RecordWriter<Text, Text> createRecordWriter() {
 	    return new LineRecordWriter();
     }
 

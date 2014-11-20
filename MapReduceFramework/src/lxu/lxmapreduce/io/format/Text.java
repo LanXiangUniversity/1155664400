@@ -29,4 +29,9 @@ public class Text {
 	public void set(String value) {
 		this.value = value;
 	}
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

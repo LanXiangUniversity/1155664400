@@ -45,7 +45,7 @@ public class JobTracker implements IJobTracker {
 	private HashMap<String, TaskTrackerStatus> taskTrackers;
 
 	public JobTracker() throws RemoteException, NotBoundException {
-        this.jobConf = new JobConf(new Configuration());
+        //this.jobConf = new JobConf(new Configuration());
 		this.jobs = new HashMap<String, JobInProgress>();
 		this.taskIDToTIPMap = new HashMap<TaskAttemptID, TaskInProgress>();
 		this.taskIDToTrackerMap = new HashMap<TaskAttemptID, String>();
@@ -68,6 +68,7 @@ public class JobTracker implements IJobTracker {
 
 	@Override
 	public JobStatus submitJob(String jobID, JobConf jobConf) {
+        this.jobConf = jobConf;
 		if (jobs.containsKey(jobID)) {
 			return jobs.get(jobID).getJobStatus();
 		}

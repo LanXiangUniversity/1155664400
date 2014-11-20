@@ -349,8 +349,8 @@ public class TaskTracker implements Runnable {
 				HashMap<Text, LinkedList<Text>> map = null;
 
 				ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-				System.err.println("Read reducer id");
 				TaskAttemptID taskID = (TaskAttemptID) in.readObject();
+                System.err.println("Read reducer id" + taskID.getTaskID());
 				map = getReduceInput(taskID);
 				ObjectOutput out = new ObjectOutputStream(sock.getOutputStream());
 				out.writeObject(map);
@@ -368,29 +368,33 @@ public class TaskTracker implements Runnable {
 		}
 
 		private HashMap<Text, LinkedList<Text>> getReduceInput(TaskAttemptID taskID) {
-			// TODO: get input for reducer.
+            File folder = new File("/Users/magl/Google Drive/cmu/14-fall/15640/1155664400");
+            String namePrefix = taskID.getTaskID().toString();
             HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
-            try {
-                //BufferedReader reader = new BufferedReader(new FileReader(taskID.getTaskID().toString()));
-                BufferedReader reader = new BufferedReader(new FileReader("job_0_r-0"));
-                String line = null;
-                while ((line = reader.readLine()) != null) {
-	                System.out.println(line);
-                    String[] info = line.split("\t");
-                    Text key = new Text(info[0]);
-                    Text value = new Text(info[1]);
-                    LinkedList<Text> values = contents.get(key);
-                    if (values == null) {
-                        values = new LinkedList<Text>();
-	                    contents.put(key, values);
-                    }
-                    values.add(value);
+            for (File fileEntry : folder.listFiles()) {
+                if (fileEntry.isFile() && fileEntry.getName().startsWith(namePrefix)) {
+                    try {
+                        BufferedReader reader = new BufferedReader(new FileReader(fileEntry));
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            System.out.println(line);
+                            String[] info = line.split("\t");
+                            Text key = new Text(info[0]);
+                            Text value = new Text(info[1]);
+                            LinkedList<Text> values = contents.get(key);
+                            if (values == null) {
+                                values = new LinkedList<Text>();
+                                contents.put(key, values);
+                            }
+                            values.add(value);
 
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
             return contents;
 		}

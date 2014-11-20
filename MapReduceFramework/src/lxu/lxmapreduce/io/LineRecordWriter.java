@@ -1,5 +1,6 @@
 package lxu.lxmapreduce.io;
 
+import java.util.LinkedList;
 import java.util.List;
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
@@ -13,25 +14,31 @@ import java.io.IOException;
  */
 //public class LineRecordWriter extends RecordWriter<Text, Text> {
 public class LineRecordWriter extends RecordWriter<LongWritable, Text> {
-	private LineWriter out;
+	private LinkedList<LineWriter> out;
 
 	public LineRecordWriter() {
 	}
 
 	@Override
 	public void initialize(List<String> outputFiles) throws FileNotFoundException {
-		this.out = new LineWriter(outputFiles.get(0));
+        this.out = new LinkedList<LineWriter>();
+        for (String outputFile : outputFiles) {
+            out.add(new LineWriter(outputFile));
+        }
 	}
 
 	@Override
 	//public void write(Text key, Text value) throws IOException {
     public void write(LongWritable key, Text value) throws IOException {
-		this.out.write(key.getValue() + "\t" + value.getValue() + "\n");
+        int index = key.hashCode() % out.size();
+		this.out.get(index).write(key.getValue() + "\t" + value.getValue() + "\n");
 	}
 
 	@Override
 	public void close() {
-		this.out.close();
+        for (LineWriter o : out) {
+            o.close();
+        }
 	}
 
 }

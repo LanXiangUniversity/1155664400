@@ -13,7 +13,7 @@ public class LineWriter {
 
 	public LineWriter(String fileName) throws FileNotFoundException {
 		try {
-			out = new PrintWriter(new FileWriter(fileName, true));
+			out = new PrintWriter(new FileWriter(fileName));
 		} catch (IOException e) {
 			throw new FileNotFoundException("Can't find file: " + fileName);
 		}

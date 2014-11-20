@@ -21,4 +21,9 @@ public class LongWritable {
 	public void setValue(int value) {
 		this.value = value;
 	}
+
+    @Override
+    public int hashCode() {
+        return (value + "").hashCode();
+    }
 }

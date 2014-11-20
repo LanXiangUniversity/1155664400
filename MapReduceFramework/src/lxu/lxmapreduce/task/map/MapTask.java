@@ -46,7 +46,7 @@ public class MapTask extends Task implements Serializable {
         int numReduceTasks = conf.getNumReduceTasks();
         String jobID = taskAttemptID.getJobID();
         for (int reduceID = 0; reduceID < numReduceTasks; reduceID++) {
-            outputFiles.add(jobID + "_r-" + reduceID);
+            outputFiles.add(jobID + "_r-" + reduceID + "_" + this.partition);
         }
     }
 

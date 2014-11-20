@@ -10,13 +10,13 @@ import java.util.*;
  * Created by Wei on 11/16/14.
  */
 public class ReduceReader {
-	private HashMap<Text, Iterator<Text>> data;
+	private HashMap<Text, LinkedList<Text>> data;
 	private Iterator<Text> keys;
 	private Text key;
 	private Iterator<Text> value;
 
 
-	public void initialize(HashMap<Text, Iterator<Text>> input) throws FileNotFoundException {
+	public void initialize(HashMap<Text, LinkedList<Text>> input) throws FileNotFoundException {
 		// Init input for reduce
 		this.data = input;
 		this.keys = data.keySet().iterator();
@@ -43,7 +43,7 @@ public class ReduceReader {
 	public  boolean nextKeyValue() throws IOException {
 		if (this.keys.hasNext()) {
 			this.key = this.keys.next();
-			this.value = this.data.get(this.key);
+			this.value = this.data.get(this.key).iterator();
 
 			return true;
 		}

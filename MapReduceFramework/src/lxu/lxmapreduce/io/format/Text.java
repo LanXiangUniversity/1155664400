@@ -1,9 +1,11 @@
 package lxu.lxmapreduce.io.format;
 
+import java.io.Serializable;
+
 /**
  * Created by Wei on 11/11/14.
  */
-public class Text {
+public class Text implements Serializable{
 	private String value;
 
     public Text() {

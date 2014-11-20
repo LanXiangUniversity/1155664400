@@ -346,7 +346,7 @@ public class TaskTracker implements Runnable {
 		public void run() {
 			// Read
 			try {
-				HashMap<Text, Iterator<Text>> map = null;
+				HashMap<Text, LinkedList<Text>> map = null;
 
 				ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
 				System.err.println("Read reducer id");
@@ -367,13 +367,12 @@ public class TaskTracker implements Runnable {
 			}
 		}
 
-		private HashMap<Text, Iterator<Text>> getReduceInput(TaskAttemptID taskID) {
+		private HashMap<Text, LinkedList<Text>> getReduceInput(TaskAttemptID taskID) {
 			// TODO: get input for reducer.
-            HashMap<Text, Iterator<Text>> map = new HashMap<Text, Iterator<Text>>();
+            HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
             try {
                 //BufferedReader reader = new BufferedReader(new FileReader(taskID.getTaskID().toString()));
                 BufferedReader reader = new BufferedReader(new FileReader("job_0_r-0"));
-                HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
                 String line = null;
                 while ((line = reader.readLine()) != null) {
 	                System.out.println(line);
@@ -383,18 +382,17 @@ public class TaskTracker implements Runnable {
                     LinkedList<Text> values = contents.get(key);
                     if (values == null) {
                         values = new LinkedList<Text>();
+	                    contents.put(key, values);
                     }
                     values.add(value);
-                }
-                for (Map.Entry<Text, LinkedList<Text>> entry : contents.entrySet()) {
-                    map.put(entry.getKey(), entry.getValue().iterator());
+
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return map;
+            return contents;
 		}
 	}
 }

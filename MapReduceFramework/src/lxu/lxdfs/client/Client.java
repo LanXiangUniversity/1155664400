@@ -54,7 +54,7 @@ public class Client {
 
 		} else if ("rm".equals(args[0])) {
 
-		} else if ("write".equals(args[0])) {
+		} else if ("put".equals(args[0])) {
 			//String fileName = args[1];
 			//String content = args[2];
             String localFileName = args[1];
@@ -72,10 +72,15 @@ public class Client {
 			//cos.setFileName(fileName);
             cos.setFileName(dfsFileName);
 			cos.write(content);
-		} else if ("read".equals(args[0])) {
+		} else if ("get".equals(args[0])) {
 			ClientInputStream clientInputStream = new ClientInputStream(args[1]);
 			String content = clientInputStream.read();
-			System.out.println("Received content = " + content);
+
+			File file = new File(args[2]);
+			PrintWriter pw = new PrintWriter(new FileWriter(file));
+			pw.println(content);
+
+			pw.close();
 		} else {
 			this.showHelpInfo(args[0]);
 		}

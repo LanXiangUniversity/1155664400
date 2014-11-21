@@ -281,7 +281,17 @@ public class NameSystemService implements INameSystemService {
 		    long lastResponseTime  = this.lastResponseTime.get(dataNodeID);
 
 		    if ((currentTime - lastResponseTime) > this.HEARTBEAT_TIMEOUT) {
+			    // Delete all the metadata about this dataNode.
+				this.lastResponseTime.remove(dataNodeID);
+			    this.dataNodes.remove(dataNodeID);
+
+			    for (Block blk : this.blockToLocationsMap.keySet()) {
+				    //List
+				    //if (th)
+			    }
+
 			    // Create new replicas for the blocks on this node.
+
 
 		    } else {
 			    this.lastResponseTime.put(dataNodeID, currentTime);
@@ -291,18 +301,22 @@ public class NameSystemService implements INameSystemService {
 					// Get each block of the deleted files.
 					for (Block blk : blocks) {
 						HashSet<DataNodeDescriptor> locations = this.blockToLocationsMap.get(blk);
+
+						// Set delete command if dataNode has replica of this node.
 						if (locations.contains(dataNode)) {
 							DataNodeCommand command = new DataNodeDeleteCommand(blk);
 							commands.add(command);
 							this.blockToLocationsMap.get(blk).remove(dataNode);
 
+							// Delete block if its location is empty.
 							if (this.blockToLocationsMap.size() == 0) {
 								this.blockToLocationsMap.remove(blk);
 								this.deletedFiles.get(fileName).remove(blk);
-							}
 
-							if (this.deletedFiles.get(fileName).size() == 0) {
-								this.deletedFiles.remove(fileName);
+								// Delete file if its blocks is empty.
+								if (this.deletedFiles.get(fileName).size() == 0) {
+									this.deletedFiles.remove(fileName);
+								}
 							}
 						}
 					}

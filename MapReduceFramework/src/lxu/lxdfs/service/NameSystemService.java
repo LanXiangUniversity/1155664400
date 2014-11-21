@@ -351,7 +351,8 @@ public class NameSystemService implements INameSystemService {
 								}
 							}
 
-							this.dataNodes.get(dataNode).setBlockNum(this.dataNodes.get(dataNode).getBlockNum() - 1);
+							this.dataNodes.get(dataNode.getDataNodeID()).setBlockNum(this.dataNodes.get(dataNode.getDataNodeID())
+									.getBlockNum() - 1);
 						}
 					}
 				}

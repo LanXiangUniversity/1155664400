@@ -22,6 +22,7 @@ public class NameSystemService implements INameSystemService {
 	private String rootPath;
 	private int replicaNum = 1;
 	private int blockID = 0;
+	private Map<Integer, Long> lastResponseTime;
 	// List of Data Nodes available.
 	private Map<Integer, DataNodeDescriptor> dataNodes;
 	// Map from file name to Block.
@@ -32,14 +33,18 @@ public class NameSystemService implements INameSystemService {
 	private HashMap<Integer, Block> IDToBlockMap;
 	// List of file names.
 	private Set<String> fileNames;
+	private HashMap<String, List<Block>> deletedFiles;
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
+	private static final int HEARTBEAT_TIMEOUT = 30 * 1000;
 
 	public NameSystemService() {
-		dataNodes = new HashMap<Integer, DataNodeDescriptor>();
-		fileNameToBlocksMap = new HashMap<String, List<Block>>();
-		blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
-		IDToBlockMap = new HashMap<Integer, Block>();
-		fileNames = new HashSet<String>();
+		this.dataNodes = new HashMap<Integer, DataNodeDescriptor>();
+		this.fileNameToBlocksMap = new HashMap<String, List<Block>>();
+		this.blockToLocationsMap = new HashMap<Block, HashSet<DataNodeDescriptor>>();
+		this.IDToBlockMap = new HashMap<Integer, Block>();
+		this.fileNames = new HashSet<String>();
+		this.lastResponseTime = new HashMap<>();
+
 	}
 
 	public boolean isSafeMode() {
@@ -164,7 +169,11 @@ public class NameSystemService implements INameSystemService {
 			return false;
 		}
 
-		return false;
+		this.fileNames.remove(path);
+		this.deletedFiles.put(path.toString(), this.fileNameToBlocksMap.get(path));
+		this.fileNameToBlocksMap.remove(path);
+
+		return true;
 	}
 
 	@Override
@@ -260,7 +269,47 @@ public class NameSystemService implements INameSystemService {
 
     @Override
     public LinkedList<DataNodeCommand> heartbeat(int dataNodeID) throws RemoteException {
-        LinkedList<DataNodeCommand> commands = new LinkedList<DataNodeCommand>();
+	    DataNodeDescriptor dataNode = new DataNodeDescriptor(dataNodeID);
+
+	    LinkedList<DataNodeCommand> commands = new LinkedList<DataNodeCommand>();
+
+	    long currentTime = System.currentTimeMillis();
+
+	    if (!this.lastResponseTime.containsKey(dataNodeID)) {
+		    this.lastResponseTime.put(dataNodeID, currentTime);
+	    } else {
+		    long lastResponseTime  = this.lastResponseTime.get(dataNodeID);
+
+		    if ((currentTime - lastResponseTime) > this.HEARTBEAT_TIMEOUT) {
+			    // Create new replicas for the blocks on this node.
+
+		    } else {
+			    this.lastResponseTime.put(dataNodeID, currentTime);
+				for(String fileName : this.deletedFiles.keySet()) {
+					List<Block> blocks = this.deletedFiles.get(fileName);
+
+					// Get each block of the deleted files.
+					for (Block blk : blocks) {
+						HashSet<DataNodeDescriptor> locations = this.blockToLocationsMap.get(blk);
+						if (locations.contains(dataNode)) {
+							DataNodeCommand command = new DataNodeDeleteCommand(blk);
+							commands.add(command);
+							this.blockToLocationsMap.get(blk).remove(dataNode);
+
+							if (this.blockToLocationsMap.size() == 0) {
+								this.blockToLocationsMap.remove(blk);
+								this.deletedFiles.get(fileName).remove(blk);
+							}
+
+							if (this.deletedFiles.get(fileName).size() == 0) {
+								this.deletedFiles.remove(fileName);
+							}
+						}
+					}
+				}
+		    }
+ 	    }
+
 
         return commands;
     }

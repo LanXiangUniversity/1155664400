@@ -20,7 +20,7 @@ public class LineWriter {
 	}
 
 	public void write(String line) {
-        System.out.println("Line Writer write " + line);
+        //System.out.println("Line Writer write " + line);
 		this.out.write(line);
 	}
 

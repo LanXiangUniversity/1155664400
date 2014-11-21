@@ -209,6 +209,15 @@ public class TaskTracker implements Runnable {
 		}
 		taskTrackerStatus.setTaskReports(statuses);
 
+		/* TODO:Reap threads */
+		for (TaskAttemptID taskAttemptID : this.taskPool.keySet()) {
+			TaskRunner taskRunner = this.taskPool.get(taskAttemptID);
+
+			if (taskRunner.status.getState() == TaskStatus.RUNNING) {
+				this.taskPool.remove(taskAttemptID);
+			}
+		}
+
 		return taskTrackerStatus;
 	}
 

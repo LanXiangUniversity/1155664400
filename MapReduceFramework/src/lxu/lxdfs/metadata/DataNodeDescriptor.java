@@ -1,5 +1,6 @@
 package lxu.lxdfs.metadata;
 
+import javax.xml.crypto.Data;
 import java.io.Serializable;
 
 /**
@@ -11,6 +12,10 @@ public class DataNodeDescriptor implements Serializable {
 	private int dataNodePort;
 	// # Blocks in the Data Node
 	private int blockNum;
+
+	public DataNodeDescriptor(int dataNodeID) {
+		this.dataNodeID = dataNodeID;
+	}
 
 	public DataNodeDescriptor(int dataNodeID,
 	                          String dataNodeIP,

@@ -21,11 +21,11 @@ public interface INameSystemService extends Remote {
 
 	public ClientOutputStream open(Path path) throws RemoteException, NotBoundException;
 
-	public ClientOutputStream create(Path path) throws RemoteException, NotBoundException;
+	public void create(String fileName) throws RemoteException, NotBoundException;
 
-	public boolean delete(Path path) throws RemoteException;
+	public boolean delete(String string) throws RemoteException;
 
-	public boolean exists(Path path) throws RemoteException;
+	public boolean exists(String string) throws RemoteException;
 
 	public LocatedBlock allocateBlock(String fileName, int offset) throws RemoteException;
 
@@ -45,4 +45,6 @@ public interface INameSystemService extends Remote {
 	public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) throws RemoteException;
 
     public LinkedList<DataNodeCommand> heartbeat(DataNodeDescriptor dataNode) throws RemoteException;
+
+	public HashSet<String> ls() throws RemoteException;
 }

@@ -1,9 +1,15 @@
 package lxu.lxdfs.client;
 
+import lxu.lxdfs.service.INameSystemService;
+
 import java.io.*;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Wei on 11/8/14.
@@ -11,8 +17,11 @@ import java.util.List;
 public class Client {
 	private ClientState state;
 	private BufferedReader consoleReader;
+	private INameSystemService nameSystemService;
 
-	public Client() {
+	public Client() throws RemoteException, NotBoundException {
+		Registry registry = LocateRegistry.getRegistry();
+		this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
 		this.state = ClientState.RUNNING;
 		this.consoleReader = new BufferedReader(
 				new InputStreamReader(System.in));
@@ -47,18 +56,33 @@ public class Client {
 		String[] args = cmd.split(" ");
 
 		if ("ls".equals(args[0])) {
+			Set<String> files = this.nameSystemService.ls();
 
+			for (String file : files) {
+				System.out.println(file);
+			}
 		} else if ("mkdir".equals(args[0])) {
 
 		} else if ("touch".equals(args[0])) {
 
 		} else if ("rm".equals(args[0])) {
+			if (!this.nameSystemService.exists(args[1])) {
+				System.out.println("No such file.");
+				return;
+			}
 
+			this.nameSystemService.delete(args[1]);
 		} else if ("put".equals(args[0])) {
 			//String fileName = args[1];
 			//String content = args[2];
             String localFileName = args[1];
             String dfsFileName = args[2];
+
+			if (this.nameSystemService.exists(args[2])) {
+				System.out.println("File exists");
+
+				return;
+			}
 
             List<String> content = new LinkedList<>();
 
@@ -73,6 +97,11 @@ public class Client {
             cos.setFileName(dfsFileName);
 			cos.write(content);
 		} else if ("get".equals(args[0])) {
+ 			if (!this.nameSystemService.exists(args[1])) {
+				System.out.println("No such file.");
+				return;
+			}
+
 			ClientInputStream clientInputStream = new ClientInputStream(args[1]);
 			String content = clientInputStream.read();
 

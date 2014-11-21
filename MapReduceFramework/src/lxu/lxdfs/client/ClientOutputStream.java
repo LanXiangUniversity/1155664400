@@ -25,7 +25,7 @@ public class ClientOutputStream {
 	private int blockOffset;
 	private int listenPort;
 	private INameSystemService nameSystem;
-	private int blockSize = 2;
+	private int blockSize = 10;
 	private int nextPacketID = 0;
 	// Locations for all replicas
 	private List<DataNodeDescriptor> locations;
@@ -136,7 +136,9 @@ public class ClientOutputStream {
 	 * @param lines
 	 * @return
 	 */
-	public int write(List<String> lines) {
+	public int write(List<String> lines) throws RemoteException, NotBoundException {
+		this.nameSystem.create(this.fileName);
+
 		int writeSize = 0;
 		LocatedBlock locatedBlock = null;
 

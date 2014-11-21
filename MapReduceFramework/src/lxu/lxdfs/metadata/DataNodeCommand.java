@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 public class DataNodeCommand implements Serializable {
 	protected int type;
+
 	protected static final int DELETE_BLOCK = 0;
 	protected static final int RESTORE_BLOCK = 1;
 }

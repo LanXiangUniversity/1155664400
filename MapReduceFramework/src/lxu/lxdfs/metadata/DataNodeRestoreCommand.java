@@ -12,4 +12,20 @@ public class DataNodeRestoreCommand extends DataNodeCommand {
 		this.block = block;
 		this.dataNode = dataNode;
 	}
+
+    public Block getBlock() {
+        return block;
+    }
+
+    public void setBlock(Block block) {
+        this.block = block;
+    }
+
+    public DataNodeDescriptor getDataNode() {
+        return dataNode;
+    }
+
+    public void setDataNode(DataNodeDescriptor dataNode) {
+        this.dataNode = dataNode;
+    }
 }

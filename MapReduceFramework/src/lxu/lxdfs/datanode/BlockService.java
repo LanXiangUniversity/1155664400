@@ -2,34 +2,87 @@ package lxu.lxdfs.datanode;
 
 import lxu.lxdfs.client.ClientPacket;
 import lxu.lxdfs.metadata.Block;
+import lxu.lxdfs.metadata.DataNodeDescriptor;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by magl on 14/11/8.
+ * BlockService.java
+ *
+ * BlockService class helps DataNode to manage all blocks. It maintains a
+ * crucial map: block -> local file name.
+ *
+ * Inner class {@link BlockReader} is a thread in response to client read
+ * request. It will read all contents of a block according to blockID and
+ * return contents to client.
+ *
+ * Inner class {@link BlockReader} is a thread in response to client write
+ * request. It will write all received data to a local file.
  */
 public class BlockService implements Runnable {
 	// blockID -> local file name
-	private ConcurrentHashMap<Block, String> blockFiles = null;
+	private static ConcurrentHashMap<Block, String> blockFiles =
+            new ConcurrentHashMap<Block, String>();
 	private ServerSocket serverSocket = null;
+    private boolean isRunning = false;
 
-	public BlockService(ServerSocket serverSocket) {
-		this.blockFiles = new ConcurrentHashMap<Block, String>();
+	public BlockService(ServerSocket serverSocket, boolean isRunning) {
 		this.serverSocket = serverSocket;
+        this.isRunning = isRunning;
 	}
+
+    public void stop() {
+        this.isRunning = false;
+    }
+
+    public void deleteBlock(Block block) {
+        blockFiles.remove(block);
+    }
+
+    public void copyBlockFromAnotherDataNode(Block block, DataNodeDescriptor dataNode) {
+        ClientPacket clientPacket = new ClientPacket();
+        clientPacket.setBlock(block);
+        clientPacket.setOperation(ClientPacket.BLOCK_READ);
+
+        String dataNodeIP = dataNode.getDataNodeIP();
+        int dataNodePort = dataNode.getDataNodePort();
+
+        try {
+            Socket socket = new Socket(dataNodeIP, dataNodePort);
+            ObjectOutputStream outputStream =
+                    new ObjectOutputStream(socket.getOutputStream());
+            outputStream.writeObject(clientPacket);
+
+            ObjectInputStream inputStream =
+                    new ObjectInputStream(socket.getInputStream());
+            DataNodePacket receivedPacket =
+                    (DataNodePacket)inputStream.readObject();
+
+            List<String> lines = receivedPacket.getLines();
+            BlockWriter.writeToFile(block, lines);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
 	@Override
 	public void run() {
-		while (true) {
+		while (isRunning) {
 			try {
 				Socket socket = serverSocket.accept();
 				ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 				ClientPacket packet = (ClientPacket) input.readObject();
-				System.out.println(packet.getBlock().getBlockID());
+				//System.out.println(packet.getBlock().getBlockID());
 				switch (packet.getOperation()) {
 					case ClientPacket.BLOCK_READ:
 						(new Thread(new BlockReader(packet, socket))).start();
@@ -48,13 +101,19 @@ public class BlockService implements Runnable {
 				System.err.println(e.getMessage());
 			}
 		}
-	}
+        try {
+            this.serverSocket.close();
+        } catch (IOException e) {
+            System.err.println("DataNode stopping block service error");
+            e.printStackTrace();
+        }
+    }
 
 	public ArrayList<Block> getAllBlocks() {
 		return new ArrayList<Block>(blockFiles.keySet());
 	}
 
-	private class BlockReader implements Runnable {
+	private static class BlockReader implements Runnable {
 		private ClientPacket packet = null;
 		private Socket socket = null;
 
@@ -99,7 +158,7 @@ public class BlockService implements Runnable {
 		}
 	}
 
-	private class BlockWriter implements Runnable {
+	private static class BlockWriter implements Runnable {
 
 		private ClientPacket packet = null;
 		private Socket socket = null;
@@ -109,27 +168,36 @@ public class BlockService implements Runnable {
 			this.socket = socket;
 		}
 
+        public static boolean writeToFile(Block block, List<String> lines) {
+            String fileName = "blk_" + block.getBlockID();
+            boolean success = false;
+
+            try {
+                // save block content
+                PrintWriter writer = new PrintWriter(fileName);
+                for (String line : lines) {
+                    writer.println(line);
+                }
+                // record blockID -> fileName
+                blockFiles.put(block, fileName);
+                writer.close();
+                success = true;
+                System.out.println("Write block " + block.getBlockID() + " to file " + fileName);
+            } catch (IOException e) {
+                System.err.println("Error: Data Node writing file " + fileName + " error");
+            }
+            return success;
+        }
+
 		@Override
 		public void run() {
 			Block block = packet.getBlock();
 			int ackPacketID = packet.getPacketID();
 			boolean operationState = false;
 			ArrayList<String> lines = packet.getLines();
-			String fileName = "blk_" + block.getBlockID();
 
-			try {
-				// save block content
-				PrintWriter writer = new PrintWriter(fileName);
-				for (String line : lines) {
-					writer.println(line);
-				}
-				operationState = true;
-				// record blockID -> fileName
-				blockFiles.put(block, fileName);
-				writer.close();
-			} catch (IOException e) {
-				System.err.println("Error: Data Node writing file " + fileName + " error");
-			}
+            operationState = writeToFile(block, lines);
+
 			// send ack to client
 			try {
 				ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -138,11 +206,6 @@ public class BlockService implements Runnable {
 			} catch (IOException e) {
 				System.err.println("Error: DataNode writing packet to client error");
 				System.err.println(e.getMessage());
-			}
-			System.out.println("Write block " + block.getBlockID() + " to file " + fileName);
-			System.out.println("Content");
-			for (String line : lines) {
-				System.out.println(line);
 			}
 		}
 	}

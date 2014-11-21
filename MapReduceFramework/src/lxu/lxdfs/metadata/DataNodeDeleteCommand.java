@@ -9,4 +9,12 @@ public class DataNodeDeleteCommand extends DataNodeCommand{
 		this.type = this.DELETE_BLOCK;
 		this.block = block;
 	}
+
+    public Block getBlock() {
+        return block;
+    }
+
+    public void setBlock(Block block) {
+        this.block = block;
+    }
 }

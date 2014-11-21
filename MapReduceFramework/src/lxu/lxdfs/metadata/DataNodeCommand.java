@@ -10,4 +10,12 @@ public class DataNodeCommand implements Serializable {
 
 	protected static final int DELETE_BLOCK = 0;
 	protected static final int RESTORE_BLOCK = 1;
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 }

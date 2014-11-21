@@ -32,10 +32,6 @@ public class TaskScheduler {
 		final int trackerRunningMaps = taskTrackerStatus.countRunningMapTask();
 		final int trackerRunningReduces = taskTrackerStatus.countRunningReduceTask();
 
-        // TODO: Change to listener
-		//Collection<JobInProgress> jobs = jobTracker.jobs.values();
-		//JobInProgress job = jobs.iterator().next();
-
         int remainingMapLoad = 0;
         int remainingReduceLoad = 0;
 

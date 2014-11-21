@@ -37,7 +37,7 @@ public class NameSystemService implements INameSystemService {
 	private HashMap<String, List<Block>> deletedFiles;
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 	private static final int HEARTBEAT_TIMEOUT = 30 * 1000;
-	private static final int REPLICA_NUM = 2;
+	private static final int REPLICA_NUM = 3;
 
 	public NameSystemService() {
 		this.dataNodes = new HashMap<Integer, DataNodeDescriptor>();

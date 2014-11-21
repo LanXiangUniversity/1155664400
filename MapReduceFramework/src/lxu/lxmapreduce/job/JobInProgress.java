@@ -32,7 +32,7 @@ public class JobInProgress {
     private int failedMapTask = 0;
     private int failedReduceTask = 0;
     // HostIP -> TaskInProgress
-    private Map<String, List<TaskInProgress>> nonRunningMapTasksMap;
+    private Map<String, List<TaskInProgress>> localMapTasksMap;
     private Map<String, Set<TaskInProgress>> runningMapTasksMap;
 
     private Set<TaskInProgress> nonRunningReduceTaskSet;
@@ -64,7 +64,7 @@ public class JobInProgress {
         for (int i = 0; i < numMapTasks; i++) {
             this.maps[i] = new TaskInProgress(jobID, allBlocks[i], jobTracker, this, i);
         }
-        nonRunningMapTasksMap = createCache(allBlocks);
+        localMapTasksMap = createCache(allBlocks);
 
         // Init Reduce Tasks
         this.reduces = new TaskInProgress[numReduceTasks];
@@ -77,7 +77,6 @@ public class JobInProgress {
         runningMapTasksMap = new HashMap<String, Set<TaskInProgress>>();
     }
 
-    // TODO: connect to namenode to get all blocks of given file
     public LocatedBlock[] getFileBlocks(String fileName) {
         try {
             return jobTracker.getNameNode().getFileBlocks(fileName).getBlocks();
@@ -175,15 +174,6 @@ public class JobInProgress {
         return cache;
     }
 
-    public Task obtainNewLocalMapTask(TaskTrackerStatus taskTrackerStatus) {
-        return obtainNewMapTask(taskTrackerStatus);
-    }
-
-    // TODO:
-    public Task obtainNewNonLocalMapTask(TaskTrackerStatus taskTrackerStatus) {
-        return null;
-    }
-
     public Task obtainNewMapTask(TaskTrackerStatus taskTrackerStatus) {
         int target = findNewMapTask(taskTrackerStatus);
         if (target == -1) {
@@ -211,17 +201,6 @@ public class JobInProgress {
         String taskTrackerName = taskTrackerStatus.getTrackerName();
         TaskInProgress taskInProgress = null;
 
-        //
-        // TODO:
-        // Check if too many tasks of this job have failed on this
-        // tasktracker prior to assigning it a new one.
-        //
-        /*
-        if (!shouldRunOnTaskTracker(taskTracker)) {
-            return -1;
-        }
-        */
-
         // When scheduling a map task:
         //  TODO: 0) Schedule a failed task without considering locality
         //  1) Schedule non-running tasks
@@ -239,17 +218,17 @@ public class JobInProgress {
             }
         */
 
-        String trackerHost = jobTracker.getHost(taskTrackerStatus.getTrackerName());
+        String trackerHost = jobTracker.getHost(taskTrackerName);
 
         //
         // 1) Non-running TIP :
         //
 
         if (trackerHost != null) {
-            List<TaskInProgress> allTasks = nonRunningMapTasksMap.get(trackerHost);
+            List<TaskInProgress> allTasks = localMapTasksMap.get(trackerHost);
             for (TaskInProgress task : allTasks) {
                 if (!task.isRunning()) {
-                    allTasks.remove(task);
+                    //allTasks.remove(task);
                     taskInProgress = task;
                     break;
                 }
@@ -262,6 +241,12 @@ public class JobInProgress {
         }
 
         // TODO: 2. Search non-local tips for a new task
+        for (TaskInProgress mapTask : maps) {
+            if (!mapTask.isRunning()) {
+                scheduleMap(trackerHost, mapTask);
+                return mapTask.getIdWithinJob();
+            }
+        }
         /*
         tip = findTaskFromList(nonLocalMaps, tts, numUniqueHosts, false);
         if (tip != null) {

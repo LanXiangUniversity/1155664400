@@ -43,6 +43,12 @@ public class BlockService implements Runnable {
 
     public void deleteBlock(Block block) {
         blockFiles.remove(block);
+        File localFile = new File("blk_" + block.getBlockID());
+        if (localFile.delete()) {
+            System.out.println(localFile.getName() + " is deleted!");
+        } else {
+            System.out.println("Delete operation is failed.");
+        }
     }
 
     public void copyBlockFromAnotherDataNode(Block block, DataNodeDescriptor dataNode) {

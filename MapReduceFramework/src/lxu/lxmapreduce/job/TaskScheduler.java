@@ -1,6 +1,5 @@
 package lxu.lxmapreduce.job;
 
-import lxu.lxmapreduce.metadata.CommitMapAction;
 import lxu.lxmapreduce.metadata.TaskTrackerAction;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.Task;
@@ -55,7 +54,6 @@ public class TaskScheduler {
         int reduceLoad = Math.min(trackerReduceCapacity - trackerRunningReduces, remainingReduceLoad);
 
 		// assign map tasks
-        scheduleMaps:
 		for (int i = 0; i < mapLoad; ++i) {
             synchronized (jobQueue) {
                 for (String jobID : jobQueue) {
@@ -65,16 +63,11 @@ public class TaskScheduler {
                         continue;
                     }
 
-                    Task task = job.obtainNewLocalMapTask(taskTrackerStatus);
+                    Task task = job.obtainNewMapTask(taskTrackerStatus);
                     if (task != null) {
-                        System.out.println("New local map task " + task.getTaskAttemptID() + " assigned");
+                        System.out.println("New map task " + task.getTaskAttemptID() + " assigned");
                         assignedTasks.add(task);
                         break;
-                    } else {
-                        task = job.obtainNewNonLocalMapTask(taskTrackerStatus);
-                        System.out.println("New non local map task " + task.getTaskAttemptID() + " assigned");
-                        assignedTasks.add(task);
-                        break scheduleMaps;
                     }
                 }
             }

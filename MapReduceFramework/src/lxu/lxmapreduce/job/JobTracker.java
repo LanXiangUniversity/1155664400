@@ -29,9 +29,6 @@ public class JobTracker implements IJobTracker {
 	// (taskAttemptID -> TaskTrackerName)
 	private HashMap<TaskAttemptID, String> taskIDToTrackerMap;
 
-    // (taskAttemptID -> jobID)
-    private Set<TaskAttemptID> runningTasks;
-
 	// (TaskTrackerName -> Set<running tasks>)
 	private HashMap<String, Set<TaskAttemptID>> taskTrackerToTaskmap;
 
@@ -49,8 +46,6 @@ public class JobTracker implements IJobTracker {
 		this.jobs = new HashMap<String, JobInProgress>();
 		this.taskIDToTIPMap = new HashMap<TaskAttemptID, TaskInProgress>();
 		this.taskIDToTrackerMap = new HashMap<TaskAttemptID, String>();
-        // TODO: No need
-        this.runningTasks = new HashSet<TaskAttemptID>();
 		this.taskTrackerToTaskmap = new HashMap<String, Set<TaskAttemptID>>();
 		this.taskTrackerToCompleteTaskMap = new HashMap<String, Set<TaskAttemptID>>();
 		this.taskTrackerToHostIPMap = new HashMap<String, String>();
@@ -126,15 +121,9 @@ public class JobTracker implements IJobTracker {
                 List<Task> tasks = taskScheduler.assignTasks(taskTrackers.get(trackerName));
                 if (tasks != null) {
                     for (Task task : tasks) {
-                        runningTasks.add(task.getTaskAttemptID());
                         actions.add(new LaunchTaskAction(task));
                     }
                 }
-            }
-
-            List<TaskTrackerAction> action = getCommitMapAction(status);
-            if (action != null) {
-                actions.addAll(action);
             }
         }
 
@@ -142,18 +131,6 @@ public class JobTracker implements IJobTracker {
 
 		return heartbeatResponse;
 	}
-
-    public List<TaskTrackerAction> getCommitMapAction(TaskTrackerStatus status) {
-        List<TaskTrackerAction> commitActions = new LinkedList<TaskTrackerAction>();
-        for (TaskStatus taskStatus : status.getTaskReports()) {
-            String jobID = taskStatus.getTaskID().getJobID();
-            JobInProgress job = jobs.get(jobID);
-            if (job.shouldAssignReduceTask()) {
-                commitActions.add(new CommitMapAction(job.getJobID(), TaskTrackerAction.ActionType.COMMIT_TASK));
-            }
-        }
-        return commitActions;
-    }
 
 	public void updateTaskStatuses(TaskTrackerStatus status) {
 		String trackerName = status.getTrackerName();

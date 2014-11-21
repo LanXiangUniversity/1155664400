@@ -141,8 +141,6 @@ public class TaskTracker implements Runnable {
 			Task task = ((LaunchTaskAction) action).getTask();
 
 			launchTask(jobConf, task);
-		} else if (action instanceof CommitMapAction) {
-			//this.acceptNewTasks = false;
 		}
 	}
 

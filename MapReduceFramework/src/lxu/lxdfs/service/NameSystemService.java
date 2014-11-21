@@ -2,6 +2,7 @@ package lxu.lxdfs.service;
 
 
 import lxu.lxdfs.client.ClientOutputStream;
+import lxu.lxdfs.datanode.DataNode;
 import lxu.lxdfs.metadata.*;
 import lxu.lxdfs.namenode.NameNodeState;
 
@@ -22,7 +23,7 @@ public class NameSystemService implements INameSystemService {
 	private String rootPath;
 	private int replicaNum = 1;
 	private int blockID = 0;
-	private Map<Integer, Long> lastResponseTime;
+	private Map<DataNodeDescriptor, Long> lastResponseTime;
 	// List of Data Nodes available.
 	private Map<Integer, DataNodeDescriptor> dataNodes;
 	// Map from file name to Block.
@@ -36,6 +37,7 @@ public class NameSystemService implements INameSystemService {
 	private HashMap<String, List<Block>> deletedFiles;
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 	private static final int HEARTBEAT_TIMEOUT = 30 * 1000;
+	private static final int REPLICA_NUM = 2;
 
 	public NameSystemService() {
 		this.dataNodes = new HashMap<Integer, DataNodeDescriptor>();
@@ -93,10 +95,23 @@ public class NameSystemService implements INameSystemService {
 		HashSet<DataNodeDescriptor> locations = new HashSet<DataNodeDescriptor>();
 
 		// TODO: Allocate DataNodes to store Block replicas.
-        for (DataNodeDescriptor dataNodeDescriptor : dataNodes.values()) {
-            locations.add(dataNodeDescriptor);
-		//for (int i = 0; i < this.replicaNum; i++) {
-			//locations.add(this.dataNodes.get(i));
+		for (int i = 0; i < this.REPLICA_NUM; i++) {
+			int min = Integer.MAX_VALUE;
+			DataNodeDescriptor dn = this.dataNodes.entrySet().iterator().next().getValue();
+			for (int dnId : this.dataNodes.keySet()) {
+				DataNodeDescriptor tmpDataNode = this.dataNodes.get(dnId);
+
+				if (tmpDataNode.getBlockNum() < min) {
+					min = tmpDataNode.getBlockNum();
+					dn = tmpDataNode;
+				}
+			}
+
+			// Update status of dataNode.
+			locations.add(dn);
+			// Increase data number by one.
+			this.dataNodes.get(dn.getDataNodeID()).setBlockNum(this.dataNodes.get(dn.getDataNodeID())
+					.getBlockNum()+1);
 		}
 
 		// Register Blocks in NameNode.
@@ -268,33 +283,52 @@ public class NameSystemService implements INameSystemService {
 	}
 
     @Override
-    public LinkedList<DataNodeCommand> heartbeat(int dataNodeID) throws RemoteException {
-	    DataNodeDescriptor dataNode = new DataNodeDescriptor(dataNodeID);
+    public LinkedList<DataNodeCommand> heartbeat(DataNodeDescriptor dataNode) throws RemoteException {
 
 	    LinkedList<DataNodeCommand> commands = new LinkedList<DataNodeCommand>();
 
 	    long currentTime = System.currentTimeMillis();
 
-	    if (!this.lastResponseTime.containsKey(dataNodeID)) {
-		    this.lastResponseTime.put(dataNodeID, currentTime);
+	    if (!this.lastResponseTime.containsKey(dataNode)) {
+		    this.lastResponseTime.put(dataNode, currentTime);
 	    } else {
-		    long lastResponseTime  = this.lastResponseTime.get(dataNodeID);
+		    long lastResponseTime  = this.lastResponseTime.get(dataNode);
 
 		    if ((currentTime - lastResponseTime) > this.HEARTBEAT_TIMEOUT) {
 			    // Delete all the metadata about this dataNode.
-				this.lastResponseTime.remove(dataNodeID);
-			    this.dataNodes.remove(dataNodeID);
+				this.lastResponseTime.remove(dataNode);
+			    this.dataNodes.remove(dataNode);
 
 			    for (Block blk : this.blockToLocationsMap.keySet()) {
-				    //List
-				    //if (th)
+				    Set<DataNodeDescriptor> locations = this.blockToLocationsMap.get(blk);
+
+				    if (locations.contains(dataNode)) {
+					    locations.remove(dataNode);
+
+					    // Get datanode which has minimum blocks number.
+					    int min = Integer.MAX_VALUE;
+					    DataNodeDescriptor dn = this.dataNodes.entrySet().iterator().next().getValue();
+					    for (int dnId : this.dataNodes.keySet()) {
+						   DataNodeDescriptor tmpDataNode = this.dataNodes.get(dnId);
+
+						   if (tmpDataNode.getBlockNum() < min) {
+							   min = tmpDataNode.getBlockNum();
+							   dn = tmpDataNode;
+						   }
+					    }
+
+					    DataNodeCommand command = new DataNodeRestoreCommand(blk, dn);
+					    commands.add(command);
+
+					    // Update status of dataNode.
+					    locations.add(dn);
+					    // Increase data number by one.
+					    this.dataNodes.get(dn.getDataNodeID()).setBlockNum(this.dataNodes.get(dn.getDataNodeID())
+							    .getBlockNum()+1);
+				    }
 			    }
-
-			    // Create new replicas for the blocks on this node.
-
-
 		    } else {
-			    this.lastResponseTime.put(dataNodeID, currentTime);
+			    this.lastResponseTime.put(dataNode, currentTime);
 				for(String fileName : this.deletedFiles.keySet()) {
 					List<Block> blocks = this.deletedFiles.get(fileName);
 
@@ -318,6 +352,8 @@ public class NameSystemService implements INameSystemService {
 									this.deletedFiles.remove(fileName);
 								}
 							}
+
+							this.dataNodes.get(dataNode).setBlockNum(this.dataNodes.get(dataNode).getBlockNum() - 1);
 						}
 					}
 				}

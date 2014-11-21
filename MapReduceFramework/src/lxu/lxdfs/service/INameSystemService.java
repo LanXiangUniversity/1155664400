@@ -44,5 +44,5 @@ public interface INameSystemService extends Remote {
 	// Services for Data Node
 	public int register(String dataNodeHostName, int port, ArrayList<Block> blocks) throws RemoteException;
 
-    public LinkedList<DataNodeCommand> heartbeat(int dataNodeID) throws RemoteException;
+    public LinkedList<DataNodeCommand> heartbeat(DataNodeDescriptor dataNode) throws RemoteException;
 }

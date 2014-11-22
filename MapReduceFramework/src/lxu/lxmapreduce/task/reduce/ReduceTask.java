@@ -51,6 +51,7 @@ public class ReduceTask extends Task implements Serializable {
         System.out.println("reduce running");
 		int port = 19001;
 		String[] mapperAddrs = jobConf.getSocketAddrs();
+        System.out.println(Arrays.toString(mapperAddrs));
 		// TODO:Init input file
 		HashMap<Text, LinkedList<Text>> reduceInput = new HashMap<>();
 

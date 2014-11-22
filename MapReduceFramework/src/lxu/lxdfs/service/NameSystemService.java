@@ -310,6 +310,7 @@ public class NameSystemService implements INameSystemService {
 
 			    commands.add(command);
 		    }
+            this.restoreBlocksQueue.remove(dataNode);
 	    } else {
 		    for(String fileName : this.deletedFiles.keySet()) {
 					List<Block> blocks = this.deletedFiles.get(fileName);
@@ -364,6 +365,7 @@ public class NameSystemService implements INameSystemService {
 
 						if ((currentTime - lastTime) > HEARTBEAT_TIMEOUT) {
 							// Delete all the metadata about this dataNode.
+                            System.out.println("datanode " + dataNode.getDataNodeID() + " died");
 							lastResponseTime.remove(dataNode);
 							dataNodes.remove(dataNode.getDataNodeID());
 

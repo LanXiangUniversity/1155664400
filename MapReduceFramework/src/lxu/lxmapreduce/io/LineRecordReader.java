@@ -78,7 +78,7 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
 	}
 
 	private boolean getInputSplit() throws IOException {
-		if (this.currentSplit < this.maxSplit) {
+		if (this.currentSplit <= this.maxSplit) {
 
 			// Local replcia ?
 			File file  = new File(inputFiles.get(this.currentSplit));

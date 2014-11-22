@@ -31,10 +31,12 @@ public class BlockService implements Runnable {
             new ConcurrentHashMap<Block, String>();
 	private ServerSocket serverSocket = null;
     private boolean isRunning = false;
+    private int datanodeId;
 
-	public BlockService(ServerSocket serverSocket, boolean isRunning) {
+	public BlockService(ServerSocket serverSocket, boolean isRunning, int id) {
 		this.serverSocket = serverSocket;
         this.isRunning = isRunning;
+        this.datanodeId = id;
 	}
 
     public void stop() {
@@ -43,7 +45,7 @@ public class BlockService implements Runnable {
 
     public void deleteBlock(Block block) {
         blockFiles.remove(block);
-        File localFile = new File("blk_" + block.getBlockID());
+        File localFile = new File("blk_" + block.getBlockID() + "dn_" + this.datanodeId);
         if (localFile.delete()) {
             System.out.println(localFile.getName() + " is deleted!");
         } else {

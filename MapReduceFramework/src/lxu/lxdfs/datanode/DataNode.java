@@ -50,7 +50,7 @@ public class DataNode implements Runnable {
 	public DataNode() throws Exception {
 		dataNodeServerSocket = new ServerSocket(port);
         nameNodeHostName = InetAddress.getLocalHost().getHostAddress();
-		blockService = new BlockService(dataNodeServerSocket, true);
+		blockService = new BlockService(dataNodeServerSocket, true, this.nodeID);
 		blockServiceThread = new Thread(blockService);
 		blockServiceThread.start();
         register();

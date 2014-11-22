@@ -20,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -65,17 +66,22 @@ public class ReduceTask extends Task implements Serializable {
 			if (addr == InetAddress.getLocalHost().getHostAddress()) {
 				reduceInput1 = getReduceInput(this.taskAttemptID);
 			} else {
-				Socket sock = new Socket(addr, port);
-				ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
-				out.writeObject(this.getTaskAttemptID());
-				System.err.println("R: Ask for input");
-				ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-				reduceInput1 = (HashMap<Text, LinkedList<Text>>) in.readObject();
-				System.err.println("R: Get input");
-				System.err.println("reduceinput size" + reduceInput.size());
-				in.close();
-				out.close();
-				sock.close();
+				try {
+					Socket sock = new Socket(addr, port);
+					ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+					out.writeObject(this.getTaskAttemptID());
+					System.err.println("R: Ask for input");
+					ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+					reduceInput1 = (HashMap<Text, LinkedList<Text>>) in.readObject();
+					System.err.println("R: Get input");
+					System.err.println("reduceinput size" + reduceInput.size());
+					in.close();
+					out.close();
+					sock.close();
+				} catch (Exception e) {
+					System.err.println("Cannot connect to this tasktracker.");
+					e.printStackTrace();
+				}
 			}
 
 			// Merge reduce input

@@ -78,7 +78,8 @@ public class TaskTracker implements Runnable {
 
 	public static void main(String[] args) {
 		JobConf jobConf = null;
-		TaskTracker taskTracker = new TaskTracker(jobConf, "TaskTracker1", 4, 4);
+		String taskTrackerName =  ((System.currentTimeMillis() + "").hashCode()%1000) + "";
+		TaskTracker taskTracker = new TaskTracker(jobConf, taskTrackerName, 4, 4);
 		new Thread(taskTracker).start();
 		taskTracker.startInterListener();
 	}

@@ -41,7 +41,7 @@ public class TestJob {
         job.setReducerClass(TestReduce.class);
         job.setInputFormatClass(TextInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
-        job.setInputPath("hello");
+        job.setInputPath("h1");
 
         job.waitForCompletion();
     }

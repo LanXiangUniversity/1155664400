@@ -154,6 +154,9 @@ public class Job extends JobContext {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {}
         }
+        System.out.println(String.format("Map : %5.2f%% Reduce : %5.2f%%",
+                status.getMapProgress(),
+                status.getReduceProgress()));
 
         System.out.println("Job " + getJobName() + " completed");
         return isSuccessful();

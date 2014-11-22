@@ -197,12 +197,15 @@ public class TaskTracker implements Runnable {
 
 		// Ask for taskReports.
 		LinkedList<TaskStatus> statuses = new LinkedList<TaskStatus>();
-		for (TaskAttemptID taskAttemptID : this.taskPool.keySet()) {
+        Iterator<TaskAttemptID> attemptIDIterator = this.taskPool.keySet().iterator();
+        while (attemptIDIterator.hasNext()) {
+            TaskAttemptID taskAttemptID = attemptIDIterator.next();
 			TaskRunner taskRunner = this.taskPool.get(taskAttemptID);
 			TaskStatus taskStatus = taskRunner.getStatus();
 
 			if (taskRunner.status.getState() == TaskStatus.SUCCEEDED) {
-				this.taskPool.remove(taskAttemptID);
+                attemptIDIterator.remove();
+				//this.taskPool.remove(taskAttemptID);
 			} else { // Terminate the task tracker.
 				if (taskRunner.status.getState() == TaskStatus.FAILED) {
 					if (taskRunner.getAttempNum() == MAX_ATTEMPT_NUM) {

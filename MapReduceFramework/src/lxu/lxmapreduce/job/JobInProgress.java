@@ -110,6 +110,7 @@ public class JobInProgress {
         TaskAttemptID taskID = status.getTaskID();
         System.out.println("Task '" + taskID.getTaskID() + "' has completed!");
         tip.setTaskCompleted(taskID);
+        jobTracker.addSucceedTask(taskID, status.getTaskTracker());
         if (tip.isMapTask()) {
             runningMapTasks--;
             finishedMapTasks++;
@@ -129,11 +130,6 @@ public class JobInProgress {
                     runningMapTasksMap.remove(hostIP);
                 }
             }
-            /*
-            System.out.println(String.format("Map : %d%%, Reduce : %d%%",
-                    (finishedMapTasks / numMapTasks) * 100,
-                    (finishedReduceTasks / numReduceTasks) * 100));
-                    */
         } else {
             runningReduceTasks--;
             finishedReduceTasks++;

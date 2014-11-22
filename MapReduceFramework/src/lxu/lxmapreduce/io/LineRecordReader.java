@@ -1,10 +1,14 @@
 package lxu.lxmapreduce.io;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
+import java.net.Socket;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
+import lxu.lxdfs.client.ClientPacket;
 import lxu.lxdfs.datanode.DataNode;
+import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.metadata.LocatedBlock;
@@ -13,14 +17,12 @@ import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 /**
  * Treats keys as offset in file and value as line.
  * Created by Wei on 11/11/14.
  */
 public class LineRecordReader extends RecordReader<LongWritable, Text> {
+
 	private int lineNum = 0;
 	private LineReader in;
 	private LongWritable key = null;
@@ -84,8 +86,36 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
 			if (!file.exists()) {
 				// TODO: read from remote.
 				for (DataNodeDescriptor dataNode : this.locatedBlockses.get(this.currentSplit).getLocations()) {
+					boolean isFailed = false;
+					Socket sock = null;
+					ObjectOutputStream oos = null;
+					ObjectInputStream ois = null;
 
-					if () {
+					try {
+						// Connect to the first DataNode.
+						sock = new Socket(dataNode.getDataNodeIP(), dataNode.getDataNodePort());
+						// Read a Block from DataNode
+						oos = new ObjectOutputStream(sock.getOutputStream());
+						oos.writeObject(generateReadPacket(this.locatedBlockses.get(this.currentSplit).getBlock()));
+						System.out.println("read block from remote");
+						ois = new ObjectInputStream(sock.getInputStream());
+						DataNodePacket packet = (DataNodePacket) ois.readObject();
+						ois.close();
+						sock.close();
+
+						List<String> lines = packet.getLines();
+						PrintWriter pw = new PrintWriter(new FileWriter(this.inputFiles.get(this.currentSplit)));
+						for (String line : lines) {
+							pw.println(line);
+						}
+						pw.close();
+						isFailed = false;
+					} catch(Exception e) {
+						isFailed = true;
+						e.printStackTrace();
+					}
+
+					if (!isFailed) {
 						if (this.currentSplit > 0) this.in.close();
 						this.in = new LineReader(inputFiles.get(this.currentSplit));
 						this.currentSplit++;
@@ -102,6 +132,13 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
 		}
 
 		return false;
+	}
+
+	public ClientPacket generateReadPacket(Block block) {
+		ClientPacket packet = new ClientPacket();
+		packet.setOperation(ClientPacket.BLOCK_READ);
+		packet.setBlock(block);
+		return packet;
 	}
 
 	@Override

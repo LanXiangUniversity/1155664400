@@ -91,6 +91,8 @@ public class ClientInputStream extends ClientStream {
 		return res.substring(1);
 	}
 
+
+
 	public ClientPacket generateReadPacket(Block block) {
 		ClientPacket packet = new ClientPacket();
 		packet.setOperation(ClientPacket.BLOCK_READ);

@@ -7,6 +7,8 @@ package lxu.lxmapreduce.io;
 import java.util.Iterator;
 import java.util.List;
 
+import lxu.lxdfs.metadata.LocatedBlock;
+import lxu.lxdfs.metadata.LocatedBlocks;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
@@ -22,7 +24,8 @@ import java.util.Map;
  */
 public abstract class RecordReader<KEYIN, VALUEIN> {
 
-	public abstract void initialize(List<String> inputFiles) throws FileNotFoundException;
+	public abstract void initialize(List<String> inputFiles, List<LocatedBlock> locatedBlockses) throws IOException;
+
 	/**
 	 * Get the current value.
 	 */

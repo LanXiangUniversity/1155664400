@@ -28,11 +28,13 @@ import java.util.List;
 public class MapTask extends Task implements Serializable {
 	private List<String> inputsplits = new LinkedList<>();
     private List<String> outputFiles = new LinkedList<>();
+	private List<LocatedBlock> locatedBlocks = new LinkedList<>();
 
 	public MapTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
 		super(attemptID, partition, locatedBlock);
 
 		// TODO: Init inputsplits
+		this.locatedBlocks.add(locatedBlock);
 		inputsplits.add("blk_" + locatedBlock.getBlock().getBlockID());
 	}
 
@@ -101,7 +103,7 @@ public class MapTask extends Task implements Serializable {
 						RecordReader.class});
 
 		// Set input file and output file.
-		input.initialize(this.inputsplits);
+		input.initialize(this.inputsplits, this.locatedBlocks);
 		output.initialize(this.outputFiles);
 
 		mapperContext = contextConstructor.newInstance(mapper, jobConf, taskAttemptID, output, input);

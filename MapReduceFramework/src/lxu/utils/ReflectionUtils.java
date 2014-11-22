@@ -67,4 +67,8 @@ public class ReflectionUtils {
 	public static <T> T newInstance(Class<T> theClass) throws IllegalAccessException, InstantiationException {
 		return (T) theClass.newInstance();
 	}
+
+	public static void main(String args) {
+
+	}
 }

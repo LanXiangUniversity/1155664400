@@ -15,10 +15,7 @@ import lxu.lxmapreduce.tmp.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
@@ -62,18 +59,34 @@ public class ReduceTask extends Task implements Serializable {
         reduceOutput.add("part-" + partition);
 
 		for (String addr : mapperAddrs) {
-			// TODO: is localhost?
-			Socket sock = new Socket(addr, port);
-			ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
-			out.writeObject(this.getTaskAttemptID());
-			System.err.println("R: Ask for input");
-			ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
-			reduceInput = (HashMap<Text, LinkedList<Text>>) in.readObject();
-			System.err.println("R: Get input");
-			System.err.println("reduceinput size" + reduceInput.size());
-			in.close();
-			out.close();
-			sock.close();
+			HashMap<Text, LinkedList<Text>> reduceInput1 = null;
+			// TODO: is map localhost?
+			if (addr == InetAddress.getLocalHost().getHostAddress()) {
+				reduceInput1 = getReduceInput(this.taskAttemptID);
+			} else {
+				Socket sock = new Socket(addr, port);
+				ObjectOutputStream out = new ObjectOutputStream(sock.getOutputStream());
+				out.writeObject(this.getTaskAttemptID());
+				System.err.println("R: Ask for input");
+				ObjectInputStream in = new ObjectInputStream(sock.getInputStream());
+				reduceInput1 = (HashMap<Text, LinkedList<Text>>) in.readObject();
+				System.err.println("R: Get input");
+				System.err.println("reduceinput size" + reduceInput.size());
+				in.close();
+				out.close();
+				sock.close();
+			}
+
+			// Merge reduce input
+			for (Text text : reduceInput1.keySet()) {
+				LinkedList<Text> values1 = reduceInput1.get(text);
+				if (!reduceInput.containsKey(text)) {
+					reduceInput.put(text, values1);
+				} else {
+					LinkedList<Text> values = reduceInput.get(text);
+					values.addAll(values1);
+				}
+			}
 		}
 
 		taskContext = new TaskAttemptContext(jobConf, this.getTaskAttemptID());
@@ -109,5 +122,35 @@ public class ReduceTask extends Task implements Serializable {
 		input.close();
 		output.close();
         System.out.println("Reduce finished");
+	}
+
+
+	private HashMap<Text, LinkedList<Text>> getReduceInput(TaskAttemptID taskID) {
+		File folder = new File(".");
+		String namePrefix = taskID.getTaskID().toString();
+		HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
+		for (File fileEntry : folder.listFiles()) {
+			if (fileEntry.isFile() && fileEntry.getName().startsWith(namePrefix)) {
+				try {
+					BufferedReader reader = new BufferedReader(new FileReader(fileEntry));
+					String line = null;
+					while ((line = reader.readLine()) != null) {
+						String[] info = line.split("\t");
+						Text key = new Text(info[0]);
+						Text value = new Text(info[1]);
+						LinkedList<Text> values = contents.get(key);
+						if (values == null) {
+							values = new LinkedList<Text>();
+							contents.put(key, values);
+						}
+						values.add(value);
+
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return contents;
 	}
 }

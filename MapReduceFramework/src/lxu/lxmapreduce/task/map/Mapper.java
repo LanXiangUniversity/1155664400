@@ -23,7 +23,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
         RecordWriter<Text, Text> output = new LineRecordWriter();
 		RecordReader<LongWritable, Text> input = new LineRecordReader();
 
-		input.initialize(null);
+		input.initialize(null, null);
 		output.initialize(null);
 
 		Mapper.Context mapperContext = null;
@@ -43,7 +43,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
 
 		// Set input file and output file.
-		input.initialize(null);
+		input.initialize(null, null);
 		output.initialize(null);
 
 		mapper.run(mapperContext);

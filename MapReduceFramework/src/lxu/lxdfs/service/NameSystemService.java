@@ -47,8 +47,9 @@ public class NameSystemService implements INameSystemService {
 		this.fileNames = new HashSet<>();
 		this.lastResponseTime = new ConcurrentHashMap<>();
 		this.deletedFiles = new ConcurrentHashMap<>();
+		this.restoreBlocksQueue = new ConcurrentHashMap<>();
+		this.dataNodeTimeoutListener = new DataNodeTimeoutListener();
 		new Thread(this.dataNodeTimeoutListener).start();
-
 	}
 
 	public synchronized boolean isSafeMode() {
@@ -347,6 +348,7 @@ public class NameSystemService implements INameSystemService {
 	class DataNodeTimeoutListener implements Runnable {
 		@Override
 		public void run() {
+
 			while (nameNodeState != NameNodeState.IN_SAFE_MODE) {
 				try {
 					long currentTime = System.currentTimeMillis();

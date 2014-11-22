@@ -28,8 +28,6 @@ public class NameNode {
 		/* TODO exit safe mode. */
 
 		nameNode.nameSystem.exitSafeMode();
-
-
 	}
 
 	public void registerService() {

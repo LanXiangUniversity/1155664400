@@ -40,6 +40,7 @@ public class TaskTracker implements Runnable {
 	private IJobTracker jobTrackerService;
 	private long lastHeartbeat;
 	private long heartbeatInterval;
+	private static int MAX_ATTEMPT_NUM = 4;
 	private IntermediateListener interListener;
 
 	public TaskTracker(JobConf jobConf,
@@ -58,12 +59,10 @@ public class TaskTracker implements Runnable {
         try {
             registry = LocateRegistry.getRegistry();
             this.jobTrackerService = (IJobTracker) registry.lookup("JobTracker");
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
+        } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
-        this.interListener = new IntermediateListener();
+		this.interListener = new IntermediateListener();
         this.isRunning = true;
 	}
 
@@ -200,21 +199,27 @@ public class TaskTracker implements Runnable {
 		LinkedList<TaskStatus> statuses = new LinkedList<TaskStatus>();
 		for (TaskAttemptID taskAttemptID : this.taskPool.keySet()) {
 			TaskRunner taskRunner = this.taskPool.get(taskAttemptID);
-
 			TaskStatus taskStatus = taskRunner.getStatus();
+
+			if (taskRunner.status.getState() == TaskStatus.SUCCEEDED) {
+				this.taskPool.remove(taskAttemptID);
+			} else { // Terminate the task tracker.
+				if (taskRunner.status.getState() == TaskStatus.FAILED) {
+					if (taskRunner.getAttempNum() == MAX_ATTEMPT_NUM) {
+						System.err.println("Task fails.");
+					} else { // Restart this task.
+						taskStatus.setState(TaskStatus.RUNNING);
+						taskRunner.getStatus().setState(TaskStatus.RUNNING);
+						taskRunner.setAttempNum(taskRunner.getAttempNum() + 1);
+						new Thread(taskRunner).start();
+					}
+				}
+			}
 
 			statuses.add(taskStatus);
 		}
+
 		taskTrackerStatus.setTaskReports(statuses);
-
-		/* TODO:Reap threads */
-		for (TaskAttemptID taskAttemptID : this.taskPool.keySet()) {
-			TaskRunner taskRunner = this.taskPool.get(taskAttemptID);
-
-			if (taskRunner.status.getState() == TaskStatus.RUNNING) {
-				this.taskPool.remove(taskAttemptID);
-			}
-		}
 
 		return taskTrackerStatus;
 	}
@@ -250,11 +255,14 @@ public class TaskTracker implements Runnable {
 		private TaskStatus status;
 		private Task task;
 		private JobConf jobConf;
+		private int attempNum;
 
 		public TaskRunner(JobConf jobConf, Task task) {
 			this.task = task;
 			this.jobConf = jobConf;
-            task.setConf(jobConf);
+            this.task.setConf(jobConf);
+			this.attempNum = 0;
+
             if (task.isMapTask()) {
                 this.status = new MapTaskStatus(task.getTaskAttemptID(),
                                                 taskTrackerName,
@@ -264,7 +272,16 @@ public class TaskTracker implements Runnable {
                                                    taskTrackerName,
                                                    TaskStatus.PREP);
             }
+
             task.initialize();
+		}
+
+		public int getAttempNum() {
+			return attempNum;
+		}
+
+		public void setAttempNum(int attempNum) {
+			this.attempNum = attempNum;
 		}
 
 		public Task getTask() {
@@ -299,6 +316,7 @@ public class TaskTracker implements Runnable {
 					| ClassNotFoundException
 					| InstantiationException
 					| IllegalAccessException e) {
+				this.status.setState(TaskStatus.FAILED);
 				e.printStackTrace();
 			}
 		}
@@ -368,9 +386,7 @@ public class TaskTracker implements Runnable {
 				in.close();
 				out.close();
 				sock.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
+			} catch (IOException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
@@ -396,8 +412,6 @@ public class TaskTracker implements Runnable {
                             values.add(value);
 
                         }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

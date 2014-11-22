@@ -23,9 +23,9 @@ public class NameSystemService implements INameSystemService {
 	private String rootPath;
 	private int replicaNum = 1;
 	private int blockID = 0;
-	private Map<DataNodeDescriptor, Long> lastResponseTime;
+	private ConcurrentHashMap<DataNodeDescriptor, Long> lastResponseTime;
 	// List of Data Nodes available.
-	private Map<Integer, DataNodeDescriptor> dataNodes;
+	private ConcurrentHashMap<Integer, DataNodeDescriptor> dataNodes;
 	// Map from file name to Block.
 	private ConcurrentHashMap<String, List<Block>> fileNameToBlocksMap;
 	// Map from Block to Data Nodes.
@@ -154,7 +154,7 @@ public class NameSystemService implements INameSystemService {
 
 
 	/**
-	 * @param path
+	 * @param fileName
 	 * @return
 	 * @throws RemoteException
 	 */
@@ -177,14 +177,14 @@ public class NameSystemService implements INameSystemService {
 	}
 
 	@Override
-	public synchronized boolean delete(String path) throws RemoteException {
+	public synchronized boolean delete(String fileName) throws RemoteException {
 		if (this.isSafeMode()) {
 			return false;
 		}
 
-		this.fileNames.remove(path);
-		this.deletedFiles.put(path.toString(), this.fileNameToBlocksMap.get(path));
-		this.fileNameToBlocksMap.remove(path);
+		this.fileNames.remove(fileName);
+		this.deletedFiles.put(fileName, this.fileNameToBlocksMap.get(fileName));
+		this.fileNameToBlocksMap.remove(fileName);
 
 		return true;
 	}
@@ -358,7 +358,6 @@ public class NameSystemService implements INameSystemService {
 				}
 		    }
  	    }
-
 
         return commands;
     }

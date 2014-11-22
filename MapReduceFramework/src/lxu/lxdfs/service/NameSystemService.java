@@ -104,9 +104,10 @@ public class NameSystemService implements INameSystemService {
 				DataNodeDescriptor tmpDataNode = this.dataNodes.get(dnId);
 
 				if (tmpDataNode.getBlockNum() < min &&
-						!this.blockToLocationsMap.get(block).contains(tmpDataNode)) {
+						(!locations.contains(tmpDataNode))) {
 					min = tmpDataNode.getBlockNum();
 					dn = tmpDataNode;
+					break;
 				}
 			}
 
@@ -299,7 +300,6 @@ public class NameSystemService implements INameSystemService {
 
 			    DataNodeDescriptor dn1 = iter.next();
 
-
 			    DataNodeRestoreCommand command = new DataNodeRestoreCommand(blk, dn1);
 
 			    commands.add(command);
@@ -351,6 +351,7 @@ public class NameSystemService implements INameSystemService {
 				try {
 					long currentTime = System.currentTimeMillis();
 
+					// Check every dataNode.
 					for (DataNodeDescriptor dataNode : lastResponseTime.keySet()) {
 						long lastTime = lastResponseTime.get(dataNode);
 
@@ -362,19 +363,24 @@ public class NameSystemService implements INameSystemService {
 							for (Block blk : blockToLocationsMap.keySet()) {
 								Set<DataNodeDescriptor> locations = blockToLocationsMap.get(blk);
 
+								// Keep all blocks of this data node into a queue.
 								if (locations.contains(dataNode)) {
 									locations.remove(dataNode);
 
-									// Get datanode which has minimum blocks number.
+									// Get data node which has minimum blocks number.
+									// And has no replica of then block.
 									int min = Integer.MAX_VALUE;
 									DataNodeDescriptor dn = dataNodes.entrySet().iterator().next().getValue();
 									for (int dnId : dataNodes.keySet()) {
 										DataNodeDescriptor tmpDataNode = dataNodes.get(dnId);
 
 										if (tmpDataNode.getBlockNum() < min &&
-												!blockToLocationsMap.get(blk).contains(tmpDataNode)) {
+												(!blockToLocationsMap.get(blk).contains(tmpDataNode)
+												|| blockToLocationsMap.get(blk) == null
+												|| blockToLocationsMap.get(blk).size() == 0)) {
 											min = tmpDataNode.getBlockNum();
 											dn = tmpDataNode;
+											break;
 										}
 									}
 
@@ -395,7 +401,6 @@ public class NameSystemService implements INameSystemService {
 							}
 						}
 					}
-
 
 					Thread.sleep(HEARTBEAT_TIMEOUT);
 				} catch (InterruptedException e) {

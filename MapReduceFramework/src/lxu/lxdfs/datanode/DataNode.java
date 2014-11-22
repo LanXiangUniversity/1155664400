@@ -2,6 +2,7 @@ package lxu.lxdfs.datanode;
 
 import lxu.lxdfs.metadata.*;
 import lxu.lxdfs.service.INameSystemService;
+import lxu.lxmapreduce.tmp.Configuration;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -69,7 +70,10 @@ public class DataNode implements Runnable {
 	}
 
 	private void register() throws IOException, NotBoundException {
-		Registry registry = LocateRegistry.getRegistry();
+        Configuration conf = new Configuration();
+        String masterAddr = conf.getSocketAddr("master.address", "localhost");
+        int rmiPort = conf.getInt("rmi.port", 1099);
+		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
 		nameNode = (INameSystemService) registry.lookup("NameSystemService");
 		nodeID = nameNode.register(nameNodeHostName, port, blockService.getAllBlocks());
 		System.out.println("Data Node registered. Node ID = " + nodeID);

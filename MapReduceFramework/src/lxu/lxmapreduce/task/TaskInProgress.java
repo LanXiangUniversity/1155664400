@@ -106,7 +106,15 @@ public class TaskInProgress {
         return !activeTasks.isEmpty();
     }
 
+    public void clearActiveTasks() {
+        this.activeTasks.clear();
+    }
+
     public int getIdWithinJob() {
         return this.partition;
+    }
+
+    public LocatedBlock getLocatedBlock() {
+        return locatedBlock;
     }
 }

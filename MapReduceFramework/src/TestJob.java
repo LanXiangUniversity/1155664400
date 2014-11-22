@@ -4,7 +4,6 @@ import lxu.lxmapreduce.task.map.Mapper;
 import lxu.lxmapreduce.task.reduce.Reducer;
 import lxu.lxmapreduce.tmp.Configuration;
 import lxu.lxmapreduce.tmp.JobConf;
-import sun.font.TextRecord;
 
 import java.io.IOException;
 import java.util.Iterator;

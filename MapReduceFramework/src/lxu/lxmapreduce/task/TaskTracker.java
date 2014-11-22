@@ -5,6 +5,7 @@ import lxu.lxmapreduce.job.IJobTracker;
 import lxu.lxmapreduce.metadata.*;
 import lxu.lxmapreduce.task.map.MapTaskStatus;
 import lxu.lxmapreduce.task.reduce.ReduceTaskStatus;
+import lxu.lxmapreduce.tmp.Configuration;
 import lxu.lxmapreduce.tmp.JobConf;
 
 import java.io.*;
@@ -54,10 +55,12 @@ public class TaskTracker implements Runnable {
 		this.initialContact = true;
 		this.heartbeatInterval = 3 * 1000;
 		this.acceptNewTasks = true;
-		// TODO get  JobTracker remote reference.
         Registry registry = null;
         try {
-            registry = LocateRegistry.getRegistry();
+            Configuration conf = new Configuration();
+            String masterAddr = conf.getSocketAddr("master.address", "localhost");
+            int rmiPort = conf.getInt("rmi.port", 1099);
+            registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
             this.jobTrackerService = (IJobTracker) registry.lookup("JobTracker");
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();

@@ -35,8 +35,8 @@ public class TaskScheduler {
         int remainingReduceLoad = 0;
 
         for (String jobID : jobQueue) {
-            JobInProgress job= jobTracker.getJobInProgress(jobID);
-            if (!job.getJobStatus().isJobComplete()) {
+            JobInProgress job = jobTracker.getJobInProgress(jobID);
+            if (!job.isComplete()) {
                 remainingMapLoad += (job.getNumMapTasks() -
                                      job.getRunningMapTasks() -
                                      job.getFinishedMapTasks());
@@ -47,8 +47,6 @@ public class TaskScheduler {
                 }
             }
         }
-		//int remainingMapLoad = job.getNumMapTasks() - job.getRunningMapTasks() - job.getFinishedMapTasks();
-		//int remainingReduceLoad = job.getNumReduceTasks() - job.getRunningReduceTasks() - job.getFailedReduceTask();
 
         int mapLoad = Math.min(trackerMapCapacity - trackerRunningMaps, remainingMapLoad);
         int reduceLoad = Math.min(trackerReduceCapacity - trackerRunningReduces, remainingReduceLoad);

@@ -1,5 +1,6 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
@@ -38,6 +39,9 @@ public class JobInProgress {
     private Set<TaskInProgress> nonRunningReduceTaskSet;
     private Set<TaskInProgress> runningReduceTaskSet;
 
+    private Set<TaskInProgress> failedMapTaskSet;
+    private Set<TaskInProgress> failedReduceTaskSet;
+
     private boolean tasksInited = false;
 
     public JobInProgress(String jobID, JobConf jobConf, JobTracker jobTracker) {
@@ -49,6 +53,8 @@ public class JobInProgress {
         this.numReduceTasks = jobConf.getNumReduceTasks();
         nonRunningReduceTaskSet = new HashSet<TaskInProgress>();
         runningReduceTaskSet = new HashSet<TaskInProgress>();
+        failedMapTaskSet = new HashSet<TaskInProgress>();
+        failedReduceTaskSet = new HashSet<TaskInProgress>();
     }
 
     public void initTasks() {
@@ -57,7 +63,7 @@ public class JobInProgress {
         }
 
         System.out.println("Initializing job: " + jobID);
-        LocatedBlock[] allBlocks = getFileBlocks("hello");
+        LocatedBlock[] allBlocks = getFileBlocks(jobConf.getInputPath());
         numMapTasks = allBlocks.length;
         // Init Map Tasks
         this.maps = new TaskInProgress[numMapTasks];
@@ -195,36 +201,34 @@ public class JobInProgress {
         }
 
         String taskTrackerName = taskTrackerStatus.getTrackerName();
+        String trackerHost = jobTracker.getHost(taskTrackerName);
+
         TaskInProgress taskInProgress = null;
 
         // When scheduling a map task:
-        //  TODO: 0) Schedule a failed task without considering locality
-        //  1) Schedule non-running tasks
-        //  2) Schedule tasks with no location information
+        //  0) Schedule a failed task without considering locality
+        //  1) Schedule non-running local tasks
+        //  2) Schedule non-running non-local tasks
 
-        // 0) Schedule the task with the most failures, unless failure was on this
-        //    machine
-        /*
-        tip = findTaskFromList(failedMaps, tts, numUniqueHosts, false);
-            if (tip != null) {
-                // Add to the running list
-                scheduleMap(tip);
-                LOG.info("Choosing a failed task " + tip.getTIPId());
-                return tip.getIdWithinJob();
+        //
+        // 0) Schedule a failed map task
+        //
+        for (TaskInProgress failedMapTask : failedMapTaskSet) {
+            if (!failedMapTask.isRunning()) {
+                taskInProgress = failedMapTask;
+                scheduleMap(trackerHost, taskInProgress);
+                failedMapTaskSet.remove(failedMapTask);
+                return taskInProgress.getIdWithinJob();
             }
-        */
-
-        String trackerHost = jobTracker.getHost(taskTrackerName);
+        }
 
         //
         // 1) Non-running TIP :
         //
-
         if (trackerHost != null) {
             List<TaskInProgress> allTasks = localMapTasksMap.get(trackerHost);
             for (TaskInProgress task : allTasks) {
                 if (!task.isRunning()) {
-                    //allTasks.remove(task);
                     taskInProgress = task;
                     break;
                 }
@@ -236,23 +240,13 @@ public class JobInProgress {
             return taskInProgress.getIdWithinJob();
         }
 
-        // TODO: 2. Search non-local tips for a new task
+        // 2) non-local tasks
         for (TaskInProgress mapTask : maps) {
             if (!mapTask.isRunning()) {
                 scheduleMap(trackerHost, mapTask);
                 return mapTask.getIdWithinJob();
             }
         }
-        /*
-        tip = findTaskFromList(nonLocalMaps, tts, numUniqueHosts, false);
-        if (tip != null) {
-            // Add to the running list
-            scheduleMap(tip);
-
-            LOG.info("Choosing a non-local task " + tip.getTIPId());
-            return tip.getIdWithinJob();
-        }
-        */
 
         return -1;
     }
@@ -301,6 +295,15 @@ public class JobInProgress {
         }
 
         TaskInProgress taskInProgress = null;
+
+        for (TaskInProgress failedReduceTask : failedReduceTaskSet) {
+            if (!failedReduceTask.isRunning()) {
+                taskInProgress = failedReduceTask;
+                scheduleReduce(taskInProgress);
+                failedReduceTaskSet.remove(failedReduceTask);
+                return taskInProgress.getIdWithinJob();
+            }
+        }
 
         Iterator<TaskInProgress> iter = nonRunningReduceTaskSet.iterator();
         while (iter.hasNext()) {
@@ -410,6 +413,27 @@ public class JobInProgress {
 
     public void setJobStatus(JobStatus jobStatus) {
         this.jobStatus = jobStatus;
+    }
+
+    public void addFailedTaskSet(TaskInProgress failedTask, boolean finished) {
+        if (finished) {
+            if (failedTask.isMapTask()) {
+                finishedMapTasks--;
+                this.failedMapTaskSet.add(failedTask);
+            } else {
+                finishedReduceTasks--;
+                this.failedReduceTaskSet.add(failedTask);
+            }
+        } else {
+            if (failedTask.isMapTask()) {
+                runningMapTasks--;
+                this.failedMapTaskSet.add(failedTask);
+            } else {
+                runningReduceTasks--;
+                this.failedReduceTaskSet.add(failedTask);
+            }
+        }
+        failedTask.clearActiveTasks();
     }
 
     public boolean isComplete() {

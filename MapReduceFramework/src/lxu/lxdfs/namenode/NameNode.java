@@ -2,6 +2,8 @@ package lxu.lxdfs.namenode;
 
 import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
+import lxu.lxmapreduce.job.JobTracker;
+import lxu.lxmapreduce.tmp.Configuration;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -13,8 +15,15 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class NameNode {
 	private INameSystemService nameSystem;
+    private Configuration configuration;
+    private static Registry registry;
+    private JobTracker jobTracker;
 
-	public static void main(String[] args) throws RemoteException {
+    public NameNode() throws Exception {
+        configuration = new Configuration();
+    }
+
+	public static void main(String[] args) throws Exception {
 		NameNode nameNode = new NameNode();
 
 		// Regsiter and start RPC service.
@@ -31,17 +40,16 @@ public class NameNode {
 	}
 
 	public void registerService() {
-		//if (System.getSecurityManager() == null) {
-		//	System.setSecurityManager(new RMISecurityManager());
-		//}
+        int rmiPort = configuration.getInt("rmi.port", 1099);
 		try {
 			INameSystemService nameSystem = new NameSystemService();
-			//Naming.rebind("rmi://localhost:56789/NameSystemService", nameSystem);
-			INameSystemService stub =
-					(INameSystemService) UnicastRemoteObject.exportObject(nameSystem, 0);
-			Registry registry = LocateRegistry.getRegistry();
+			registry = LocateRegistry.createRegistry(rmiPort);
+            INameSystemService stub =
+                    (INameSystemService) UnicastRemoteObject.exportObject(nameSystem, rmiPort);
 			registry.rebind("NameSystemService", stub);
 			this.nameSystem = nameSystem;
+            jobTracker = new JobTracker(nameSystem);
+            jobTracker.startService(registry, rmiPort);
 			System.out.println("NameNode Start!");
 		} catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());

@@ -158,7 +158,11 @@ public class Job extends JobContext {
                 status.getMapProgress(),
                 status.getReduceProgress()));
 
-        System.out.println("Job " + getJobName() + " completed");
+        if (status.isMapSuccessful() && status.isReduceSuccessful()) {
+            System.out.println("Job " + getJobName() + " succeed");
+        } else {
+            System.out.println("Job " + getJobName() + " failed");
+        }
         return isSuccessful();
     }
 

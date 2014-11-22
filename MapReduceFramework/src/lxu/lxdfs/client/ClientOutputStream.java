@@ -36,7 +36,7 @@ public class ClientOutputStream {
 	private Queue<String> buffer;
 	private LinkedList<AckListener> ackListeners;
 
-	public ClientOutputStream() throws RemoteException, NotBoundException {
+	public ClientOutputStream(String masterAddr, int rmiPort) throws RemoteException, NotBoundException {
 		this.listenPort = 15998;
 		this.locations = new LinkedList<DataNodeDescriptor>();
 		this.dataQueue = new LinkedList<ClientPacket>();
@@ -44,7 +44,7 @@ public class ClientOutputStream {
 		this.ackListeners = new LinkedList<AckListener>();
 		this.buffer = new LinkedList<String>();
 
-		Registry registry = LocateRegistry.getRegistry();
+		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
 		this.nameSystem = (INameSystemService) registry.lookup("NameSystemService");
 	}
 

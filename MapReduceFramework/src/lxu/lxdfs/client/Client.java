@@ -1,6 +1,7 @@
 package lxu.lxdfs.client;
 
 import lxu.lxdfs.service.INameSystemService;
+import lxu.lxmapreduce.tmp.Configuration;
 
 import java.io.*;
 import java.rmi.NotBoundException;
@@ -18,9 +19,13 @@ public class Client {
 	private ClientState state;
 	private BufferedReader consoleReader;
 	private INameSystemService nameSystemService;
+    private Configuration conf;
 
 	public Client() throws RemoteException, NotBoundException {
-		Registry registry = LocateRegistry.getRegistry();
+        conf = new Configuration();
+        String masterAddr = conf.getSocketAddr("master.address", "localhost");
+        int rmiPort = conf.getInt("rmi.port", 1099);
+		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
 		this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
 		this.state = ClientState.RUNNING;
 		this.consoleReader = new BufferedReader(
@@ -92,7 +97,9 @@ public class Client {
                 content.add(line);
             }
 
-			ClientOutputStream cos = new ClientOutputStream();
+            String masterAddr = conf.getSocketAddr("master.address", "localhost");
+            int rmiPort = conf.getInt("rmi.port", 1099);
+			ClientOutputStream cos = new ClientOutputStream(masterAddr, rmiPort);
 			//cos.setFileName(fileName);
             cos.setFileName(dfsFileName);
 			cos.write(content);
@@ -102,7 +109,9 @@ public class Client {
 				return;
 			}
 
-			ClientInputStream clientInputStream = new ClientInputStream(args[1]);
+            String masterAddr = conf.getSocketAddr("master.address", "localhost");
+            int rmiPort = conf.getInt("rmi.port", 1099);
+			ClientInputStream clientInputStream = new ClientInputStream(args[1], masterAddr, rmiPort);
 			String content = clientInputStream.read();
 
 			File file = new File(args[2]);

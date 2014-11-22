@@ -25,9 +25,11 @@ public class ClientInputStream extends ClientStream {
 	private String fileName;
 	private INameSystemService nameSystemService;
 
-	public ClientInputStream(String fileName) throws RemoteException, NotBoundException {
+	public ClientInputStream(String fileName, String masterAddr, int rmiPort)
+            throws RemoteException, NotBoundException
+    {
 		this.fileName = fileName;
-		Registry registry = LocateRegistry.getRegistry();
+		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
 		this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
 	}
 

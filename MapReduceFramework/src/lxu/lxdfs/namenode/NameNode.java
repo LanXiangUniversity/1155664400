@@ -42,7 +42,7 @@ public class NameNode {
 	public void registerService() {
         int rmiPort = configuration.getInt("rmi.port", 1099);
 		try {
-			INameSystemService nameSystem = new NameSystemService();
+			INameSystemService nameSystem = new NameSystemService(configuration);
 			registry = LocateRegistry.createRegistry(rmiPort);
             INameSystemService stub =
                     (INameSystemService) UnicastRemoteObject.exportObject(nameSystem, rmiPort);

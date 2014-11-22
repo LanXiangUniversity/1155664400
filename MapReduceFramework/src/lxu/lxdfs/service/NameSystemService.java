@@ -4,6 +4,7 @@ package lxu.lxdfs.service;
 import lxu.lxdfs.client.ClientOutputStream;
 import lxu.lxdfs.metadata.*;
 import lxu.lxdfs.namenode.NameNodeState;
+import lxu.lxmapreduce.tmp.Configuration;
 
 import java.nio.file.Path;
 import java.rmi.NotBoundException;
@@ -38,8 +39,10 @@ public class NameSystemService implements INameSystemService {
 	private ConcurrentHashMap<DataNodeDescriptor, ArrayList<Block>> restoreBlocksQueue;
 	private NameNodeState nameNodeState = NameNodeState.STARTING;
 	private DataNodeTimeoutListener dataNodeTimeoutListener;
+    private Configuration conf;
 
-	public NameSystemService() {
+	public NameSystemService(Configuration conf) {
+        this.conf = conf;
 		this.dataNodes = new ConcurrentHashMap<>();
 		this.fileNameToBlocksMap = new ConcurrentHashMap<String, List<Block>>();
 		this.blockToLocationsMap = new ConcurrentHashMap<Block, HashSet<DataNodeDescriptor>>();
@@ -150,7 +153,9 @@ public class NameSystemService implements INameSystemService {
 			return null;
 		}
 
-		ClientOutputStream cos = new ClientOutputStream();
+        String masterAddr = conf.getSocketAddr("master.address", "localhost");
+        int rmiPort = conf.getInt("rmi.port", 1099);
+		ClientOutputStream cos = new ClientOutputStream(masterAddr, rmiPort);
 		cos.setFileName(fileName);
 
 		return cos;

@@ -28,7 +28,9 @@ public class JobClient {
     public void locateJobTracker() {
         Registry registry = null;
         try {
-            registry = LocateRegistry.getRegistry();
+            String masterAddr = jobConf.getSocketAddr("master.address", "localhost");
+            int rmiPort = jobConf.getInt("rmi.port", 1099);
+            registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
             jobTracker = (IJobTracker)registry.lookup("JobTracker");
             if (jobTracker == null) {
                 System.out.println("Cannot lookup JobTracker");

@@ -1,12 +1,15 @@
 package lxu.lxmapreduce.task;
 
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.job.IJobTracker;
-import lxu.lxmapreduce.metadata.*;
+import lxu.lxmapreduce.metadata.HeartbeatResponse;
+import lxu.lxmapreduce.metadata.LaunchTaskAction;
+import lxu.lxmapreduce.metadata.TaskTrackerAction;
+import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.map.MapTaskStatus;
 import lxu.lxmapreduce.task.reduce.ReduceTaskStatus;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +21,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,6 +30,7 @@ import java.util.Map;
  * Created by Wei on 11/12/14.
  */
 public class TaskTracker implements Runnable {
+	private static int MAX_ATTEMPT_NUM = 4;
 	private boolean initialContact;
 	private String taskTrackerName;
 	private TaskTrackerStatus status;
@@ -41,7 +44,6 @@ public class TaskTracker implements Runnable {
 	private IJobTracker jobTrackerService;
 	private long lastHeartbeat;
 	private long heartbeatInterval;
-	private static int MAX_ATTEMPT_NUM = 4;
 	private IntermediateListener interListener;
 
 	public TaskTracker(JobConf jobConf,
@@ -69,13 +71,6 @@ public class TaskTracker implements Runnable {
         this.isRunning = true;
 	}
 
-	public void startInterListener() {
-		// TODO: Init interListener
-		//this.interListener.setPort();
-		//this.interListener.setFileName();
-		new Thread(this.interListener).start();
-	}
-
 	public static void main(String[] args) {
 		JobConf jobConf = null;
 		String taskTrackerName =  "taskTracker-" +
@@ -83,6 +78,13 @@ public class TaskTracker implements Runnable {
 		TaskTracker taskTracker = new TaskTracker(jobConf, taskTrackerName, 4, 4);
 		new Thread(taskTracker).start();
 		taskTracker.startInterListener();
+	}
+
+	public void startInterListener() {
+		// TODO: Init interListener
+		//this.interListener.setPort();
+		//this.interListener.setFileName();
+		new Thread(this.interListener).start();
 	}
 
 	public TaskTrackerStatus getStatus() {

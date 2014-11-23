@@ -22,83 +22,81 @@ import java.util.Iterator;
  * Created by Wei on 11/8/14.
  */
 public class ClientInputStream extends ClientStream {
-	private String fileName;
-	private INameSystemService nameSystemService;
+    private String fileName;
+    private INameSystemService nameSystemService;
 
-	public ClientInputStream(String fileName, String masterAddr, int rmiPort)
-            throws RemoteException, NotBoundException
-    {
-		this.fileName = fileName;
-		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
-		this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
-	}
+    public ClientInputStream(String fileName, String masterAddr, int rmiPort)
+            throws RemoteException, NotBoundException {
+        this.fileName = fileName;
+        Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
+        this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
+    }
 
-	public String getFileName() {
-		return fileName;
-	}
+    public String getFileName() {
+        return fileName;
+    }
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
-	public INameSystemService getNameSystemService() {
-		return nameSystemService;
-	}
+    public INameSystemService getNameSystemService() {
+        return nameSystemService;
+    }
 
-	public void setNameSystemService(INameSystemService nameSystemService) {
-		this.nameSystemService = nameSystemService;
-	}
+    public void setNameSystemService(INameSystemService nameSystemService) {
+        this.nameSystemService = nameSystemService;
+    }
 
-	// Read the content of file.
-	public String read() throws IOException, ClassNotFoundException {
-		// Get  AllocatedBlocks of the file from NameNode.
-		LocatedBlock[] blockToDataNodeMap = null;
-		blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName).getBlocks();
-		String res = "";
+    // Read the content of file.
+    public String read() throws IOException, ClassNotFoundException {
+        // Get  AllocatedBlocks of the file from NameNode.
+        LocatedBlock[] blockToDataNodeMap = null;
+        blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName).getBlocks();
+        String res = "";
 
-		// Get the content of each block sequentially.
-		for (LocatedBlock locatedBlock : blockToDataNodeMap) {
-			Block block = locatedBlock.getBlock();
+        // Get the content of each block sequentially.
+        for (LocatedBlock locatedBlock : blockToDataNodeMap) {
+            Block block = locatedBlock.getBlock();
 
-			Socket sock = null;
-			ObjectOutputStream oos = null;
-			ObjectInputStream ois = null;
+            Socket sock = null;
+            ObjectOutputStream oos = null;
+            ObjectInputStream ois = null;
 
-			HashSet<DataNodeDescriptor> locations = locatedBlock.getLocations();
-			Iterator<DataNodeDescriptor> iterator = locations.iterator();
-			DataNodeDescriptor dataNodeDescriptor = iterator.next();
+            HashSet<DataNodeDescriptor> locations = locatedBlock.getLocations();
+            Iterator<DataNodeDescriptor> iterator = locations.iterator();
+            DataNodeDescriptor dataNodeDescriptor = iterator.next();
 
-			// Connect to the first DataNode.
-			sock = new Socket(dataNodeDescriptor.getDataNodeIP(),
-					dataNodeDescriptor.getDataNodePort());
+            // Connect to the first DataNode.
+            sock = new Socket(dataNodeDescriptor.getDataNodeIP(),
+                    dataNodeDescriptor.getDataNodePort());
 
-			// Read a Block from DataNode
-			oos = new ObjectOutputStream(sock.getOutputStream());
+            // Read a Block from DataNode
+            oos = new ObjectOutputStream(sock.getOutputStream());
 
-			oos.writeObject(generateReadPacket(block));
-			System.out.println("here");
+            oos.writeObject(generateReadPacket(block));
+            System.out.println("here");
 
-			ois = new ObjectInputStream(sock.getInputStream());
-			DataNodePacket packet = (DataNodePacket) ois.readObject();
-			ois.close();
-			sock.close();
+            ois = new ObjectInputStream(sock.getInputStream());
+            DataNodePacket packet = (DataNodePacket) ois.readObject();
+            ois.close();
+            sock.close();
 
-			ArrayList<String> lines = packet.getLines();
+            ArrayList<String> lines = packet.getLines();
 
-			for (String line : lines) {
-				res += "\n" + line;
-			}
-		}
+            for (String line : lines) {
+                res += "\n" + line;
+            }
+        }
 
-		return res.substring(1);
-	}
-
+        return res.substring(1);
+    }
 
 
-	public ClientPacket generateReadPacket(Block block) {
-		ClientPacket packet = new ClientPacket();
-		packet.setOperation(ClientPacket.BLOCK_READ);
-		packet.setBlock(block);
-		return packet;
-	}
+    public ClientPacket generateReadPacket(Block block) {
+        ClientPacket packet = new ClientPacket();
+        packet.setOperation(ClientPacket.BLOCK_READ);
+        packet.setBlock(block);
+        return packet;
+    }
 }

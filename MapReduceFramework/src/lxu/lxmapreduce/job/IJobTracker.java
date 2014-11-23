@@ -1,8 +1,8 @@
 package lxu.lxmapreduce.job;
 
+import lxu.lxmapreduce.configuration.JobConf;
 import lxu.lxmapreduce.metadata.HeartbeatResponse;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
-import lxu.lxmapreduce.tmp.JobConf;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -11,16 +11,16 @@ import java.rmi.RemoteException;
  * Created by magl on 14/11/10.
  */
 public interface IJobTracker extends Remote {
-	// for job client
-	public String getNewJobID() throws RemoteException;
+    // for job client
+    public String getNewJobID() throws RemoteException;
 
-	public JobStatus submitJob(String jobID, JobConf jobConf) throws RemoteException;
+    public JobStatus submitJob(String jobID, JobConf jobConf) throws RemoteException;
 
     public JobStatus getJobStatus(String jobID) throws RemoteException;
 
-	// for TaskTracker
-	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
-	                                   boolean initialContact,
-	                                   boolean acceptNewTasks,
-	                                   short responseID) throws RemoteException;
+    // for TaskTracker
+    public HeartbeatResponse heartbeat(TaskTrackerStatus status,
+                                       boolean initialContact,
+                                       boolean acceptNewTasks,
+                                       short responseID) throws RemoteException;
 }

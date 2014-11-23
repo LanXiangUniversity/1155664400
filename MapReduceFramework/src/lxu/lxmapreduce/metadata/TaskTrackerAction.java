@@ -11,10 +11,6 @@ public abstract class TaskTrackerAction implements Serializable {
     // Kill Task
     // Commit Task
 
-    public static enum ActionType {
-        LAUNCH_TASK, COMMIT_TASK
-    }
-
     private ActionType actionType;
 
     protected TaskTrackerAction(ActionType actionType) {
@@ -23,5 +19,9 @@ public abstract class TaskTrackerAction implements Serializable {
 
     public ActionType getActionType() {
         return actionType;
+    }
+
+    public static enum ActionType {
+        LAUNCH_TASK, COMMIT_TASK
     }
 }

@@ -15,7 +15,7 @@ public class ReduceTaskStatus extends TaskStatus implements Serializable {
     }
 
     @Override
-	public boolean isMapTask() {
-		return false;
-	}
+    public boolean isMapTask() {
+        return false;
+    }
 }

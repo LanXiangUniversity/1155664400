@@ -2,7 +2,7 @@ package lxu.lxdfs.datanode;
 
 import lxu.lxdfs.metadata.*;
 import lxu.lxdfs.service.INameSystemService;
-import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.configuration.Configuration;
 
 import java.io.IOException;
 import java.net.InetAddress;

@@ -1,9 +1,8 @@
 package lxu.lxmapreduce.io.format;
 
-import lxu.lxmapreduce.io.LineRecordWriter;
+import lxu.lxmapreduce.io.MapWriter;
 import lxu.lxmapreduce.io.RecordWriter;
-
-import java.io.File;
+import lxu.lxmapreduce.io.ReduceWriter;
 
 /**
  * Created by magl on 14/11/17.
@@ -11,10 +10,10 @@ import java.io.File;
 public class TextOutputFormat extends OutputFormat<Text, Text> {
     @Override
     public RecordWriter<Text, Text> createRecordWriter() {
-	    return new LineRecordWriter();
+        return new MapWriter();
     }
 
-	public ReduceWriter createReduceWriter() {
-		return new ReduceWriter();
-	}
+    public ReduceWriter createReduceWriter() {
+        return new ReduceWriter();
+    }
 }

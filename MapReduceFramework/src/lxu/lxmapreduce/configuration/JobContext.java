@@ -1,4 +1,4 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.configuration;
 
 import java.io.Serializable;
 

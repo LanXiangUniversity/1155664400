@@ -13,46 +13,46 @@ import java.io.IOException;
  */
 
 public class LineReader {
-	private BufferedReader in;
+    private BufferedReader in;
 
-	public LineReader(String fileName) throws FileNotFoundException {
-		try {
-			in = new BufferedReader(new FileReader(fileName));
-		} catch (FileNotFoundException e) {
-			throw new FileNotFoundException("Cannot open the file: " + fileName);
-		}
+    public LineReader(String fileName) throws FileNotFoundException {
+        try {
+            in = new BufferedReader(new FileReader(fileName));
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("Cannot open the file: " + fileName);
+        }
 
-	}
+    }
 
-	/**
-	 * Read a line into Text
-	 *
-	 * @param str
-	 * @return 0 if reach the end of file.
-	 * @throws IOException
-	 */
-	public int readLine(Text str) throws IOException {
-		String buffer = null;
+    /**
+     * Read a line into Text
+     *
+     * @param str
+     * @return 0 if reach the end of file.
+     * @throws IOException
+     */
+    public int readLine(Text str) throws IOException {
+        String buffer = null;
 
-		buffer = this.in.readLine();
+        buffer = this.in.readLine();
 
 
-		if (buffer == null) {
-			str.set(null);
+        if (buffer == null) {
+            str.set(null);
 
-			return 0;
-		}
+            return 0;
+        }
 
-		str.set(buffer);
+        str.set(buffer);
 
-		return buffer.length();
-	}
+        return buffer.length();
+    }
 
-	public int readLine(Text str, int maxLineNum) {
-		return 0;
-	}
+    public int readLine(Text str, int maxLineNum) {
+        return 0;
+    }
 
-	public void close() throws IOException {
-		this.in.close();
-	}
+    public void close() throws IOException {
+        this.in.close();
+    }
 }

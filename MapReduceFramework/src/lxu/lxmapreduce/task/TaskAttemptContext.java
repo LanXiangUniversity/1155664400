@@ -1,7 +1,8 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.task;
 
 import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxmapreduce.task.TaskAttemptID;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobContext;
 
 /**
  * Created by Wei on 11/12/14.

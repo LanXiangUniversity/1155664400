@@ -1,16 +1,16 @@
 package lxu.lxmapreduce.job;
 
 import lxu.lxdfs.service.INameSystemService;
-import lxu.lxdfs.service.NameSystemService;
-import lxu.lxmapreduce.metadata.*;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
+import lxu.lxmapreduce.metadata.HeartbeatResponse;
+import lxu.lxmapreduce.metadata.LaunchTaskAction;
+import lxu.lxmapreduce.metadata.TaskTrackerAction;
+import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.TaskID;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
@@ -63,12 +63,12 @@ public class JobTracker implements IJobTracker {
 	}
 
 	@Override
-	public String getNewJobID() {
+	public synchronized String getNewJobID() {
 		return "job_" + this.nextJobID++;
 	}
 
 	@Override
-	public JobStatus submitJob(String jobID, JobConf jobConf) {
+	public synchronized JobStatus submitJob(String jobID, JobConf jobConf) {
         this.jobConf = jobConf;
 		if (jobs.containsKey(jobID)) {
 			return jobs.get(jobID).getJobStatus();
@@ -86,21 +86,21 @@ public class JobTracker implements IJobTracker {
 	}
 
     @Override
-    public JobStatus getJobStatus(String jobID) {
+    public synchronized JobStatus getJobStatus(String jobID) {
         JobInProgress jobInProgress = jobs.get(jobID);
         return jobInProgress.getJobStatus();
     }
 
-    public String getHost(String taskTrackerName) {
+    public synchronized String getHost(String taskTrackerName) {
         return taskTrackerToHostIPMap.get(taskTrackerName);
     }
 
-    public JobInProgress getJobInProgress(String jobID) {
+    public synchronized JobInProgress getJobInProgress(String jobID) {
         return this.jobs.get(jobID);
     }
 
 	@Override
-	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
+	public synchronized HeartbeatResponse heartbeat(TaskTrackerStatus status,
 	                                   boolean initialContact,
 	                                   boolean acceptNewTasks,
 	                                   short responseID) {
@@ -138,7 +138,7 @@ public class JobTracker implements IJobTracker {
 		return heartbeatResponse;
 	}
 
-	public void updateTaskStatuses(TaskTrackerStatus status) {
+	public synchronized void updateTaskStatuses(TaskTrackerStatus status) {
 		String trackerName = status.getTrackerName();
         LinkedList<TaskStatus> taskReports = status.getTaskReports();
 
@@ -161,7 +161,7 @@ public class JobTracker implements IJobTracker {
 		}
 	}
 
-    public void createTaskEntry(TaskAttemptID attemptID,
+    public synchronized void createTaskEntry(TaskAttemptID attemptID,
                                 String taskTrackerName,
                                 TaskInProgress taskInProgress) {
         taskIDToTrackerMap.put(attemptID.getTaskID(), taskTrackerName);
@@ -176,7 +176,7 @@ public class JobTracker implements IJobTracker {
         taskIDToTIPMap.put(attemptID.getTaskID(), taskInProgress);
     }
 
-    public void addSucceedTask(TaskAttemptID attemptID, String taskTrackerName) {
+    public synchronized void addSucceedTask(TaskAttemptID attemptID, String taskTrackerName) {
         Set<TaskID> runningTasks = taskTrackerToTaskmap.get(taskTrackerName);
         if (runningTasks == null || runningTasks.size() == 0) {
             System.err.println("Error: Adding wrong succeed task " +
@@ -193,7 +193,7 @@ public class JobTracker implements IJobTracker {
         completedTasks.add(attemptID.getTaskID());
     }
 
-	public void startService(Registry registry, int rmiPort) {
+	public synchronized void startService(Registry registry, int rmiPort) {
 		// set job tracker of task scheduler
 		this.taskScheduler.setJobTracker(this);
 
@@ -210,11 +210,11 @@ public class JobTracker implements IJobTracker {
         }
     }
 
-    public INameSystemService getNameNode() {
+    public synchronized INameSystemService getNameNode() {
         return this.nameNode;
     }
 
-    public String getTaskLocation(TaskID taskID) {
+    public synchronized String getTaskLocation(TaskID taskID) {
         String trackerName = taskIDToTrackerMap.get(taskID);
         String hostIP = taskTrackerToHostIPMap.get(trackerName);
         return hostIP;
@@ -238,66 +238,68 @@ public class JobTracker implements IJobTracker {
         public void run() {
             System.out.println("TaskTrackerTimeoutListener started!");
 
-            while (true) {
-                try {
-                    long currentTime = System.currentTimeMillis();
+            synchronized (JobTracker.this) {
+                while (true) {
+                    try {
+                        long currentTime = System.currentTimeMillis();
 
-                    // Check every task tracker
-                    for (Map.Entry<String, TaskTrackerStatus> entry :
-                            taskTrackers.entrySet()) {
-                        String trackerName = entry.getKey();
-                        TaskTrackerStatus status = entry.getValue();
-                        long lastSeen = status.getLastSeen();
+                        // Check every task tracker
+                        for (Map.Entry<String, TaskTrackerStatus> entry :
+                                taskTrackers.entrySet()) {
+                            String trackerName = entry.getKey();
+                            TaskTrackerStatus status = entry.getValue();
+                            long lastSeen = status.getLastSeen();
 
-                        if ((currentTime - lastSeen) > HEARTBEAT_TIMEOUT) {
-                            System.out.println("TaskTracker " + trackerName + " failed!");
-                            // TaskTracker is out of service
-                            // set all completed tasks failed
-                            Set<TaskID> completedTasks =
-                                    taskTrackerToCompleteTaskMap.get(trackerName);
-                            if (completedTasks != null && completedTasks.size() != 0) {
-                                taskTrackerToCompleteTaskMap.remove(trackerName);
-                                for (TaskID completedTask : completedTasks) {
-                                    String jobID = completedTask.getJobID();
-                                    JobInProgress jobInProgress = jobs.get(jobID);
-                                    if (jobInProgress.isComplete()) {
-                                        continue;
+                            if ((currentTime - lastSeen) > HEARTBEAT_TIMEOUT) {
+                                System.out.println("TaskTracker " + trackerName + " failed!");
+                                // TaskTracker is out of service
+                                // set all completed tasks failed
+                                Set<TaskID> completedTasks =
+                                        taskTrackerToCompleteTaskMap.get(trackerName);
+                                if (completedTasks != null && completedTasks.size() != 0) {
+                                    taskTrackerToCompleteTaskMap.remove(trackerName);
+                                    for (TaskID completedTask : completedTasks) {
+                                        String jobID = completedTask.getJobID();
+                                        JobInProgress jobInProgress = jobs.get(jobID);
+                                        if (jobInProgress.isComplete()) {
+                                            continue;
+                                        }
+                                        System.out.println("Set completed task " +
+                                                completedTask + " to failed");
+                                        TaskInProgress task = taskIDToTIPMap.get(completedTask);
+                                        jobInProgress.addFailedTaskSet(task, true);
+                                        taskIDToTrackerMap.remove(completedTask);
+                                        taskIDToTIPMap.remove(completedTask);
                                     }
-                                    System.out.println("Set completed task " +
-                                            completedTask + " to failed");
-                                    TaskInProgress task = taskIDToTIPMap.get(completedTask);
-                                    jobInProgress.addFailedTaskSet(task, true);
-                                    taskIDToTrackerMap.remove(completedTask);
-                                    taskIDToTIPMap.remove(completedTask);
                                 }
-                            }
 
-                            // set all running tasks failed
-                            Set<TaskID> runningTasks = taskTrackerToTaskmap.get(trackerName);
-                            if (runningTasks != null && runningTasks.size() != 0) {
-                                taskTrackerToTaskmap.remove(trackerName);
-                                for (TaskID runningTask : runningTasks) {
-                                    String jobID = runningTask.getJobID();
-                                    JobInProgress jobInProgress = jobs.get(jobID);
+                                // set all running tasks failed
+                                Set<TaskID> runningTasks = taskTrackerToTaskmap.get(trackerName);
+                                if (runningTasks != null && runningTasks.size() != 0) {
+                                    taskTrackerToTaskmap.remove(trackerName);
+                                    for (TaskID runningTask : runningTasks) {
+                                        String jobID = runningTask.getJobID();
+                                        JobInProgress jobInProgress = jobs.get(jobID);
 
-                                    System.out.println("Set completed task " +
-                                            runningTask + " to failed");
+                                        System.out.println("Set completed task " +
+                                                runningTask + " to failed");
 
-                                    TaskInProgress task = taskIDToTIPMap.get(runningTask);
-                                    jobInProgress.addFailedTaskSet(task, false);
-                                    taskIDToTrackerMap.remove(runningTask);
-                                    taskIDToTIPMap.remove(runningTask);
+                                        TaskInProgress task = taskIDToTIPMap.get(runningTask);
+                                        jobInProgress.addFailedTaskSet(task, false);
+                                        taskIDToTrackerMap.remove(runningTask);
+                                        taskIDToTIPMap.remove(runningTask);
+                                    }
                                 }
-                            }
 
-                            // remove the record of the task tracker
-                            taskTrackerToHostIPMap.remove(trackerName);
-                            taskTrackers.remove(trackerName);
+                                // remove the record of the task tracker
+                                taskTrackerToHostIPMap.remove(trackerName);
+                                taskTrackers.remove(trackerName);
+                            }
                         }
+                        Thread.sleep(HEARTBEAT_TIMEOUT);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    Thread.sleep(HEARTBEAT_TIMEOUT);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
         }

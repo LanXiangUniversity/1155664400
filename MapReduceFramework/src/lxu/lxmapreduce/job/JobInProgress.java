@@ -1,12 +1,10 @@
 package lxu.lxmapreduce.job;
 
-import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.metadata.LocatedBlock;
+import lxu.lxmapreduce.configuration.JobConf;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.TaskID;
 
 import java.rmi.RemoteException;
 import java.util.*;

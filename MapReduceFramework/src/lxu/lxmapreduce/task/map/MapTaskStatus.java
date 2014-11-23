@@ -15,7 +15,7 @@ public class MapTaskStatus extends TaskStatus implements Serializable {
     }
 
     @Override
-	public boolean isMapTask() {
-		return true;
-	}
+    public boolean isMapTask() {
+        return true;
+    }
 }

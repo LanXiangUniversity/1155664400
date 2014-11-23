@@ -1,11 +1,12 @@
 package lxu.lxmapreduce.task.map;
 
+import lxu.lxmapreduce.configuration.Configuration;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.format.LongWritable;
+import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.TaskAttemptID;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.TaskID;
-import lxu.lxmapreduce.tmp.TaskInputOutputContext;
+import lxu.lxmapreduce.task.TaskInputOutputContext;
 
 import java.io.IOException;
 
@@ -13,31 +14,31 @@ import java.io.IOException;
  * The context that is given to the Mapper.
  * Created by Wei on 11/11/14.
  */
-public class MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
-		extends TaskInputOutputContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
-	private RecordReader<KEYIN, VALUEIN> reader;
+public class MapContext
+        extends TaskInputOutputContext<LongWritable, Text, Text, Text> {
+    private RecordReader<LongWritable, Text> reader;
 
-	public MapContext(Configuration conf,
-	                  TaskAttemptID taskId,
-	                  RecordWriter<KEYOUT, VALUEOUT> out,
-	                  RecordReader<KEYIN, VALUEIN> reader
-	) {
-		super(conf, taskId, out);
-		this.reader = reader;
-	}
+    public MapContext(Configuration conf,
+                      TaskAttemptID taskId,
+                      RecordWriter<Text, Text> out,
+                      RecordReader<LongWritable, Text> reader
+    ) {
+        super(conf, taskId, out);
+        this.reader = reader;
+    }
 
-	@Override
-	public KEYIN getCurrentKey() {
-		return this.reader.getCurrentKey();
-	}
+    @Override
+    public LongWritable getCurrentKey() {
+        return this.reader.getCurrentKey();
+    }
 
-	@Override
-	public VALUEIN getCurrentValue() {
-		return this.reader.getCurrentValue();
-	}
+    @Override
+    public Text getCurrentValue() {
+        return this.reader.getCurrentValue();
+    }
 
-	@Override
-	public boolean nextKeyValue() throws IOException {
-		return this.reader.nextKeyValue();
-	}
+    @Override
+    public boolean nextKeyValue() throws IOException {
+        return this.reader.nextKeyValue();
+    }
 }

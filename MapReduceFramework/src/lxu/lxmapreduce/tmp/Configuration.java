@@ -1,7 +1,13 @@
 package lxu.lxmapreduce.tmp;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
+import java.util.jar.JarFile;
 
 /**
  * Created by Wei on 11/11/14.
@@ -53,7 +59,33 @@ public class Configuration implements Serializable {
 	}
 
     public Class<?> getClass(String className, Class<?> defaultValue) {
-        String valueString = get(className);
+	    String jarName = this.get("mapreduce.jar.name");
+
+	    URL url = null;
+
+	    try {
+		    url = new URL("file:" + jarName);
+	    } catch (MalformedURLException e) {
+		    e.printStackTrace();
+	    }
+	    URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+	    Class<? extends URLClassLoader> sysclass = URLClassLoader.class;
+
+	    Method method = null;
+	    try {
+		    method = sysclass.getDeclaredMethod("addURL", URL.class);
+	    } catch (NoSuchMethodException e) {
+		    e.printStackTrace();
+	    }
+	    method.setAccessible(true);
+	    try {
+		    method.invoke(sysloader, url);
+	    } catch (IllegalAccessException | InvocationTargetException e) {
+		    e.printStackTrace();
+	    }
+
+
+	    String valueString = get(className);
         if (valueString == null) {
             return defaultValue;
         }

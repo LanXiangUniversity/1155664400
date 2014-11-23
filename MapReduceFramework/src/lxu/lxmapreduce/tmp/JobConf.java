@@ -80,7 +80,16 @@ public class JobConf extends Configuration implements Serializable {
         set("mapreduce.job.name", jobName);
     }
 
-    public Class<?> getOutputKeyClass() {
+	public void setJarName(String jobName) {
+		set("mapreduce.jar.name", jobName);
+	}
+
+	public String getJarName() {
+		return get("mapreduce.jar.name");
+	}
+
+
+	public Class<?> getOutputKeyClass() {
         return getClass("mapreduce.output.key.class", LongWritable.class);
     }
 

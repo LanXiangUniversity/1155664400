@@ -35,14 +35,13 @@ public class TestJob {
     }
 
     public static void main(String[] args) {
-        Job job = new Job(new JobConf(new Configuration()));
-
-        job.setMapperClass(TestMap.class);
-        job.setReducerClass(TestReduce.class);
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
-        job.setInputPath("hello");
-
-        job.waitForCompletion();
+		Job job = new Job(new JobConf(new Configuration()));
+	    job.setJarName("/Users/parasitew/Documents/testDir/Test.jar");
+		job.setMapperClass(TestMap.class);
+		job.setReducerClass(TestReduce.class);
+		job.setInputFormatClass(TextInputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
+		job.setInputPath("hello");
+		job.waitForCompletion();
     }
 }

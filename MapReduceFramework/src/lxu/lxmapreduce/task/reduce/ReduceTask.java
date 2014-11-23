@@ -9,6 +9,7 @@ import lxu.lxmapreduce.io.format.ReduceReader;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.Task;
 import lxu.lxmapreduce.task.TaskAttemptID;
+import lxu.lxmapreduce.task.TaskStatus;
 import lxu.lxmapreduce.tmp.Configuration;
 import lxu.lxmapreduce.tmp.JobConf;
 import lxu.lxmapreduce.tmp.TaskAttemptContext;
@@ -83,8 +84,10 @@ public class ReduceTask extends Task implements Serializable {
 					out.close();
 					sock.close();
 				} catch (Exception e) {
-					System.err.println("Cannot connect to this tasktracker.");
+					System.err.println("Reduce Task fails: Cannot connect to this tasktracker.");
+					this.taskStatus.setState(TaskStatus.FAILED);
 					e.printStackTrace();
+					return;
 				}
 			}
 

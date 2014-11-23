@@ -15,7 +15,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * JobTracker.java
  * Created by magl on 14/11/10.
+ *
+ * This class is the main class to manage all jobs. It maintains all crucial
+ * data structures of all running jobs and tasks.
  */
 public class JobTracker implements IJobTracker {
     private static int HEARTBEAT_TIMEOUT = 10 * 1000;
@@ -60,11 +64,27 @@ public class JobTracker implements IJobTracker {
         this.nameNode = nameNode;
 	}
 
+    /**
+     * getNewJobID
+     *
+     * Assign a job id for new job.
+     *
+     * @return The new job id.
+     */
 	@Override
 	public String getNewJobID() {
 		return "job_" + this.nextJobID++;
 	}
 
+    /**
+     * submitJob
+     *
+     * The service for client to submit a new job.
+     *
+     * @param jobID
+     * @param jobConf
+     * @return
+     */
 	@Override
 	public JobStatus submitJob(String jobID, JobConf jobConf) {
         this.jobConf = jobConf;
@@ -83,6 +103,14 @@ public class JobTracker implements IJobTracker {
 		return job.getJobStatus();
 	}
 
+    /**
+     * getJobStatus
+     *
+     * The service for client to update a job status.
+     *
+     * @param jobID
+     * @return
+     */
     @Override
     public JobStatus getJobStatus(String jobID) {
         JobInProgress jobInProgress = jobs.get(jobID);
@@ -97,13 +125,26 @@ public class JobTracker implements IJobTracker {
         return this.jobs.get(jobID);
     }
 
+    /**
+     * heartbeat
+     *
+     * The service for {@link lxu.lxmapreduce.task.TaskTracker} to report the statuses of
+     * all running tasks and itself.
+     *
+     * @param status
+     * @param initialContact
+     * @param acceptNewTasks
+     * @param responseID
+     * @return
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
 	@Override
 	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
 	                                   boolean initialContact,
 	                                   boolean acceptNewTasks,
 	                                   short responseID) throws RemoteException, NotBoundException {
 		String trackerName = status.getTrackerName();
-        //System.out.println("Received heartbeat from " + trackerName);
 		long now = System.currentTimeMillis();
 
 		short newResponseID = (short) (responseID + 1);
@@ -116,6 +157,7 @@ public class JobTracker implements IJobTracker {
 		taskTrackers.put(trackerName, status);
 		updateTaskStatuses(status);
 
+        // response, contains new tasks to be run
 		HeartbeatResponse heartbeatResponse =
 				new HeartbeatResponse(newResponseID, jobConf, null);
 		ArrayList<TaskTrackerAction> actions = new ArrayList<TaskTrackerAction>();
@@ -136,6 +178,13 @@ public class JobTracker implements IJobTracker {
 		return heartbeatResponse;
 	}
 
+    /**
+     * updateTaskStatuses
+     *
+     * Update the statuses of all tasks running on one TaskTracker.
+     *
+     * @param status
+     */
 	public void updateTaskStatuses(TaskTrackerStatus status) {
 		String trackerName = status.getTrackerName();
         LinkedList<TaskStatus> taskReports = status.getTaskReports();
@@ -154,11 +203,19 @@ public class JobTracker implements IJobTracker {
 
 			if (job.isComplete()) {
 				System.out.println("Job " + job.getJobID() + " Completed");
-				//jobs.remove(report.getJobID());
 			}
 		}
 	}
 
+    /**
+     * createTaskEntry
+     *
+     * Record useful information for the task.
+     *
+     * @param attemptID
+     * @param taskTrackerName
+     * @param taskInProgress
+     */
     public void createTaskEntry(TaskAttemptID attemptID,
                                 String taskTrackerName,
                                 TaskInProgress taskInProgress) {
@@ -174,6 +231,14 @@ public class JobTracker implements IJobTracker {
         taskIDToTIPMap.put(attemptID.getTaskID(), taskInProgress);
     }
 
+    /**
+     * addSucceedTask
+     *
+     * If one task succeeded, record it.
+     *
+     * @param attemptID
+     * @param taskTrackerName
+     */
     public void addSucceedTask(TaskAttemptID attemptID, String taskTrackerName) {
         Set<TaskID> runningTasks = taskTrackerToTaskmap.get(taskTrackerName);
         if (runningTasks == null || runningTasks.size() == 0) {
@@ -191,6 +256,14 @@ public class JobTracker implements IJobTracker {
         completedTasks.add(attemptID.getTaskID());
     }
 
+    /**
+     * startService
+     *
+     * JobTracker register its service to java rmiregistry
+     *
+     * @param registry
+     * @param rmiPort
+     */
 	public void startService(Registry registry, int rmiPort) {
 		// set job tracker of task scheduler
 		this.taskScheduler.setJobTracker(this);
@@ -218,19 +291,12 @@ public class JobTracker implements IJobTracker {
         return hostIP;
     }
 
-    /*
-    public static void main(String[] args) {
-        try {
-            JobTracker jobTracker = new JobTracker();
-            jobTracker.startService();
-        } catch (Exception e) {
-            System.err.println("Error: Starting job tracker! ");
-            System.err.println(e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    */
-
+    /**
+     * TaskTrackerTimeoutListener
+     *
+     * A class periodically check whether there exists some {@link lxu.lxmapreduce.task.TaskTracker}
+     * if out of service.
+     */
     class TaskTrackerTimeoutListener implements Runnable {
         @Override
         public void run() {

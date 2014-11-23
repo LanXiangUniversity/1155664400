@@ -3,6 +3,8 @@ package lxu.lxdfs.metadata;
 import java.io.Serializable;
 
 /**
+ * DataNodeDescriptor.java
+ *
  * This class stores the meta-data of a Data Node.
  */
 public class DataNodeDescriptor implements Serializable {

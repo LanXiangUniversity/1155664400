@@ -1,7 +1,10 @@
 package lxu.lxmapreduce.io;
 
 /**
+ * RecordReader.java
  * Created by Wei on 11/11/14.
+ *
+ * The base class of all reader utilities.
  */
 
 import java.util.List;

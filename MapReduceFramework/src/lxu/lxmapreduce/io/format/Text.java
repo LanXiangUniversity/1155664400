@@ -3,7 +3,10 @@ package lxu.lxmapreduce.io.format;
 import java.io.Serializable;
 
 /**
+ * Text.java
  * Created by Wei on 11/11/14.
+ *
+ * A wrapper of String.
  */
 public class Text implements Serializable {
     private String value;

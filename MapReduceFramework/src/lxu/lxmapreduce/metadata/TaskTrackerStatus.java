@@ -6,7 +6,10 @@ import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
+ * TaskTrackerStatus.java
  * Created by magl on 14/11/10.
+ *
+ * The status of a TaskTracker.
  */
 public class TaskTrackerStatus implements Serializable {
     private String trackerName;

@@ -9,15 +9,22 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 
 /**
+ * Configuration.java
  * Created by Wei on 11/11/14.
+ *
+ * The base class of all configuration. It will read the conf file when created.
  */
 public class Configuration implements Serializable {
     private static final long serialVersionUID = 1L;
     protected HashMap<String, String> entries = null;
 
+    /**
+     * Constructor.
+     *
+     * Read configuration file when created.
+     */
 	public Configuration() {
         this.entries = new HashMap<String, String>();
-        //readAllConf("/Users/magl/Google Drive/cmu/14-fall/15640/1155664400/MapReduceFramework/conf");
         readAllConf("conf");
     }
 
@@ -25,6 +32,14 @@ public class Configuration implements Serializable {
 		this.entries = conf.entries;
 	}
 
+    /**
+     * get
+     *
+     * Given a conf key name, return the string of its value.
+     *
+     * @param name
+     * @return
+     */
     public String get(String name) {
         return entries.get(name);
     }
@@ -46,6 +61,15 @@ public class Configuration implements Serializable {
         }
     }
 
+    /**
+     * getClassByName
+     *
+     * Given the name of a class, create that class using java reflection
+     *
+     * @param name
+     * @return
+     * @throws ClassNotFoundException
+     */
     public Class<?> getClassByName(String name) throws ClassNotFoundException {
         ClassLoader classLoader;
         {
@@ -57,6 +81,15 @@ public class Configuration implements Serializable {
 		return Class.forName(name, true, classLoader);
 	}
 
+    /**
+     * getClass
+     *
+     * Given the class name, create a Class Object of that class
+     *
+     * @param className
+     * @param defaultValue
+     * @return
+     */
     public Class<?> getClass(String className, Class<?> defaultValue) {
 	    String jarName = this.get("mapreduce.jar.name");
 
@@ -96,6 +129,15 @@ public class Configuration implements Serializable {
         }
     }
 
+    /**
+     * getInt
+     *
+     * Given a conf key name, return its int value.
+     *
+     * @param name
+     * @param defaultValue
+     * @return
+     */
     public int getInt(String name, int defaultValue) {
         String valueString = get(name);
         if (valueString == null) {
@@ -105,6 +147,15 @@ public class Configuration implements Serializable {
         return Integer.parseInt(valueString);
     }
 
+    /**
+     * getSocketAddr
+     *
+     * Given a key name, return the string as if it is the IP address.
+     *
+     * @param name
+     * @param defaultAddr
+     * @return
+     */
     public String getSocketAddr(String name, String defaultAddr) {
         String valueString = get(name);
         if (valueString == null) {
@@ -114,6 +165,14 @@ public class Configuration implements Serializable {
         return valueString;
     }
 
+    /**
+     * getSocketAddrs
+     *
+     * Given a key name, return a list of IP addresses.
+     *
+     * @param name
+     * @return
+     */
     public String[] getSocketAddrs(String name) {
         String valueString = get(name);
         if (valueString == null) {
@@ -123,6 +182,14 @@ public class Configuration implements Serializable {
         return valueString.split(",");
     }
 
+    /**
+     * set
+     *
+     * Given a key and its value, record this entry in configuration.
+     *
+     * @param name
+     * @param value
+     */
     public void set(String name, String value) {
         this.entries.put(name, value);
     }
@@ -153,6 +220,13 @@ public class Configuration implements Serializable {
         set(name, joinedAddrs.toString());
     }
 
+    /**
+     * readAllConf
+     *
+     * Read configuration from conf file.
+     *
+     * @param fileName
+     */
     public void readAllConf(String fileName) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));

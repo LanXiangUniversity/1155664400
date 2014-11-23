@@ -19,12 +19,25 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
+ * ClientInputStream.java
  * Created by Wei on 11/8/14.
+ *
+ * This class provide convenient interface to read file contents in dfs.
  */
 public class ClientInputStream extends ClientStream {
     private String fileName;
     private INameSystemService nameSystemService;
 
+    /**
+     * Constructor
+     *
+     * Connect to {@link lxu.lxdfs.namenode.NameNode} using java rmi
+     * @param fileName
+     * @param masterAddr
+     * @param rmiPort
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
     public ClientInputStream(String fileName, String masterAddr, int rmiPort)
             throws RemoteException, NotBoundException {
         this.fileName = fileName;
@@ -48,9 +61,17 @@ public class ClientInputStream extends ClientStream {
         this.nameSystemService = nameSystemService;
     }
 
-    // Read the content of file.
+    /**
+     * read
+     *
+     * Read the content of file.
+     *
+     * @return the content of the file
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public String read() throws IOException, ClassNotFoundException {
-        // Get  AllocatedBlocks of the file from NameNode.
+        // Get AllocatedBlocks of the file from NameNode.
         LocatedBlock[] blockToDataNodeMap = null;
         blockToDataNodeMap = this.nameSystemService.getFileBlocks(this.fileName).getBlocks();
         String res = "";
@@ -93,6 +114,15 @@ public class ClientInputStream extends ClientStream {
     }
 
 
+    /**
+     * generateReadPacket
+     *
+     * Generate a BLOCK_READ {@link lxu.lxdfs.client.ClientPacket} to
+     * read file on dfs
+     *
+     * @param block
+     * @return
+     */
     public ClientPacket generateReadPacket(Block block) {
         ClientPacket packet = new ClientPacket();
         packet.setOperation(ClientPacket.BLOCK_READ);

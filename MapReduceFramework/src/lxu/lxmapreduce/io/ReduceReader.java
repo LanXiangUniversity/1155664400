@@ -1,6 +1,5 @@
 package lxu.lxmapreduce.io;
 
-import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.format.Text;
 
 import java.io.FileNotFoundException;
@@ -8,7 +7,10 @@ import java.io.IOException;
 import java.util.*;
 
 /**
+ * ReduceReader.java
  * Created by Wei on 11/16/14.
+ *
+ * This class holds all reducer input data.
  */
 public class ReduceReader {
 	private HashMap<Text, LinkedList<Text>> data;

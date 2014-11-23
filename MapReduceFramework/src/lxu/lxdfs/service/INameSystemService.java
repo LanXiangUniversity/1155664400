@@ -12,13 +12,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 /**
- * Remote Interface for NameSystem
+ * INameSystemService
  * Created by Wei on 11/3/14.
+ *
+ * Remote Interface for NameSystem
  */
 public interface INameSystemService extends Remote {
-    // Services for Client
-    public boolean mkdirs(Path path) throws RemoteException;
-
     public ClientOutputStream open(Path path) throws RemoteException, NotBoundException;
 
     public void create(String fileName) throws RemoteException, NotBoundException;

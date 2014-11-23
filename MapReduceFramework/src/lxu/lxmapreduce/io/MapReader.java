@@ -13,8 +13,11 @@ import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
 
 /**
- * Treats keys as offset in file and value as line.
+ * MapReader.java
  * Created by Wei on 11/11/14.
+ *
+ * A utility to read map input file.
+ * Treats keys as offset in file and value as line.
  */
 public class MapReader extends RecordReader<LongWritable, Text> {
 
@@ -28,7 +31,6 @@ public class MapReader extends RecordReader<LongWritable, Text> {
 	private List<LocatedBlock> locatedBlockses;
 
 	public MapReader() {
-		/* TODO Init LineReader */
 		if (this.key == null) {
 			this.key = new LongWritable();
 		}
@@ -38,13 +40,21 @@ public class MapReader extends RecordReader<LongWritable, Text> {
 		}
 	}
 
+    /**
+     * initialize
+     *
+     * Initialize the map reader.
+     *
+     * @param inputFiles A list of map input files.
+     * @param locatedBlockses A list of remote map input blocks.
+     * @throws IOException
+     */
 	@Override
 	public void initialize(List<String> inputFiles, List<LocatedBlock> locatedBlockses) throws IOException {
 		this.currentSplit = 0;
 		this.maxSplit = inputFiles.size() - 1;
 		this.inputFiles = inputFiles;
 		this.locatedBlockses = locatedBlockses;
-		//System.out.println("init reader");
 
 		getInputSplit();
 	}
@@ -80,7 +90,6 @@ public class MapReader extends RecordReader<LongWritable, Text> {
 			File file  = new File(inputFiles.get(this.currentSplit));
 			// If there is no files in the localhost then get from remote data node.
 			if (!file.exists()) {
-				// TODO: read from remote.
 				for (DataNodeDescriptor dataNode : this.locatedBlockses.get(this.currentSplit).getLocations()) {
 					boolean isFailed = false;
 					Socket sock = null;
@@ -113,7 +122,6 @@ public class MapReader extends RecordReader<LongWritable, Text> {
 
 					if (!isFailed) {
 						if (this.currentSplit > 0) this.in.close();
-						System.out.println("new in");
 						this.in = new LineReader(inputFiles.get(this.currentSplit));
 						this.currentSplit++;
 						return true;
@@ -121,7 +129,6 @@ public class MapReader extends RecordReader<LongWritable, Text> {
 				}
 			} else {
 				if (this.currentSplit > 0) this.in.close();
-				System.out.println("new in");
 				this.in = new LineReader(inputFiles.get(this.currentSplit));
 				this.currentSplit++;
 				return true;

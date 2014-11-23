@@ -9,7 +9,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
+ * MapWriter.java
  * Created by Wei on 11/11/14.
+ *
+ * Write the map output to files.
  */
 public class MapWriter extends RecordWriter<Text, Text> {
 	private LinkedList<LineWriter> out;
@@ -27,7 +30,7 @@ public class MapWriter extends RecordWriter<Text, Text> {
 
 	@Override
 	public void write(Text key, Text value) throws IOException {
-        int index = key.hashCode() % out.size();
+        int index = Math.abs(key.hashCode()) % out.size();
 		this.out.get(index).write(key.getValue() + "\t" + value.getValue() + "\n");
 	}
 

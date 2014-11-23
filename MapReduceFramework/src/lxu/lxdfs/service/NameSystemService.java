@@ -13,12 +13,23 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Remote object for Name System.
+ * NameSystemService.java
  * Created by Wei on 11/3/14.
+ *
+ * The implementation of {@link lxu.lxdfs.service.INameSystemService}.
+ * NameSystemService maintains several crucial table:
+ *
+ * lastResponseTime : The last heartbeat time of {@link lxu.lxdfs.datanode.DataNode}
+ * dataNodes : Available data nodes
+ * fileNameToBlocksMap : Map from file name to Block.
+ * blockToLocationsMap : Map from Block to Data Nodes.
+ * IDToBlockMap : Map from BlockID to Block.
+ * deletedFiles : Map from datanode to files to be deleted
+ * restoreBlocksQueue : Map from datanode to blocks to be restored
  */
 public class NameSystemService implements INameSystemService {
-    private static final int HEARTBEAT_TIMEOUT = 30 * 1000;
-    private static final int REPLICA_NUM = 2;
+    private static final int HEARTBEAT_TIMEOUT = 10 * 1000;
+    private static final int REPLICA_NUM = (new Configuration().getInt("mapreduce.replica.factor", 2));
     // Index of DataNode to be allocated.
     private int nextDataNodeID = 0;
     // Path of root of the DFS
@@ -74,14 +85,10 @@ public class NameSystemService implements INameSystemService {
         this.nameNodeState = NameNodeState.OUT_OF_SAFE_MODE;
     }
 
-    // Remote services for Client.
-    @Override
-    public synchronized boolean mkdirs(Path path) throws RemoteException {
-        return false;
-    }
-
     /**
-     * Allocate two replicas for a Block with filename and Block offset.
+     * allocateBlock
+     *
+     * Allocate replicas for a Block with filename and Block offset.
      *
      * @param fileName
      * @param offset   the blockId of in the file
@@ -93,14 +100,14 @@ public class NameSystemService implements INameSystemService {
         if (this.isSafeMode()) {
             return null;
         }
-        System.out.println("allocate blocks for client filname: " + fileName);
+        System.out.println("allocate blocks for client filename: " + fileName);
 
         // Set unique global block ID.
         int blockId = this.blockID++;
         Block block = new Block(blockId, offset, 0L);
         HashSet<DataNodeDescriptor> locations = new HashSet<DataNodeDescriptor>();
 
-        // TODO: Allocate DataNodes to store Block replicas.
+        // Allocate DataNodes to store Block replicas.
         for (int i = 0; i < this.REPLICA_NUM; i++) {
             int min = Integer.MAX_VALUE;
             DataNodeDescriptor dn = this.dataNodes.entrySet().iterator().next().getValue();
@@ -138,6 +145,8 @@ public class NameSystemService implements INameSystemService {
     }
 
     /**
+     * open
+     *
      * Open a file and get the its outputStream.
      *
      * @param path
@@ -163,8 +172,11 @@ public class NameSystemService implements INameSystemService {
 
 
     /**
+     * create
+     *
+     * Create a file entry on dfs
+     *
      * @param fileName
-     * @return
      * @throws RemoteException
      */
     @Override
@@ -180,11 +192,17 @@ public class NameSystemService implements INameSystemService {
         System.out.println("Create file, filename " + fileName);
         this.fileNames.add(fileName);
         this.fileNameToBlocksMap.put(fileName, new ArrayList<Block>());
-
-
-        return;
     }
 
+    /**
+     * delete
+     *
+     * Delete a file on dfs
+     *
+     * @param fileName
+     * @return
+     * @throws RemoteException
+     */
     @Override
     public synchronized boolean delete(String fileName) throws RemoteException {
         if (this.isSafeMode()) {
@@ -198,18 +216,29 @@ public class NameSystemService implements INameSystemService {
         return true;
     }
 
+    /**
+     * exists
+     *
+     * Whether a file exists on dfs
+     *
+     * @param filename
+     * @return Whether a file exists on dfs
+     * @throws RemoteException
+     */
     @Override
     public synchronized boolean exists(String filename) throws RemoteException {
         return this.fileNames.contains(filename);
     }
 
-    @Override
     /**
+     * getBlockLocations
+     *
      * Return the replicas' locations of a Block
      *
      * @param blockID
      * @return locations that store the Block
      */
+    @Override
     public synchronized HashSet<DataNodeDescriptor> getBlockLocations(int blockID) throws RemoteException {
         HashSet<DataNodeDescriptor> blockLocations = new HashSet<DataNodeDescriptor>();
 
@@ -229,7 +258,9 @@ public class NameSystemService implements INameSystemService {
     }
 
     /**
-     * Get the allocated Blocks of the file.
+     * getFileBlocks
+     *
+     * Get all allocated Blocks of the file.
      *
      * @param fileName
      * @return
@@ -253,7 +284,14 @@ public class NameSystemService implements INameSystemService {
     }
 
     /**
+     * register
+     *
      * Data Node register to the NameNode.
+     *
+     * @param dataNodeHostName
+     * @param port
+     * @param blocks
+     * @return The node id of the DataNode
      */
     @Override
     public synchronized int register(String dataNodeHostName, int port, ArrayList<Block> blocks) {
@@ -271,8 +309,6 @@ public class NameSystemService implements INameSystemService {
         this.dataNodes.put(nextDataNodeID, dataNode);
         //this.dataNodes.add(dataNode);
 
-	    /* TODO return <**fileName**, blocksID, replicas> */
-
         // update blockToLocationsMap
         for (Block block : blocks) {
             HashSet<DataNodeDescriptor> dataNodeDescriptorSet = blockToLocationsMap.get(block);
@@ -289,6 +325,15 @@ public class NameSystemService implements INameSystemService {
         return this.nextDataNodeID;
     }
 
+    /**
+     * heartbeat
+     *
+     * DataNode uses heartbeat to report its status and receive commands from NameNode.
+     *
+     * @param dataNode
+     * @return
+     * @throws RemoteException
+     */
     @Override
     public synchronized LinkedList<DataNodeCommand> heartbeat(DataNodeDescriptor dataNode) throws RemoteException {
 
@@ -298,6 +343,9 @@ public class NameSystemService implements INameSystemService {
         this.lastResponseTime.put(dataNode, currentTime);
 
 
+        /*
+         * Need to restore blocks on this data node
+         */
         if (this.restoreBlocksQueue.keySet().contains(dataNode)) {
             for (Block blk : this.restoreBlocksQueue.get(dataNode)) {
                 HashSet<DataNodeDescriptor> srcDataNode =
@@ -312,6 +360,9 @@ public class NameSystemService implements INameSystemService {
             }
             this.restoreBlocksQueue.remove(dataNode);
         } else {
+            /*
+             * Need to delete blocks on this data node.
+             */
             for (String fileName : this.deletedFiles.keySet()) {
                 List<Block> blocks = this.deletedFiles.get(fileName);
 
@@ -346,11 +397,25 @@ public class NameSystemService implements INameSystemService {
         return commands;
     }
 
+    /**
+     * ls
+     *
+     * Return all file names on dfs
+     *
+     * @return
+     * @throws RemoteException
+     */
     @Override
     public synchronized HashSet<String> ls() throws RemoteException {
         return this.fileNames;
     }
 
+    /**
+     * DataNodeTimeoutListener
+     *
+     * A thread that periodically check the status of a {@link lxu.lxdfs.datanode.DataNode}.
+     * If a DataNode does not send heartbeat in 10 seconds, we mark it as dead.
+     */
     class DataNodeTimeoutListener implements Runnable {
         @Override
         public void run() {

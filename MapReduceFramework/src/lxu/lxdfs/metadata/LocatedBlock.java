@@ -4,7 +4,11 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 /**
+ * LocatedBlock.java
  * Created by magl on 14/11/8.
+ *
+ * This class is useful when client tries to find the location of a
+ * specific block.
  */
 public class LocatedBlock implements Serializable {
     private Block block;

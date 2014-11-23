@@ -8,7 +8,11 @@ import lxu.lxmapreduce.task.reduce.Reducer;
 import java.io.Serializable;
 
 /**
+ * JobConf.java
  * Created by Wei on 11/12/14.
+ *
+ * Configurations all jobs used. It is a wrapper of the basic
+ * {@link lxu.lxmapreduce.configuration.Configuration}
  */
 public class JobConf extends Configuration implements Serializable {
     private static final long serialVersionUID = 1L;

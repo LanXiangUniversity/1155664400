@@ -1,7 +1,10 @@
 package lxu.lxdfs.metadata;
 
 /**
+ * DataNodeRestoreCommand.java
  * Created by Wei on 11/21/14.
+ *
+ * To restore a block.
  */
 public class DataNodeRestoreCommand extends DataNodeCommand {
     private Block block;

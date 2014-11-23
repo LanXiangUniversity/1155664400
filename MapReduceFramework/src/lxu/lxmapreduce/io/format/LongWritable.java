@@ -1,7 +1,10 @@
 package lxu.lxmapreduce.io.format;
 
 /**
+ * LongWritable.java
  * Created by Wei on 11/11/14.
+ *
+ * A wrapper for long.
  */
 public class LongWritable {
     private int value;

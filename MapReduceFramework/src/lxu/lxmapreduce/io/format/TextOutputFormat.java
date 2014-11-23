@@ -5,7 +5,10 @@ import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.ReduceWriter;
 
 /**
+ * TextOutputFormat.java
  * Created by magl on 14/11/17.
+ *
+ * A abstraction for Text Output. Key and value are seperated by "\t".
  */
 public class TextOutputFormat extends OutputFormat<Text, Text> {
     @Override

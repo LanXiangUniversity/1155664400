@@ -13,7 +13,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Client.java
  * Created by Wei on 11/8/14.
+ *
+ * This is the command line client to interact with lxdfs.
+ * Supported command:
+ * ls                            print all files stored in dfs
+ * rm <file>                     delete a file in dfs
+ * get <dfs file> <local file>   get a dfs file to local file system
+ * put <local file> <dfs file>   put a local file to dfs
  */
 public class Client {
     private ClientState state;
@@ -21,6 +29,14 @@ public class Client {
     private INameSystemService nameSystemService;
     private Configuration conf;
 
+    /**
+     * Constructor
+     *
+     * Connecting to {@link lxu.lxdfs.namenode.NameNode} using java rmi
+     *
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
     public Client() throws RemoteException, NotBoundException {
         conf = new Configuration();
         String masterAddr = conf.getSocketAddr("master.address", "localhost");
@@ -32,6 +48,16 @@ public class Client {
                 new InputStreamReader(System.in));
     }
 
+    /**
+     * main
+     *
+     * print prompt and parse input
+     *
+     * @param args
+     * @throws IOException
+     * @throws NotBoundException
+     * @throws ClassNotFoundException
+     */
     public static void main(String[] args) throws IOException, NotBoundException, ClassNotFoundException {
         Client client = new Client();
 
@@ -57,6 +83,12 @@ public class Client {
      */
     public void parseInput() throws IOException, NotBoundException, ClassNotFoundException {
         String cmd = this.consoleReader.readLine();
+        if ("".equals(cmd)) {
+            return;
+        } else if (cmd == null) {
+            this.state = ClientState.TERMINATED;
+            return;
+        }
 
         String[] args = cmd.split(" ");
 
@@ -66,10 +98,6 @@ public class Client {
             for (String file : files) {
                 System.out.println(file);
             }
-        } else if ("mkdir".equals(args[0])) {
-
-        } else if ("touch".equals(args[0])) {
-
         } else if ("rm".equals(args[0])) {
             if (!this.nameSystemService.exists(args[1])) {
                 System.out.println("No such file.");
@@ -78,14 +106,11 @@ public class Client {
 
             this.nameSystemService.delete(args[1]);
         } else if ("put".equals(args[0])) {
-            //String fileName = args[1];
-            //String content = args[2];
             String localFileName = args[1];
             String dfsFileName = args[2];
 
             if (this.nameSystemService.exists(args[2])) {
                 System.out.println("File exists");
-
                 return;
             }
 
@@ -100,9 +125,9 @@ public class Client {
             String masterAddr = conf.getSocketAddr("master.address", "localhost");
             int rmiPort = conf.getInt("rmi.port", 1099);
             ClientOutputStream cos = new ClientOutputStream(masterAddr, rmiPort);
-            //cos.setFileName(fileName);
             cos.setFileName(dfsFileName);
             cos.write(content);
+
         } else if ("get".equals(args[0])) {
             if (!this.nameSystemService.exists(args[1])) {
                 System.out.println("No such file.");
@@ -126,11 +151,11 @@ public class Client {
 
     public void showHelpInfo(String opt) {
         System.out.println("Unkonwn option: " + opt);
-        System.out.println("Usage:");
-        System.out.println("ls");
-        System.out.println("mkdir");
-        System.out.println("touch");
-        System.out.println("rm");
+        System.out.println("Usage: (Waring: Current version does not support directory and wild card)");
+        System.out.println("ls                            print all files stored in dfs");
+        System.out.println("rm <file>                     delete a file in dfs");
+        System.out.println("get <dfs file> <local file>   get a dfs file to local file system");
+        System.out.println("put <local file> <dfs file>   put a local file to dfs");
     }
 
     public void exit() throws IOException {

@@ -12,7 +12,19 @@ import java.rmi.RemoteException;
 import java.util.*;
 
 /**
+ * JobInProgress.java
  * Created by magl on 14/11/10.
+ *
+ * The main abstraction of a job.
+ * This class maintains several crucial data structure:
+ * localMapTasksMap : Maps from a host ip to a list of map tasks that can fetch data locally.
+ * runningMapTasksMap : Maps from a host ip to a set of map tasks that is running on this host.
+ * nonRunningReduceTaskSet : A set of non-running reduce task
+ * runningReduceTaskSet : A set of running reduce task
+ * failedMapTaskSet : A set of failed map task
+ * failedReduceTaskSet : A set of failed reduce task
+ * maps : All map tasks of this job
+ * reduces : All reduce tasks of this job
  */
 public class JobInProgress {
     private String jobID;
@@ -58,20 +70,26 @@ public class JobInProgress {
         failedReduceTaskSet = new HashSet<TaskInProgress>();
     }
 
-    public void initTasks() {
+    /**
+     * initTasks
+     *
+     * Initialize all map and reduce tasks of this job.
+     */
+    public synchronized void initTasks() {
         if (tasksInited || isComplete()) {
             return;
         }
 
         System.out.println("Initializing job: " + jobID);
+        // get input file splits
         LocatedBlock[] allBlocks = getFileBlocks(jobConf.getInputPath());
-        System.out.println("Reading all blocks done");
         numMapTasks = allBlocks.length;
-        // Init Map Tasks
+        // Init Map Tasks according to split number
         this.maps = new TaskInProgress[numMapTasks];
         for (int i = 0; i < numMapTasks; i++) {
             this.maps[i] = new TaskInProgress(jobID, allBlocks[i], jobTracker, this, i);
         }
+        // build local map task cache
         localMapTasksMap = createCache(allBlocks);
 
         // Init Reduce Tasks
@@ -83,9 +101,16 @@ public class JobInProgress {
 
         tasksInited = true;
         runningMapTasksMap = new HashMap<String, Set<TaskInProgress>>();
-        System.out.println("Initializing job done");
     }
 
+    /**
+     * getFileBlocks
+     *
+     * Get the location of all blocks of input file.
+     *
+     * @param fileName
+     * @return
+     */
     public LocatedBlock[] getFileBlocks(String fileName) {
         try {
             return jobTracker.getNameNode().getFileBlocks(fileName).getBlocks();
@@ -96,13 +121,15 @@ public class JobInProgress {
         }
     }
 
-    public void updateTaskStatus(TaskInProgress tip, TaskStatus status) {
-        // if task has complete and status is succeed, ignore status
-        /*
-        if (tip.isComplete() && status.getState() == SUCCEED) {
-            return;
-        }
-        */
+    /**
+     * updateTaskStatus
+     *
+     * Update the status of a task
+     *
+     * @param tip
+     * @param status
+     */
+    public synchronized void updateTaskStatus(TaskInProgress tip, TaskStatus status) {
         boolean changed = tip.updateStatus(status);
         if (changed) {
             int state = status.getState();
@@ -115,7 +142,15 @@ public class JobInProgress {
         }
     }
 
-    public void handleSucceedTask(TaskInProgress tip, TaskStatus status) {
+    /**
+     * handleSucceedTask
+     *
+     * Record a succeeded task and report this task to {@link lxu.lxmapreduce.job.JobTracker}
+     *
+     * @param tip
+     * @param status
+     */
+    public synchronized void handleSucceedTask(TaskInProgress tip, TaskStatus status) {
         TaskAttemptID taskID = status.getTaskID();
         System.out.println("Task '" + taskID.getTaskID() + "' has completed!");
         tip.setTaskCompleted(taskID);
@@ -150,7 +185,15 @@ public class JobInProgress {
         }
     }
 
-    public Map<String, List<TaskInProgress>> createCache(LocatedBlock[] blocks) {
+    /**
+     * createCache
+     *
+     * Build local map task cache.
+     *
+     * @param blocks
+     * @return
+     */
+    public synchronized Map<String, List<TaskInProgress>> createCache(LocatedBlock[] blocks) {
         Map<String, List<TaskInProgress>> cache = new HashMap<String, List<TaskInProgress>>();
 
         // for each block
@@ -179,12 +222,21 @@ public class JobInProgress {
         return cache;
     }
 
-    public Task obtainNewMapTask(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
+    /**
+     * obtainNewMapTask
+     *
+     * Get a new runnable map task
+     *
+     * @param taskTrackerStatus
+     * @return
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
+    public synchronized Task obtainNewMapTask(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
         int target = findNewMapTask(taskTrackerStatus);
         if (target == -1) {
             return null;
         }
-        System.out.println("assign target = " + target);
 
         Task result = maps[target].getTaskToRun(taskTrackerStatus.getTrackerName());
 
@@ -198,6 +250,15 @@ public class JobInProgress {
         return result;
     }
 
+    /**
+     * findNewMapTask
+     *
+     * Find a runnable map task for {@link lxu.lxmapreduce.job.TaskScheduler}
+     * First choose a failed task, then local map task, finally non-local map task.
+     *
+     * @param taskTrackerStatus
+     * @return The index of the map task in maps
+     */
     private synchronized int findNewMapTask(TaskTrackerStatus taskTrackerStatus) {
         if (numMapTasks == 0) {
             System.out.println("No maps to schedule for " + this.jobID);
@@ -258,6 +319,14 @@ public class JobInProgress {
         return -1;
     }
 
+    /**
+     * scheduleMap
+     *
+     * Record a new map task to be run.
+     *
+     * @param trackerHost
+     * @param taskInProgress
+     */
     private synchronized void scheduleMap(String trackerHost, TaskInProgress taskInProgress) {
         Set<TaskInProgress> hostMaps = runningMapTasksMap.get(trackerHost);
         if (hostMaps == null) {
@@ -267,12 +336,23 @@ public class JobInProgress {
         hostMaps.add(taskInProgress);
     }
 
+    /**
+     * abtainNewReduceTask
+     *
+     * Find a new reduce task for {@link lxu.lxmapreduce.job.TaskScheduler}
+     *
+     * @param taskTrackerStatus
+     * @return
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
     public synchronized Task obtainNewReduceTask(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
         if (jobStatus.getMapState() != JobStatus.SUCCEEDED) {
             System.out.println("Error: Cannot assign reduce task before map finishing");
             return null;
         }
 
+        // If map is done, then we can assign reduce task.
         if (!shouldAssignReduceTask()) {
             return null;
         }
@@ -295,6 +375,14 @@ public class JobInProgress {
         return task;
     }
 
+    /**
+     * findNewReducetasks
+     *
+     * Find a new reduce tasks. First schedule failed tasks.
+     *
+     * @param taskTrackerStatus
+     * @return
+     */
     private synchronized int findNewReduceTasks(TaskTrackerStatus taskTrackerStatus) {
         if (numReduceTasks == 0) {
             System.out.println("No reduces to schedule for " + this.jobID);
@@ -330,10 +418,24 @@ public class JobInProgress {
         return -1;
     }
 
+    /**
+     * shouldAssignReduceTask
+     *
+     * Assign reduce task only when all map tasks have finished
+     *
+     * @return
+     */
     public boolean shouldAssignReduceTask() {
         return finishedMapTasks == numMapTasks;
     }
 
+    /**
+     * scheduleReduce
+     *
+     * Record a reduce task to be run.
+     *
+     * @param taskInProgress
+     */
     private void scheduleReduce(TaskInProgress taskInProgress) {
         if (runningReduceTaskSet == null) {
             System.err.println("Running cache for reducers missing!! Job details are missing");
@@ -342,6 +444,12 @@ public class JobInProgress {
         runningReduceTaskSet.add(taskInProgress);
     }
 
+    /**
+     * getAllMapTaskLocations
+     *
+     * Get all map task locations for reducer.
+     * @return
+     */
     public HashSet<String> getAllMapTaskLocations() {
         HashSet<String> locations = new HashSet<String>();
 
@@ -434,6 +542,13 @@ public class JobInProgress {
         this.jobStatus = jobStatus;
     }
 
+    /**
+     * addFailedTaskSet
+     *
+     * If a task failed, then adding it to set.
+     * @param failedTask
+     * @param finished
+     */
     public void addFailedTaskSet(TaskInProgress failedTask, boolean finished) {
         if (finished) {
             if (failedTask.isMapTask()) {

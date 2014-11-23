@@ -9,7 +9,10 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
+ * IJobTracker.java
  * Created by magl on 14/11/10.
+ *
+ * The interface of all JobTracker service.
  */
 public interface IJobTracker extends Remote {
 	// for job client

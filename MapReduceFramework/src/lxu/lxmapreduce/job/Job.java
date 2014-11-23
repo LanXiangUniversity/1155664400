@@ -6,10 +6,15 @@ import lxu.lxmapreduce.configuration.JobContext;
 import java.io.IOException;
 
 /**
+ * Job.java
  * Created by magl on 14/11/15.
+ *
+ * This class is the main abstraction of a Job.
+ * It helps client to configure all properties of a job and provides
+ * interface to submit job.
  */
 public class Job extends JobContext {
-    private JobClient jobClient;
+    private JobClient jobClient;    // A client which interact with JobTracker
     private JobState state = JobState.DEFINE;
     private JobStatus status = null;
 
@@ -32,6 +37,9 @@ public class Job extends JobContext {
         return status;
     }
 
+    /*
+     * Interfaces to configure the job.
+     */
     public void setNumMapTasks(int numMapTasks) throws IllegalStateException {
         ensureState(JobState.DEFINE);
         conf.setNumMapTasks(numMapTasks);
@@ -120,23 +128,43 @@ public class Job extends JobContext {
         conf.setOutputPath(path);
     }
 
+    /**
+     * isComplete
+     *
+     * Whether the job is complete.
+     *
+     * @return
+     */
     public boolean isComplete() {
         ensureState(JobState.RUNNING);
         updateStatus();
         return status.isJobComplete();
     }
 
+    /**
+     * isSuccessful
+     *
+     * Whether the job completes successfully.
+     *
+     * @return
+     */
     public boolean isSuccessful() {
         ensureState(JobState.RUNNING);
         updateStatus();
         return status.isSuccessful();
     }
 
-    public void submit() {
+    /**
+     * submit
+     *
+     * Submit a job.
+     */
+    private void submit() {
         if (getInputPath() == null) {
             System.err.println("FATAL: Missing input file(s)!");
             System.exit(-1);
         }
+        // JobClient submit the job
         status = jobClient.submitJob(this, new JobConf(getConfiguration()));
         if (status == null) {
             System.err.println("Error: Job submitting wrong");
@@ -145,6 +173,13 @@ public class Job extends JobContext {
         state = JobState.RUNNING;
     }
 
+    /**
+     * waitForCompletion
+     *
+     * An interface for client to submit a job and wait for its completion
+     *
+     * @return
+     */
     public boolean waitForCompletion() {
         if (state == JobState.DEFINE) {
             submit();
@@ -170,6 +205,14 @@ public class Job extends JobContext {
         return isSuccessful();
     }
 
+    /**
+     * ensureState
+     *
+     * Client can configure the job only when it is in define state.
+     *
+     * @param state
+     * @throws IllegalStateException
+     */
     private void ensureState(JobState state) throws IllegalStateException {
         if (this.state != state) {
             throw new IllegalStateException("Job in state "+ this.state +

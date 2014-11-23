@@ -50,7 +50,7 @@ public class DataNode implements Runnable {
 	public DataNode() throws Exception {
 		dataNodeServerSocket = new ServerSocket(port);
         nameNodeHostName = InetAddress.getLocalHost().getHostAddress();
-		blockService = new BlockService(dataNodeServerSocket, true, this.nodeID);
+		blockService = new BlockService(dataNodeServerSocket, true);
 		blockServiceThread = new Thread(blockService);
 		blockServiceThread.start();
         register();
@@ -69,6 +69,16 @@ public class DataNode implements Runnable {
 		}
 	}
 
+    /**
+     * register
+     *
+     * Register this DataNode to {@link lxu.lxdfs.namenode.NameNode}.
+     * Connecting to NameNode using java rmi.
+     * Start blockService thread.
+     *
+     * @throws IOException
+     * @throws NotBoundException
+     */
 	private void register() throws IOException, NotBoundException {
         Configuration conf = new Configuration();
         String masterAddr = conf.getSocketAddr("master.address", "localhost");
@@ -76,6 +86,7 @@ public class DataNode implements Runnable {
 		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
 		nameNode = (INameSystemService) registry.lookup("NameSystemService");
 		nodeID = nameNode.register(nameNodeHostName, port, blockService.getAllBlocks());
+        blockService.setDatanodeId(nodeID);
 		System.out.println("Data Node registered. Node ID = " + nodeID);
 	}
 
@@ -102,6 +113,7 @@ public class DataNode implements Runnable {
                                            this.nameNodeHostName,
                                            this.port,
                                            this.blockService.getAllBlocks().size());
+            // Send heartbeat to namenode
             LinkedList<DataNodeCommand> commands = nameNode.heartbeat(thisNode);
             processCommands(commands);
             this.lastHeartbeatTime = System.currentTimeMillis();

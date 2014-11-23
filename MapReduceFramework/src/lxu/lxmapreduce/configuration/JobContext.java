@@ -3,9 +3,11 @@ package lxu.lxmapreduce.configuration;
 import java.io.Serializable;
 
 /**
+ * JobContext.java
+ * Created by Wei on 11/12/14.
+ *
  * A read-only view of the job that is provided to the tasks while they
  * are running.
- * Created by Wei on 11/12/14.
  */
 public class JobContext implements Serializable {
     public static final String INPUT_FORMAT_CLASS_ATTR = "mapreduce.job.inputformat.class";

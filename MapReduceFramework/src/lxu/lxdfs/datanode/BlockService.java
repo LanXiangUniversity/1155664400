@@ -3,7 +3,6 @@ package lxu.lxdfs.datanode;
 import lxu.lxdfs.client.ClientPacket;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
-import sun.tools.tree.FieldExpression;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -34,31 +33,49 @@ public class BlockService implements Runnable {
     private boolean isRunning = false;
     private static int datanodeId;
 
-    public BlockService(ServerSocket serverSocket, boolean isRunning, int id) {
+    public BlockService(ServerSocket serverSocket, boolean isRunning) {
         this.serverSocket = serverSocket;
         this.isRunning = isRunning;
-        this.datanodeId = id;
-        File folder = new File("datanode_" + this.datanodeId);
-        if (!folder.exists()) {
-            folder.mkdir();
-        }
     }
 
     public void stop() {
         this.isRunning = false;
     }
 
+    public static int getDatanodeId() {
+        return datanodeId;
+    }
+
+    public static void setDatanodeId(int datanodeId) {
+        BlockService.datanodeId = datanodeId;
+    }
+
+    /**
+     * deleteBlock
+     *
+     * Delete the local file of the block
+     *
+     * @param block block to be deleted
+     */
     public void deleteBlock(Block block) {
         blockFiles.remove(block);
         File localFile = new File("datanode_" + this.datanodeId +
                 "/blk_" + block.getBlockID());
-        if (localFile.delete()) {
-            System.out.println(localFile.getName() + " is deleted!");
-        } else {
-            System.out.println("Delete operation is failed.");
+        if (!localFile.delete()) {
+            System.err.println("Delete operation is failed.");
         }
     }
 
+    /**
+     * copyBlockFromAnotherDataNode
+     *
+     * This function handles {@link lxu.lxdfs.datanode.DataNode} failure situation.
+     * When one DataNode fails, {@link lxu.lxdfs.namenode.NameNode} will ask the
+     * DataNode to fetch a new block from another DataNode.
+     *
+     * @param block Block to be fetched
+     * @param dataNode Where the block is stored
+     */
     public void copyBlockFromAnotherDataNode(Block block, DataNodeDescriptor dataNode) {
         ClientPacket clientPacket = new ClientPacket();
         clientPacket.setBlock(block);
@@ -96,7 +113,11 @@ public class BlockService implements Runnable {
                 Socket socket = serverSocket.accept();
                 ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                 ClientPacket packet = (ClientPacket) input.readObject();
-                //System.out.println(packet.getBlock().getBlockID());
+                /**
+                 * When received a READ request, new a {@link lxu.lxdfs.datanode.BlockService.BlockReader}
+                 * to process. If it is a WRITE request, new a {@link lxu.lxdfs.datanode.BlockService.BlockWriter}
+                 * to process.
+                 */
                 switch (packet.getOperation()) {
                     case ClientPacket.BLOCK_READ:
                         (new Thread(new BlockReader(packet, socket))).start();
@@ -127,6 +148,9 @@ public class BlockService implements Runnable {
         return new ArrayList<Block>(blockFiles.keySet());
     }
 
+    /**
+     * Thread to handle BLOCK_READ request.
+     */
     private static class BlockReader implements Runnable {
         private ClientPacket packet = null;
         private Socket socket = null;
@@ -138,6 +162,9 @@ public class BlockService implements Runnable {
 
         @Override
         public void run() {
+            /*
+             * Extract Block and read contents of that block.
+             */
             Block block = packet.getBlock();
             int ackPacketID = packet.getPacketID();
             String fileName = blockFiles.get(block);
@@ -160,6 +187,9 @@ public class BlockService implements Runnable {
                     System.err.println("Error: Data Node reading file " + fileName + " error");
                 }
             }
+            /*
+             * Send contents back.
+             */
             try {
                 ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                 output.writeObject(new DataNodePacket(ackPacketID, block, operationState, lines));
@@ -172,6 +202,9 @@ public class BlockService implements Runnable {
         }
     }
 
+    /**
+     * A thread to handle BLOCK_WRITE request.
+     */
     private static class BlockWriter implements Runnable {
 
         private ClientPacket packet = null;
@@ -182,8 +215,21 @@ public class BlockService implements Runnable {
             this.socket = socket;
         }
 
+        /**
+         * writeToFile
+         *
+         * Write a list of lines to file.
+         *
+         * @param block
+         * @param lines
+         * @return
+         */
         public static boolean writeToFile(Block block, List<String> lines) {
             String fileName = "datanode_" + datanodeId + "/blk_" + block.getBlockID();
+            File folder = new File("datanode_" + datanodeId);
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
             boolean success = false;
 
             try {
@@ -200,7 +246,6 @@ public class BlockService implements Runnable {
                 blockFiles.put(block, fileName);
                 writer.close();
                 success = true;
-                System.out.println("Write block " + block.getBlockID() + " to file " + fileName);
             } catch (IOException e) {
                 System.err.println("Error: Data Node writing file " + fileName + " error");
                 e.printStackTrace();
@@ -215,6 +260,7 @@ public class BlockService implements Runnable {
             boolean operationState = false;
             ArrayList<String> lines = packet.getLines();
 
+            // write contents to file
             operationState = writeToFile(block, lines);
 
             // send ack to client

@@ -3,7 +3,10 @@ package lxu.lxdfs.metadata;
 import java.io.Serializable;
 
 /**
+ * Block.java
  * Created by Wei on 11/3/14.
+ *
+ * A abstraction to a file block.
  */
 public class Block implements Serializable {
     private Long blockID;              // global Block ID

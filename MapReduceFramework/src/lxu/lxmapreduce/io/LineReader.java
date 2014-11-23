@@ -8,8 +8,10 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * Read lines form inputStream
+ * LineReader.java
  * Created by Wei on 11/11/14.
+ *
+ * Read lines form inputStream
  */
 
 public class LineReader {
@@ -25,6 +27,8 @@ public class LineReader {
     }
 
     /**
+     * readLine
+     *
      * Read a line into Text
      *
      * @param str

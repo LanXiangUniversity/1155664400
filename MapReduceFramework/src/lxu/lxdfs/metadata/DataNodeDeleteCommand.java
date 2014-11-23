@@ -1,7 +1,10 @@
 package lxu.lxdfs.metadata;
 
 /**
+ * DataNodeDeleteCommand.java
  * Created by Wei on 11/21/14.
+ *
+ * Delete a block.
  */
 public class DataNodeDeleteCommand extends DataNodeCommand {
     private Block block;

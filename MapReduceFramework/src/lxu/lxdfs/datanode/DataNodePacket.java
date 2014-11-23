@@ -6,7 +6,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
+ * DataNodePacket.java
  * Created by magl on 14/11/8.
+ *
+ * This class is the packet to be send to DFS client. It contains the ackID to client,
+ * a {@link lxu.lxdfs.metadata.Block} representing the block to be read or write, the
+ * operation state and the contents of the block.
  */
 public class DataNodePacket implements Serializable {
     private int ackPacketID;

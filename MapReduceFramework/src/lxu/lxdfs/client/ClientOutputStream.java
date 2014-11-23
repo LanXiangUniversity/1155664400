@@ -18,7 +18,11 @@ import java.rmi.registry.Registry;
 import java.util.*;
 
 /**
+ * ClientOutputStream.java
  * Created by Wei on 11/3/14.
+ *
+ * A class that provides convenient interface to write the contents
+ * of a file to dfs
  */
 public class ClientOutputStream {
     private String fileName;
@@ -36,6 +40,17 @@ public class ClientOutputStream {
     private Queue<String> buffer;
     private LinkedList<AckListener> ackListeners;
 
+    /**
+     * Contructor
+     *
+     * Connecting to {@link lxu.lxdfs.namenode.NameNode} using java rmi
+     * Generating several queue to monitor writing process
+     *
+     * @param masterAddr
+     * @param rmiPort
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
     public ClientOutputStream(String masterAddr, int rmiPort) throws RemoteException, NotBoundException {
         this.listenPort = 15998;
         this.locations = new LinkedList<DataNodeDescriptor>();
@@ -48,6 +63,11 @@ public class ClientOutputStream {
         this.nameSystem = (INameSystemService) registry.lookup("NameSystemService");
     }
 
+    /**
+     * close
+     *
+     * Close all ackListener
+     */
     public void close() {
         for (AckListener ackListener : ackListeners) {
             if (ackListener.isRunning()) {
@@ -56,6 +76,9 @@ public class ClientOutputStream {
         }
     }
 
+    ///
+    /// getter and setter
+    ///
     public int getListenPort() {
         return listenPort;
     }
@@ -129,21 +152,20 @@ public class ClientOutputStream {
     }
 
     /**
+     * write
+     *
      * Write data to the first DataNode.
      * Store data in the buffer, and send to the DataNode
      * if the buffer size >= Block size.
      *
      * @param lines
-     * @return
+     * @return # of lines writed
      */
     public int write(List<String> lines) throws RemoteException, NotBoundException {
         this.nameSystem.create(this.fileName);
 
         int writeSize = 0;
         LocatedBlock locatedBlock = null;
-
-        // get data
-        //String[] lines = data.split(";");
 
         // Buffer
         for (String line : lines) {
@@ -184,19 +206,15 @@ public class ClientOutputStream {
             this.blockOffset++;
         }
 
-		/* TODO wait for ackQueue to be cleared by ackListener */
-
         return writeSize;
     }
 
     /**
+     * sendPacket
+     *
      * Send packet (Block) to the first Data Node.
      */
     public void sendPacket(ClientPacket packet) {
-        /*
-		String ip = packet.getLocations().get(0).getDataNodeIP();
-		int port = packet.getLocations().get(0).getDataNodePort();
-		*/
         String ip = packet.getLocation().getDataNodeIP();
         int port = packet.getLocation().getDataNodePort();
 
@@ -209,17 +227,21 @@ public class ClientOutputStream {
             (new Thread(ackListener)).start();
 
             // Log
+            /*
             System.out.println("Succeed to write to DataNode " +
                     packet.getLocation().getDataNodeID());
+            */
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
+     * getPacketsFromBuffer
+     *
      * Get data from buffer and build a packet.
      *
-     * @return
+     * @return A list of {@link lxu.lxdfs.client.ClientPacket} to be sent
      */
     public List<ClientPacket> getPacketsFromBuffer(Set<DataNodeDescriptor> locations,
                                                    Block block) {
@@ -246,7 +268,6 @@ public class ClientOutputStream {
             packet.setLines(lines);
             packet.setBlock(block);
             packet.setOperation(ClientPacket.BLOCK_WRITE);
-            //packet.setLocations(locations);
             packet.setLocation(location);
             packet.setReplicaID(1);
             packet.setReplicaNum(2);
@@ -259,6 +280,8 @@ public class ClientOutputStream {
     }
 
     /**
+     * AckListener
+     *
      * Listen for acks from data node.
      */
     private class AckListener implements Runnable {

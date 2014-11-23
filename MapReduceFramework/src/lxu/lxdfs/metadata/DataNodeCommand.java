@@ -3,7 +3,10 @@ package lxu.lxdfs.metadata;
 import java.io.Serializable;
 
 /**
+ * DataNodeCommand.java
  * Created by magl on 14/11/19.
+ *
+ * The base class for all commands {@link lxu.lxdfs.namenode.NameNode} sent.
  */
 public class DataNodeCommand implements Serializable {
     protected static final int DELETE_BLOCK = 0;

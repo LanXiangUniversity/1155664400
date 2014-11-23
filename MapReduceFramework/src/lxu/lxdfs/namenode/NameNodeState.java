@@ -1,7 +1,10 @@
 package lxu.lxdfs.namenode;
 
 /**
+ * NameNodeState.java
  * Created by Wei on 11/9/14.
+ *
+ * The state of NameNode
  */
 public enum NameNodeState {
     STARTING,

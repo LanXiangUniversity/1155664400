@@ -6,7 +6,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
+ * HeartbeatResponse.java
  * Created by magl on 14/11/10.
+ *
+ * The response for TaskTracker.
  */
 public class HeartbeatResponse implements Serializable {
     private Configuration configuration;

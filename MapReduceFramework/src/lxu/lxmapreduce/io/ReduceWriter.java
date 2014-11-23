@@ -1,7 +1,5 @@
 package lxu.lxmapreduce.io;
 
-import lxu.lxmapreduce.io.LineWriter;
-import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.NullWritable;
 import lxu.lxmapreduce.io.format.Text;
 
@@ -10,7 +8,10 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * ReduceWriter.java
  * Created by Wei on 11/19/14.
+ *
+ * This class writes the output of reducer to file.
  */
 public class ReduceWriter extends RecordWriter<NullWritable, Text> {
 	private LineWriter out;
@@ -25,7 +26,6 @@ public class ReduceWriter extends RecordWriter<NullWritable, Text> {
 	}
 
 	@Override
-	//public void write(Null key, Text value) throws IOException {
 	public void write(NullWritable key, Text value) throws IOException {
 		this.out.write(value.getValue() + "\n");
 	}

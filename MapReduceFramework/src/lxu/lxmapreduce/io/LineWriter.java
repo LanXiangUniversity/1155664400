@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
+ * LineWriter.java
  * Created by Wei on 11/11/14.
+ *
+ * Write a line to file.
  */
 public class LineWriter {
     private PrintWriter out;
@@ -20,7 +23,6 @@ public class LineWriter {
     }
 
     public void write(String line) {
-        //System.out.println("Line Writer write " + line);
         this.out.write(line);
     }
 

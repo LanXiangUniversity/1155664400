@@ -4,17 +4,11 @@ package lxu.lxmapreduce.io;
  * Created by Wei on 11/11/14.
  */
 
-import java.util.Iterator;
 import java.util.List;
 
 import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxdfs.metadata.LocatedBlocks;
-import lxu.lxmapreduce.io.format.Text;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Break the records into key/value pairs for input to the Mapper.

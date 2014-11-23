@@ -1,9 +1,8 @@
 package lxu.lxmapreduce.task;
 
 import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.JobContext;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
+import lxu.lxmapreduce.configuration.JobConf;
+import lxu.lxmapreduce.configuration.JobContext;
 
 import java.io.IOException;
 import java.io.Serializable;

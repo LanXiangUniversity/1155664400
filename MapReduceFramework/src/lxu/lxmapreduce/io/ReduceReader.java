@@ -1,6 +1,7 @@
-package lxu.lxmapreduce.io.format;
+package lxu.lxmapreduce.io;
 
 import lxu.lxmapreduce.io.RecordReader;
+import lxu.lxmapreduce.io.format.Text;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

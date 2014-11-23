@@ -3,9 +3,8 @@ package lxu.lxdfs.namenode;
 import lxu.lxdfs.service.INameSystemService;
 import lxu.lxdfs.service.NameSystemService;
 import lxu.lxmapreduce.job.JobTracker;
-import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.configuration.Configuration;
 
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;

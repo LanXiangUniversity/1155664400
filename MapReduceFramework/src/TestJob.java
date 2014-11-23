@@ -2,8 +2,8 @@ import lxu.lxmapreduce.io.format.*;
 import lxu.lxmapreduce.job.Job;
 import lxu.lxmapreduce.task.map.Mapper;
 import lxu.lxmapreduce.task.reduce.Reducer;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
 
 import java.io.IOException;
 import java.util.Iterator;

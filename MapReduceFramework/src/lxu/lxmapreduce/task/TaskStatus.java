@@ -1,7 +1,5 @@
 package lxu.lxmapreduce.task;
 
-import lxu.lxmapreduce.tmp.TaskID;
-
 import java.io.Serializable;
 
 /**

@@ -5,7 +5,6 @@ import lxu.lxmapreduce.job.JobInProgress;
 import lxu.lxmapreduce.job.JobTracker;
 import lxu.lxmapreduce.task.map.MapTask;
 import lxu.lxmapreduce.task.reduce.ReduceTask;
-import lxu.lxmapreduce.tmp.TaskID;
 
 import java.util.HashMap;
 import java.util.HashSet;

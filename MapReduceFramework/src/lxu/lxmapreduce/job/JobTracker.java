@@ -1,16 +1,14 @@
 package lxu.lxmapreduce.job;
 
 import lxu.lxdfs.service.INameSystemService;
-import lxu.lxdfs.service.NameSystemService;
 import lxu.lxmapreduce.metadata.*;
 import lxu.lxmapreduce.task.*;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.TaskID;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
+import lxu.lxmapreduce.task.TaskID;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;

@@ -1,7 +1,9 @@
-package lxu.lxmapreduce.io.format;
+package lxu.lxmapreduce.io;
 
 import lxu.lxmapreduce.io.LineWriter;
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.format.NullWritable;
+import lxu.lxmapreduce.io.format.Text;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

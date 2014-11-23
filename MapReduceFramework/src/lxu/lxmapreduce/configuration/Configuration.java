@@ -1,4 +1,4 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.configuration;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
-import java.util.jar.JarFile;
 
 /**
  * Created by Wei on 11/11/14.

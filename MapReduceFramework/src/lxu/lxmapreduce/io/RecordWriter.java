@@ -1,7 +1,6 @@
 package lxu.lxmapreduce.io;
 
 import java.util.List;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

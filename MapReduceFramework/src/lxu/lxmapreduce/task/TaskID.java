@@ -1,7 +1,6 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.task;
 
 import java.io.Serializable;
-import java.text.NumberFormat;
 
 /**
  * Created by Wei on 11/12/14.

@@ -2,26 +2,21 @@ package lxu.lxmapreduce.io;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import lxu.lxdfs.client.ClientPacket;
-import lxu.lxdfs.datanode.DataNode;
 import lxu.lxdfs.datanode.DataNodePacket;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
 import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxdfs.metadata.LocatedBlocks;
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
 /**
  * Treats keys as offset in file and value as line.
  * Created by Wei on 11/11/14.
  */
-public class LineRecordReader extends RecordReader<LongWritable, Text> {
+public class MapReader extends RecordReader<LongWritable, Text> {
 
 	private int lineNum = 0;
 	private LineReader in;
@@ -32,7 +27,7 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
 	private List<String> inputFiles;
 	private List<LocatedBlock> locatedBlockses;
 
-	public LineRecordReader() {
+	public MapReader() {
 		/* TODO Init LineReader */
 		if (this.key == null) {
 			this.key = new LongWritable();

@@ -3,9 +3,8 @@ package lxu.lxmapreduce.task.map;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.task.TaskAttemptID;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.TaskID;
-import lxu.lxmapreduce.tmp.TaskInputOutputContext;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.task.TaskInputOutputContext;
 
 import java.io.IOException;
 

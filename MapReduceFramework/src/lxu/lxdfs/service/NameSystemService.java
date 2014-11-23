@@ -4,7 +4,7 @@ package lxu.lxdfs.service;
 import lxu.lxdfs.client.ClientOutputStream;
 import lxu.lxdfs.metadata.*;
 import lxu.lxdfs.namenode.NameNodeState;
-import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.configuration.Configuration;
 
 import java.nio.file.Path;
 import java.rmi.NotBoundException;

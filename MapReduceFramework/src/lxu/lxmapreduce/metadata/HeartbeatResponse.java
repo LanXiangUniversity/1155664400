@@ -1,6 +1,6 @@
 package lxu.lxmapreduce.metadata;
 
-import lxu.lxmapreduce.tmp.Configuration;
+import lxu.lxmapreduce.configuration.Configuration;
 
 import java.io.Serializable;
 import java.util.ArrayList;

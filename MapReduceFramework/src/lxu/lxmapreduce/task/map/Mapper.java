@@ -1,14 +1,14 @@
 package lxu.lxmapreduce.task.map;
 
-import lxu.lxmapreduce.io.LineRecordReader;
-import lxu.lxmapreduce.io.LineRecordWriter;
+import lxu.lxmapreduce.io.MapReader;
+import lxu.lxmapreduce.io.MapWriter;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.TaskAttemptID;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.TaskID;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.task.TaskID;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -20,8 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	public static void main(String[] args) throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		//RecordWriter<Text, Text> output = new LineRecordWriter();
-        RecordWriter<Text, Text> output = new LineRecordWriter();
-		RecordReader<LongWritable, Text> input = new LineRecordReader();
+        RecordWriter<Text, Text> output = new MapWriter();
+		RecordReader<LongWritable, Text> input = new MapReader();
 
 		input.initialize(null, null);
 		output.initialize(null);

@@ -1,7 +1,6 @@
 package lxu.lxmapreduce.job;
 
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.JobContext;
+import lxu.lxmapreduce.configuration.JobConf;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;

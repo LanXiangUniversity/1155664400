@@ -2,9 +2,8 @@ package lxu.lxmapreduce.io;
 
 import java.util.LinkedList;
 import java.util.List;
-import lxu.lxmapreduce.io.format.LongWritable;
+
 import lxu.lxmapreduce.io.format.Text;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,10 +11,10 @@ import java.io.IOException;
 /**
  * Created by Wei on 11/11/14.
  */
-public class LineRecordWriter extends RecordWriter<Text, Text> {
+public class MapWriter extends RecordWriter<Text, Text> {
 	private LinkedList<LineWriter> out;
 
-	public LineRecordWriter() {
+	public MapWriter() {
 	}
 
 	@Override

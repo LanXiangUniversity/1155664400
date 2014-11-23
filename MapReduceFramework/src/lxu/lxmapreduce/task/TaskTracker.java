@@ -5,8 +5,8 @@ import lxu.lxmapreduce.job.IJobTracker;
 import lxu.lxmapreduce.metadata.*;
 import lxu.lxmapreduce.task.map.MapTaskStatus;
 import lxu.lxmapreduce.task.reduce.ReduceTaskStatus;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +18,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;

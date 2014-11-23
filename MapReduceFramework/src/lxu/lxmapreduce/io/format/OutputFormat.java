@@ -1,6 +1,7 @@
 package lxu.lxmapreduce.io.format;
 
 import lxu.lxmapreduce.io.RecordWriter;
+import lxu.lxmapreduce.io.ReduceWriter;
 
 /**
  * Created by Wei on 11/12/14.

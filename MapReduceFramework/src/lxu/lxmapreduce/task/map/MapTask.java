@@ -4,21 +4,18 @@ import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
-import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.OutputFormat;
-import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.Task;
 import lxu.lxmapreduce.task.TaskAttemptID;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
+import lxu.lxmapreduce.task.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

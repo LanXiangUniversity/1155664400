@@ -1,12 +1,11 @@
 package lxu.lxmapreduce.task.reduce;
 
 import lxu.lxmapreduce.io.RecordWriter;
-import lxu.lxmapreduce.io.format.NullWritable;
-import lxu.lxmapreduce.io.format.ReduceReader;
+import lxu.lxmapreduce.io.ReduceReader;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.TaskAttemptID;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.TaskInputOutputContext;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.task.TaskInputOutputContext;
 
 import java.io.IOException;
 import java.util.Iterator;

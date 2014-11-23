@@ -1,6 +1,6 @@
 package lxu.lxmapreduce.io.format;
 
-import lxu.lxmapreduce.io.LineRecordReader;
+import lxu.lxmapreduce.io.MapReader;
 import lxu.lxmapreduce.io.RecordReader;
 
 /**
@@ -9,6 +9,6 @@ import lxu.lxmapreduce.io.RecordReader;
 public class TextInputFormat extends InputFormat<LongWritable, Text> {
 	@Override
 	public RecordReader<LongWritable, Text> createRecordReader() {
-		return new LineRecordReader();
+		return new MapReader();
 	}
 }

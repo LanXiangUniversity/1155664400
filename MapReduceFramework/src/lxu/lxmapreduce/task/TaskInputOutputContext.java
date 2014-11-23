@@ -1,7 +1,7 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.task;
 
 import lxu.lxmapreduce.io.RecordWriter;
-import lxu.lxmapreduce.task.TaskAttemptID;
+import lxu.lxmapreduce.configuration.Configuration;
 
 import java.io.IOException;
 

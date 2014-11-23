@@ -8,7 +8,12 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 /**
+ * JobClient.java
  * Created by Wei on 11/10/14.
+ *
+ * This class provides utilities to interact with
+ * {@link lxu.lxmapreduce.job.JobTracker}. Current utilities include
+ * locate JobTracker, update job status, and submit job.
  */
 public class JobClient {
     private JobConf jobConf;
@@ -24,6 +29,11 @@ public class JobClient {
         locateJobTracker();
     }
 
+    /**
+     * locateJobTracker
+     *
+     * Locate JobTracker using java rmi.
+     */
     public void locateJobTracker() {
         Registry registry = null;
         try {
@@ -42,6 +52,15 @@ public class JobClient {
         }
     }
 
+    /**
+     * updateStatus
+     *
+     * Given a jobID, connecting JobTracker and get the latest
+     * status of that job.
+     *
+     * @param jobID
+     * @return The latest job status.
+     */
     public JobStatus updateStatus(String jobID) {
         if (jobTracker == null) {
             System.err.println("Error: JobClient cannot connect to JobTracker!");
@@ -58,6 +77,17 @@ public class JobClient {
         return newStatus;
     }
 
+    /**
+     * submitJob
+     *
+     * First connecting to JobTracker to assign a new JobID for
+     * new job. Then submit the {@link lxu.lxmapreduce.configuration.JobConf} of
+     * the new job to JobTracker.
+     *
+     * @param job
+     * @param jobConf
+     * @return
+     */
     public JobStatus submitJob(Job job, JobConf jobConf) {
         JobStatus jobStatus = null;
         try {

@@ -14,7 +14,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * TaskInProgress.java
  * Created by magl on 14/11/10.
+ *
+ * This is the abstraction of a task. It records the information of a
+ * map or reduce task.
  */
 public class TaskInProgress {
     private int numMaps;
@@ -62,6 +66,14 @@ public class TaskInProgress {
         this.taskID = new TaskID(jobID, false, partition);
     }
 
+    /**
+     * updateStatus
+     *
+     * Update a status of a task.
+     *
+     * @param status
+     * @return
+     */
     public boolean updateStatus(TaskStatus status) {
         TaskAttemptID taskID = status.getTaskID();
         TaskStatus oldStatus = taskStatuses.get(taskID);
@@ -76,12 +88,29 @@ public class TaskInProgress {
         return true;
     }
 
+    /**
+     * setTaskCompleted
+     *
+     * Set a task to complete.
+     *
+     * @param taskID
+     */
     public void setTaskCompleted(TaskAttemptID taskID) {
         taskStatuses.get(taskID).setState(TaskStatus.SUCCEEDED);
         successfulTaskID = taskID;
         activeTasks.remove(taskID);
     }
 
+    /**
+     * getTaskToRun
+     *
+     * Set the task to running state.
+     *
+     * @param taskTrackerName
+     * @return
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
     public Task getTaskToRun(String taskTrackerName) throws RemoteException, NotBoundException {
         TaskAttemptID attemptID = new TaskAttemptID(taskID, nextAttemptID++);
         Task newTask = null;

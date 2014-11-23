@@ -59,8 +59,7 @@ public class BlockService implements Runnable {
      */
     public void deleteBlock(Block block) {
         blockFiles.remove(block);
-        File localFile = new File("datanode_" + this.datanodeId +
-                "/blk_" + block.getBlockID());
+        File localFile = new File("datanode/blk_" + block.getBlockID());
         if (!localFile.delete()) {
             System.err.println("Delete operation is failed.");
         }
@@ -225,8 +224,8 @@ public class BlockService implements Runnable {
          * @return
          */
         public static boolean writeToFile(Block block, List<String> lines) {
-            String fileName = "datanode_" + datanodeId + "/blk_" + block.getBlockID();
-            File folder = new File("datanode_" + datanodeId);
+            String fileName = "datanode/blk_" + block.getBlockID();
+            File folder = new File("datanode");
             if (!folder.exists()) {
                 folder.mkdir();
             }

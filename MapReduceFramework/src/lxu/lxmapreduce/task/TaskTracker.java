@@ -24,7 +24,13 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
+ * TaskTracker.java
  * Created by Wei on 11/12/14.
+ *
+ * This is the main class for TaskTracker. TaskTracker periodically send
+ * heartbeat message to {@link lxu.lxmapreduce.job.JobTracker} and receive
+ * actions from JobTracker. Then launch tasks and report their status back
+ * to JobTracker.
  */
 public class TaskTracker implements Runnable {
 	private boolean initialContact;
@@ -69,9 +75,6 @@ public class TaskTracker implements Runnable {
 	}
 
 	public void startInterListener() {
-		// TODO: Init interListener
-		//this.interListener.setPort();
-		//this.interListener.setFileName();
 		new Thread(this.interListener).start();
 	}
 
@@ -92,9 +95,14 @@ public class TaskTracker implements Runnable {
 		this.status = status;
 	}
 
+    /**
+     * sendHeartBeat
+     *
+     * Collect the status of all tasks and send heartbeat to JobTracker.
+     * @return {@link lxu.lxmapreduce.metadata.HeartbeatResponse} from JobTracker.
+     * @throws UnknownHostException
+     */
 	public HeartbeatResponse sendHeartBeat() throws UnknownHostException {
-        //System.out.println("Send heartbeat, id = " + responseID);
-
 		// Create TaskTrackerStatus.
 		TaskTrackerStatus taskTrackerStatus = buildTaskTrackerStatus();
 
@@ -122,10 +130,16 @@ public class TaskTracker implements Runnable {
 		return heartBeatResponse;
 	}
 
+    /**
+     * processHeartBeatResponse
+     *
+     * Process the response from JobTracker.
+     *
+     * @param heartBeatResponse
+     */
 	public void processHeartBeatResponse(HeartbeatResponse heartBeatResponse) {
 		// Update last responseID.
 		this.responseID = heartBeatResponse.getResponseID();
-        //System.out.println("Received heartBeatResponse, response ID = " + responseID);
 
 		// Handle JobTracker commands(TaskTrackerActions)
 		for (TaskTrackerAction action : heartBeatResponse.getActions()) {
@@ -135,7 +149,10 @@ public class TaskTracker implements Runnable {
 	}
 
 	/**
+     * processAction
+     *
 	 * Process actions received from JobTracker.
+     *
 	 * @param action
 	 * @param heartBeatResponse
 	 */
@@ -150,6 +167,8 @@ public class TaskTracker implements Runnable {
 	}
 
 	/**
+     * offerService
+     *
 	 * Send heartbeat every hearbeatInterval time.
 	 *
 	 * @throws InterruptedException
@@ -175,7 +194,9 @@ public class TaskTracker implements Runnable {
 	}
 
 	/**
-	 * Launch  a task and add it to the taskPoll.
+     * launchTask
+     *
+	 * Launch a task and add it to the taskPool.
 	 *
 	 * @param jobConf
 	 * @param task
@@ -187,6 +208,8 @@ public class TaskTracker implements Runnable {
 	}
 
 	/**
+     * buildTaskTrackerStatus
+     *
 	 * Get status for each task and build taskTrackerStatus for heart beat.
 	 *
 	 * @return
@@ -247,16 +270,6 @@ public class TaskTracker implements Runnable {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	static enum State {NORMAL, INTERRUPTED}
-
-	static class A {
-		int v = 0;
-	}
-
-	static class B {
-		A a = new A();
 	}
 
 	// Run a map/reduce task in a thread.
@@ -373,6 +386,11 @@ public class TaskTracker implements Runnable {
 		}
 	}
 
+    /**
+     * SendDataThread
+     *
+     * Send map output data to reducer.
+     */
 	public class SendDataThread implements Runnable {
 		private Socket sock;
 		public SendDataThread (Socket sock) {
@@ -403,7 +421,7 @@ public class TaskTracker implements Runnable {
 		}
 
 		private HashMap<Text, LinkedList<Text>> getReduceInput(TaskAttemptID taskID) {
-            File folder = new File(".");
+            File folder = new File("mapoutput/");
             String namePrefix = taskID.getTaskID().toString();
             HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
             for (File fileEntry : folder.listFiles()) {

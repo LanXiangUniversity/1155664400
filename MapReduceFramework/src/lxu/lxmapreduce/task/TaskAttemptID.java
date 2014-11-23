@@ -3,7 +3,10 @@ package lxu.lxmapreduce.task;
 import java.io.Serializable;
 
 /**
+ * TaskAttemptID.java
  * Created by magl on 14/11/13.
+ *
+ * The id of a task attempt.
  */
 public class TaskAttemptID implements Serializable {
     private TaskID taskID;

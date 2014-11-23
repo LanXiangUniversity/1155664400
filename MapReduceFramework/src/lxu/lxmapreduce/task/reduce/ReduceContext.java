@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
+ * ReduceContext.java
  * Created by Wei on 11/12/14.
+ *
+ * The context that is given to reducer.
  */
 public class ReduceContext extends TaskInputOutputContext {
 	private ReduceReader reader;

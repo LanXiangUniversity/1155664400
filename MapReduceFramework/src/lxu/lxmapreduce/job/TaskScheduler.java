@@ -11,7 +11,14 @@ import java.util.List;
 import java.util.Queue;
 
 /**
+ * TaskScheduler.java
  * Created by magl on 14/11/10.
+ *
+ * This class is a FIFO task scheduler. All jobs are queued in jobQueue.
+ * The head of the queue has the highest priority and the tail the lowest.
+ * When assigning a task, scan the entire queue. If the head of the queue
+ * has un-running task, then assign them. If not, assign tasks of the next
+ * job and so on.
  */
 public class TaskScheduler {
     // use job tracker to get job information
@@ -26,6 +33,16 @@ public class TaskScheduler {
         this.jobQueue.offer(jobID);
     }
 
+    /**
+     * assignTasks
+     *
+     * Scan the entire jobQueue. If the head of the queue has un-running tasks,
+     * then assign them. If not, assign tasks of the next job and so on.
+     * @param taskTrackerStatus
+     * @return
+     * @throws RemoteException
+     * @throws NotBoundException
+     */
     public synchronized List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
         List<Task> assignedTasks = new ArrayList<Task>();
 
@@ -38,6 +55,9 @@ public class TaskScheduler {
         int remainingMapLoad = 0;
         int remainingReduceLoad = 0;
 
+        /*
+         * First calculate remaining map and reduce work load.
+         */
         for (String jobID : jobQueue) {
             JobInProgress job = jobTracker.getJobInProgress(jobID);
             if (!job.isComplete()) {
@@ -88,7 +108,7 @@ public class TaskScheduler {
                         Task task = job.obtainNewReduceTask(taskTrackerStatus);
                         if (task != null) {
                             assignedTasks.add(task);
-                            System.out.println("assign reduce task");
+                            System.out.println("assign new reduce task");
                             break;
                         }
                     }

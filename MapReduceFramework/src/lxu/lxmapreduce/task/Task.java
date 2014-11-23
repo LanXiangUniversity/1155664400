@@ -11,7 +11,10 @@ import java.rmi.NotBoundException;
 import java.text.NumberFormat;
 
 /**
+ * Task.java
  * Created by magl on 14/11/10.
+ *
+ * The base class of all map and reduce task.
  */
 public abstract class Task implements Serializable {
     /**

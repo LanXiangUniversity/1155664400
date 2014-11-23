@@ -53,7 +53,6 @@ public class ReduceTask extends Task implements Serializable {
 
     @Override
     public void initialize() {
-        // TODO move connection here
     }
 
     @Override
@@ -61,22 +60,24 @@ public class ReduceTask extends Task implements Serializable {
         this.runReducer(jobConf);
 	}
 
-    // TODO move initilization to initialize()
 	public void runReducer(JobConf jobConf) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException, NotBoundException {
         System.out.println("reduce running");
 		int port = 19001;
         System.out.println(mapperLocations.toString());
-		// TODO:Init input file
 		HashMap<Text, LinkedList<Text>> reduceInput = new HashMap<>();
 
-		// TODO:Init output file path
+		// Init output file path
 		List<String> reduceOutput = new ArrayList<String>();
-        reduceOutput.add("part-" + partition);
+        File reduceOutputFolder = new File("reduceoutput");
+        if (!reduceOutputFolder.exists()) {
+            reduceOutputFolder.mkdir();
+        }
+        reduceOutput.add("reduceoutput/part-" + partition);
 
 		for (String addr : mapperLocations) {
 			HashMap<Text, LinkedList<Text>> reduceInput1 = null;
-			// TODO: is map localhost?
+			// is map localhost?
 			if (addr == InetAddress.getLocalHost().getHostAddress()) {
 				reduceInput1 = getReduceInput(this.taskAttemptID);
 			} else {
@@ -152,8 +153,7 @@ public class ReduceTask extends Task implements Serializable {
 		for (String fileName : reduceOutput) {
 
 			String localFileName = fileName;
-			String dfsFileName = this.taskAttemptID.getJobID() + "-" + this.taskAttemptID.getTaskID() + "-"
-					+ fileName;
+			String dfsFileName = this.taskAttemptID.getTaskID() + "-" + fileName;
 
 			List<String> content = new LinkedList<>();
 
@@ -166,7 +166,6 @@ public class ReduceTask extends Task implements Serializable {
 			String masterAddr = conf.getSocketAddr("master.address", "localhost");
 			int rmiPort = conf.getInt("rmi.port", 1099);
 			ClientOutputStream cos = new ClientOutputStream(masterAddr, rmiPort);
-			//cos.setFileName(fileName);
 			cos.setFileName(dfsFileName);
 			cos.write(content);
 		}
@@ -174,7 +173,7 @@ public class ReduceTask extends Task implements Serializable {
 
 
 	private HashMap<Text, LinkedList<Text>> getReduceInput(TaskAttemptID taskID) {
-		File folder = new File(".");
+		File folder = new File("mapoutput/");
 		String namePrefix = taskID.getTaskID().toString();
 		HashMap<Text, LinkedList<Text>> contents = new HashMap<Text, LinkedList<Text>>();
 		for (File fileEntry : folder.listFiles()) {

@@ -12,6 +12,7 @@ import lxu.lxmapreduce.configuration.JobConf;
 import lxu.lxmapreduce.task.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -20,7 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * MapTask.java
  * Created by Wei on 11/12/14.
+ *
+ * The class which actually runs the mapper.
  */
 public class MapTask extends Task implements Serializable {
 	private List<String> inputsplits = new LinkedList<>();
@@ -30,9 +34,8 @@ public class MapTask extends Task implements Serializable {
 	public MapTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
 		super(attemptID, partition, locatedBlock);
 
-		// TODO: Init inputsplits
 		this.locatedBlocks.add(locatedBlock);
-		inputsplits.add("blk_" + locatedBlock.getBlock().getBlockID());
+		inputsplits.add("datanode/blk_" + locatedBlock.getBlock().getBlockID());
 	}
 
     @Override
@@ -40,33 +43,34 @@ public class MapTask extends Task implements Serializable {
         return true;
     }
 
+    /**
+     * initialize
+     *
+     * Initialize the input and output entries.
+     */
     @Override
     public void initialize() {
         int numReduceTasks = conf.getNumReduceTasks();
         String jobID = taskAttemptID.getJobID();
+        File mapOutputFolder = new File("mapoutput");
+        if (!mapOutputFolder.exists()) {
+            mapOutputFolder.mkdir();
+        }
         for (int reduceID = 0; reduceID < numReduceTasks; reduceID++) {
-            outputFiles.add(jobID + "_r-" + reduceID + "_" + this.partition);
+            outputFiles.add("mapoutput/" + jobID + "_r-" + reduceID + "_" + this.partition);
         }
     }
-
-    public static void main(String[] args) {
-
-	}
 
 	@Override
 	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 		// start thread that will handle communication with parent
-//		TaskReporter reporter = new TaskReporter();
-//		reporter.startCommunicationThread();
-//
 		this.runMapper(jobConf);
-//		done();
 	}
 
-	private
-	void runMapper(JobConf jobConf) throws IOException, NoSuchMethodException, IllegalAccessException,
-			InvocationTargetException,
-			InstantiationException, ClassNotFoundException {
+	private void runMapper(JobConf jobConf)
+            throws IOException, NoSuchMethodException, IllegalAccessException,
+			InvocationTargetException, InstantiationException, ClassNotFoundException
+    {
 
 		// Create taskContext.
 		TaskAttemptContext taskContext = new TaskAttemptContext(jobConf, this.getTaskAttemptID());
@@ -80,11 +84,7 @@ public class MapTask extends Task implements Serializable {
 
 		// Create mapper
 		Mapper mapper = (Mapper) ReflectionUtils.newInstance(jobConf.getMapperClass());
-        /*
-        Mapper<LongWritable, Text, Text, Text> mapper = (Mapper<LongWritable, Text, Text,
-                Text>) ReflectionUtils.newInstance(jobConf.getMapperClass());
-                */
-		/* TODO Init form input block files. */
+
 		// Create LineRecordReader.
 		RecordReader input = inputFormat.createRecordReader();
 		RecordWriter output = outputFormat.createRecordWriter();

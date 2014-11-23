@@ -6,7 +6,10 @@ import lxu.lxmapreduce.task.TaskStatus;
 import java.io.Serializable;
 
 /**
+ * ReduceTaskStatus.java
  * Created by magl on 14/11/13.
+ *
+ * The status of a reduce task.
  */
 public class ReduceTaskStatus extends TaskStatus implements Serializable {
 

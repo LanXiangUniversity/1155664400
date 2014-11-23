@@ -137,7 +137,8 @@ public class JobInProgress {
             if (state == TaskStatus.SUCCEEDED) {
                 handleSucceedTask(tip, status);
             } else if (state == TaskStatus.FAILED) {
-                // TODO: handle failed task
+                this.jobStatus.setMapState(JobStatus.FAILED);
+                this.jobStatus.setReduceState(JobStatus.FAILED);
             }
         }
     }
@@ -293,10 +294,12 @@ public class JobInProgress {
         //
         if (trackerHost != null) {
             List<TaskInProgress> allTasks = localMapTasksMap.get(trackerHost);
-            for (TaskInProgress task : allTasks) {
-                if (task.isRunnable() && !task.isRunning()) {
-                    taskInProgress = task;
-                    break;
+            if (allTasks != null) {
+                for (TaskInProgress task : allTasks) {
+                    if (task.isRunnable() && !task.isRunning()) {
+                        taskInProgress = task;
+                        break;
+                    }
                 }
             }
         }

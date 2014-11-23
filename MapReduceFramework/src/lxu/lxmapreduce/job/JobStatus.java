@@ -3,7 +3,10 @@ package lxu.lxmapreduce.job;
 import java.io.Serializable;
 
 /**
+ * JobStatus.java
  * Created by magl on 14/11/10.
+ *
+ * This is the wrapper of the status of a job.
  */
 public class JobStatus implements Serializable {
     public static final int RUNNING = 1;

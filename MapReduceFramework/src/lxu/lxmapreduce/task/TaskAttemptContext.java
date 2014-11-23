@@ -5,7 +5,10 @@ import lxu.lxmapreduce.configuration.Configuration;
 import lxu.lxmapreduce.configuration.JobContext;
 
 /**
+ * TaskAttemptContext.java
  * Created by Wei on 11/12/14.
+ *
+ * The context of a task attempt.
  */
 public class TaskAttemptContext extends JobContext {
     private final TaskAttemptID taskId;

@@ -113,12 +113,12 @@ public class NameSystemService implements INameSystemService {
             DataNodeDescriptor dn = this.dataNodes.entrySet().iterator().next().getValue();
             for (int dnId : this.dataNodes.keySet()) {
                 DataNodeDescriptor tmpDataNode = this.dataNodes.get(dnId);
+                System.out.println("datanode " + tmpDataNode.getDataNodeID() + " has " + tmpDataNode.getBlockNum() + " blocks");
 
                 if (tmpDataNode.getBlockNum() < min &&
                         (!locations.contains(tmpDataNode))) {
                     min = tmpDataNode.getBlockNum();
                     dn = tmpDataNode;
-                    break;
                 }
             }
 
@@ -357,6 +357,9 @@ public class NameSystemService implements INameSystemService {
                 DataNodeRestoreCommand command = new DataNodeRestoreCommand(blk, dn1);
 
                 commands.add(command);
+
+                // Update status of dataNode.
+                this.blockToLocationsMap.get(blk).add(dataNode);
             }
             this.restoreBlocksQueue.remove(dataNode);
         } else {
@@ -454,12 +457,11 @@ public class NameSystemService implements INameSystemService {
                                                         || blockToLocationsMap.get(blk).size() == 0)) {
                                             min = tmpDataNode.getBlockNum();
                                             dn = tmpDataNode;
-                                            break;
                                         }
                                     }
 
                                     // Update status of dataNode.
-                                    locations.add(dn);
+                                    //locations.add(dn);
                                     // Increase data number by one.
                                     dataNodes.get(dn.getDataNodeID()).setBlockNum(dataNodes.get(dn.getDataNodeID())
                                             .getBlockNum() + 1);

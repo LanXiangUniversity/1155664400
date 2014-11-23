@@ -9,7 +9,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
+ * ReflectionUtils.java
  * Created by Wei on 11/12/14.
+ *
+ * Utility to load classes.
  */
 public class ReflectionUtils {
 	/**

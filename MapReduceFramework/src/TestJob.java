@@ -12,7 +12,7 @@ import java.util.Iterator;
  * Created by magl on 14/11/17.
  */
 public class TestJob {
-    static public class TestMap extends Mapper<LongWritable, Text, Text, Text> {
+    static public class TestMap extends Mapper {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException {
             String[] words = value.toString().split(" ");

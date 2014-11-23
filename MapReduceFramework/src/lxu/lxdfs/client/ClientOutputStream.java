@@ -173,7 +173,6 @@ public class ClientOutputStream {
         }
 
         while (buffer.size() > 0) {
-            System.out.println("iter");
 
             writeSize += buffer.size() < blockSize ? buffer.size() : blockSize;
 
@@ -224,7 +223,7 @@ public class ClientOutputStream {
             oos.writeObject(packet);
             AckListener ackListener = new AckListener(sock);
             ackListeners.add(ackListener);
-            (new Thread(ackListener)).start();
+            //(new Thread(ackListener)).start();
 
             // Log
             /*
@@ -315,11 +314,12 @@ public class ClientOutputStream {
                     packet = (DataNodePacket) dis.readObject();
 
                     int ackID = packet.getAckPacketID();
-                    System.out.println("ACK ID: " + ackID);
 
-                    for (ClientPacket clientPacket : ackQueue) {
+                    Iterator<ClientPacket> packetIterator = ackQueue.iterator();
+                    while (packetIterator.hasNext()) {
+                        ClientPacket clientPacket = packetIterator.next();
                         if (clientPacket.getPacketID() == ackID) {
-                            ackQueue.remove(clientPacket);
+                            packetIterator.remove();
                             this.isRunning = false;
                             break;
                         }

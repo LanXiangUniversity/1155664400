@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
+ * Reducer.java
  * Created by Wei on 11/15/14.
+ *
+ * The base class of a reducer.
  */
 public class Reducer {
 	protected void reduce(Text key, Iterator<Text> values, Context context) throws IOException {

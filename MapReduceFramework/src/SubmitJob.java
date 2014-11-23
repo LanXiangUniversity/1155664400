@@ -35,7 +35,6 @@ public class SubmitJob {
 			while (jarEntries.hasMoreElements()) {
 				JarEntry jarEntry = (JarEntry) jarEntries.nextElement();
 				String name = jarEntry.getName();
-				System.out.println(name);
 				if (name != null && name.endsWith("TestJob.class")) {
 					//Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(name.replace("/", ".").substring(0,name.length() - 6));
 					// Get user defined class.
@@ -46,7 +45,6 @@ public class SubmitJob {
 			e.printStackTrace();
 		}
 
-		System.out.println(c);
 		Method m = c.getMethod("main", String[].class);
 		Object[] objs = new Object[1];
 		m.invoke(c.newInstance(), objs);

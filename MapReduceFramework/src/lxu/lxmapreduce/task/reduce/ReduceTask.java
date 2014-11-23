@@ -1,6 +1,8 @@
 package lxu.lxmapreduce.task.reduce;
 
+import lxu.lxdfs.client.ClientOutputStream;
 import lxu.lxdfs.metadata.LocatedBlock;
+import lxu.lxdfs.service.INameSystemService;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
 import lxu.lxmapreduce.io.format.OutputFormat;
@@ -19,6 +21,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.*;
 
 /**
@@ -26,12 +32,18 @@ import java.util.*;
  */
 public class ReduceTask extends Task implements Serializable {
     HashSet<String> mapperLocations;
+	private INameSystemService nameSystemService;
 	public ReduceTask(TaskAttemptID attemptID,
                       int partition,
                       LocatedBlock locatedBlock,
-                      HashSet<String> mapperLocations) {
+                      HashSet<String> mapperLocations) throws RemoteException, NotBoundException {
 		super(attemptID, partition, locatedBlock);
         this.mapperLocations = mapperLocations;
+		Configuration conf = new Configuration();
+		String masterAddr = conf.getSocketAddr("master.address", "localhost");
+		int rmiPort = conf.getInt("rmi.port", 1099);
+		Registry registry = LocateRegistry.getRegistry(masterAddr, rmiPort);
+		this.nameSystemService = (INameSystemService) registry.lookup("NameSystemService");
 	}
 
     @Override
@@ -45,13 +57,13 @@ public class ReduceTask extends Task implements Serializable {
     }
 
     @Override
-	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+	public void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NotBoundException {
         this.runReducer(jobConf);
 	}
 
     // TODO move initilization to initialize()
 	public void runReducer(JobConf jobConf) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException {
+			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException, NotBoundException {
         System.out.println("reduce running");
 		int port = 19001;
         System.out.println(mapperLocations.toString());
@@ -132,7 +144,32 @@ public class ReduceTask extends Task implements Serializable {
 
 		input.close();
 		output.close();
+		putReduceOutput(reduceOutput);
         System.out.println("Reduce finished");
+	}
+
+	private void putReduceOutput(List<String> reduceOutput) throws IOException, NotBoundException {
+		for (String fileName : reduceOutput) {
+
+			String localFileName = fileName;
+			String dfsFileName = this.taskAttemptID.getJobID() + "-" + this.taskAttemptID.getTaskID() + "-"
+					+ fileName;
+
+			List<String> content = new LinkedList<>();
+
+			BufferedReader reader = new BufferedReader(new FileReader(localFileName));
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				content.add(line);
+			}
+
+			String masterAddr = conf.getSocketAddr("master.address", "localhost");
+			int rmiPort = conf.getInt("rmi.port", 1099);
+			ClientOutputStream cos = new ClientOutputStream(masterAddr, rmiPort);
+			//cos.setFileName(fileName);
+			cos.setFileName(dfsFileName);
+			cos.write(content);
+		}
 	}
 
 

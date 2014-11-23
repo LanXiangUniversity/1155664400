@@ -7,6 +7,7 @@ import lxu.lxmapreduce.task.*;
 import lxu.lxmapreduce.configuration.JobConf;
 import lxu.lxmapreduce.task.TaskID;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.*;
 
@@ -178,7 +179,7 @@ public class JobInProgress {
         return cache;
     }
 
-    public Task obtainNewMapTask(TaskTrackerStatus taskTrackerStatus) {
+    public Task obtainNewMapTask(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
         int target = findNewMapTask(taskTrackerStatus);
         if (target == -1) {
             return null;
@@ -266,7 +267,7 @@ public class JobInProgress {
         hostMaps.add(taskInProgress);
     }
 
-    public synchronized Task obtainNewReduceTask(TaskTrackerStatus taskTrackerStatus) {
+    public synchronized Task obtainNewReduceTask(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
         if (jobStatus.getMapState() != JobStatus.SUCCEEDED) {
             System.out.println("Error: Cannot assign reduce task before map finishing");
             return null;

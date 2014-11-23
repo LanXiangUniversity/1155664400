@@ -63,7 +63,7 @@ public class MapTask extends Task implements Serializable {
 //		done();
 	}
 
-	private <KEYIN, VALUEIN, KEYOUT, VALUEOUT>
+	private
 	void runMapper(JobConf jobConf) throws IOException, NoSuchMethodException, IllegalAccessException,
 			InvocationTargetException,
 			InstantiationException, ClassNotFoundException {
@@ -79,8 +79,7 @@ public class MapTask extends Task implements Serializable {
 				ReflectionUtils.newInstance(taskContext.getOutputFormatClass());
 
 		// Create mapper
-		Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> mapper = (Mapper<KEYIN, VALUEIN, KEYOUT,
-				VALUEOUT>) ReflectionUtils.newInstance(jobConf.getMapperClass());
+		Mapper mapper = (Mapper) ReflectionUtils.newInstance(jobConf.getMapperClass());
         /*
         Mapper<LongWritable, Text, Text, Text> mapper = (Mapper<LongWritable, Text, Text,
                 Text>) ReflectionUtils.newInstance(jobConf.getMapperClass());
@@ -91,7 +90,7 @@ public class MapTask extends Task implements Serializable {
 		RecordWriter output = outputFormat.createRecordWriter();
 
 		// Create mapperContext
-		Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context mapperContext = null;
+		Mapper.Context mapperContext = null;
 		Constructor<Mapper.Context> contextConstructor = Mapper.Context.class.getConstructor
 				(new Class[]{Mapper.class,
 						Configuration.class,

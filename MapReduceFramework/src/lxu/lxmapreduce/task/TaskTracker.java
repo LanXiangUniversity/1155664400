@@ -109,9 +109,11 @@ public class TaskTracker implements Runnable {
                     responseID);
         } catch (RemoteException e) {
             e.printStackTrace();
+        } catch (NotBoundException e) {
+	        e.printStackTrace();
         }
 
-        processHeartBeatResponse(heartBeatResponse);
+		processHeartBeatResponse(heartBeatResponse);
 
         if (this.initialContact == true) {
             this.initialContact = false;
@@ -324,6 +326,8 @@ public class TaskTracker implements Runnable {
 					| InstantiationException
 					| IllegalAccessException e) {
 				this.status.setState(TaskStatus.FAILED);
+				e.printStackTrace();
+			} catch (NotBoundException e) {
 				e.printStackTrace();
 			}
 		}

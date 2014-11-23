@@ -6,6 +6,8 @@ import lxu.lxmapreduce.job.JobTracker;
 import lxu.lxmapreduce.task.map.MapTask;
 import lxu.lxmapreduce.task.reduce.ReduceTask;
 
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,7 +82,7 @@ public class TaskInProgress {
         activeTasks.remove(taskID);
     }
 
-    public Task getTaskToRun(String taskTrackerName) {
+    public Task getTaskToRun(String taskTrackerName) throws RemoteException, NotBoundException {
         TaskAttemptID attemptID = new TaskAttemptID(taskID, nextAttemptID++);
         Task newTask = null;
         if (isMapTask()) {

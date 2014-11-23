@@ -4,6 +4,7 @@ import lxu.lxmapreduce.metadata.HeartbeatResponse;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.configuration.JobConf;
 
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -22,5 +23,5 @@ public interface IJobTracker extends Remote {
 	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
 	                                   boolean initialContact,
 	                                   boolean acceptNewTasks,
-	                                   short responseID) throws RemoteException;
+	                                   short responseID) throws RemoteException, NotBoundException;
 }

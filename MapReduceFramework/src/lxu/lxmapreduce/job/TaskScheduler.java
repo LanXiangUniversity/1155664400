@@ -3,6 +3,8 @@ package lxu.lxmapreduce.job;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.Task;
 
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class TaskScheduler {
         this.jobQueue.offer(jobID);
     }
 
-    public synchronized List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) {
+    public synchronized List<Task> assignTasks(TaskTrackerStatus taskTrackerStatus) throws RemoteException, NotBoundException {
         List<Task> assignedTasks = new ArrayList<Task>();
 
         // Get map reduce count for current taskTracker

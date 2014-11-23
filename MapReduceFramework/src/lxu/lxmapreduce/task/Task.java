@@ -7,6 +7,7 @@ import lxu.lxmapreduce.configuration.JobContext;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.NotBoundException;
 import java.text.NumberFormat;
 
 /**
@@ -71,5 +72,5 @@ public abstract class Task implements Serializable {
 
     public abstract void initialize();
 
-    public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException;
+    public abstract void run(JobConf jobConf) throws IOException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException, NotBoundException;
 }

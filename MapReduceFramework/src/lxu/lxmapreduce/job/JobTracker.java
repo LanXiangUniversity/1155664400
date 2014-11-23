@@ -101,7 +101,7 @@ public class JobTracker implements IJobTracker {
 	public HeartbeatResponse heartbeat(TaskTrackerStatus status,
 	                                   boolean initialContact,
 	                                   boolean acceptNewTasks,
-	                                   short responseID) {
+	                                   short responseID) throws RemoteException, NotBoundException {
 		String trackerName = status.getTrackerName();
         //System.out.println("Received heartbeat from " + trackerName);
 		long now = System.currentTimeMillis();

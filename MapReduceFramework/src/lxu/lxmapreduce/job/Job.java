@@ -98,6 +98,11 @@ public class Job extends JobContext {
         conf.setJobName(name);
     }
 
+	public void setJarName(String name) {
+		ensureState(JobState.DEFINE);
+		conf.setJarName(name);
+	}
+
     public String getInputPath() {
         return conf.getInputPath();
     }

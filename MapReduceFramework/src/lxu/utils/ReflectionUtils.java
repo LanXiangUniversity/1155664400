@@ -31,7 +31,6 @@ public class ReflectionUtils {
 			while (jarEntries.hasMoreElements()) {
 				JarEntry jarEntry = (JarEntry) jarEntries.nextElement();
 				String name = jarEntry.getName();
-
 				if (name != null && name.endsWith(className)) {
 					//Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(name.replace("/", ".").substring(0,name.length() - 6));
 					// Get user defined class.

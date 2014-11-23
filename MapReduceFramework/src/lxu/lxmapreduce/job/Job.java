@@ -1,8 +1,7 @@
 package lxu.lxmapreduce.job;
 
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.JobContext;
+import lxu.lxmapreduce.configuration.JobConf;
+import lxu.lxmapreduce.configuration.JobContext;
 
 import java.io.IOException;
 

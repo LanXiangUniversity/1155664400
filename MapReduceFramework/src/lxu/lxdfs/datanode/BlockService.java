@@ -3,6 +3,7 @@ package lxu.lxdfs.datanode;
 import lxu.lxdfs.client.ClientPacket;
 import lxu.lxdfs.metadata.Block;
 import lxu.lxdfs.metadata.DataNodeDescriptor;
+import sun.tools.tree.FieldExpression;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -31,12 +32,16 @@ public class BlockService implements Runnable {
             new ConcurrentHashMap<Block, String>();
     private ServerSocket serverSocket = null;
     private boolean isRunning = false;
-    private int datanodeId;
+    private static int datanodeId;
 
     public BlockService(ServerSocket serverSocket, boolean isRunning, int id) {
         this.serverSocket = serverSocket;
         this.isRunning = isRunning;
         this.datanodeId = id;
+        File folder = new File("datanode_" + this.datanodeId);
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
     }
 
     public void stop() {
@@ -45,7 +50,8 @@ public class BlockService implements Runnable {
 
     public void deleteBlock(Block block) {
         blockFiles.remove(block);
-        File localFile = new File("blk_" + block.getBlockID() + "dn_" + this.datanodeId);
+        File localFile = new File("datanode_" + this.datanodeId +
+                "/blk_" + block.getBlockID());
         if (localFile.delete()) {
             System.out.println(localFile.getName() + " is deleted!");
         } else {
@@ -177,10 +183,14 @@ public class BlockService implements Runnable {
         }
 
         public static boolean writeToFile(Block block, List<String> lines) {
-            String fileName = "blk_" + block.getBlockID();
+            String fileName = "datanode_" + datanodeId + "/blk_" + block.getBlockID();
             boolean success = false;
 
             try {
+                File file = new File(fileName);
+                if (file.exists()) {
+                    file.createNewFile();
+                }
                 // save block content
                 PrintWriter writer = new PrintWriter(fileName);
                 for (String line : lines) {
@@ -193,6 +203,7 @@ public class BlockService implements Runnable {
                 System.out.println("Write block " + block.getBlockID() + " to file " + fileName);
             } catch (IOException e) {
                 System.err.println("Error: Data Node writing file " + fileName + " error");
+                e.printStackTrace();
             }
             return success;
         }

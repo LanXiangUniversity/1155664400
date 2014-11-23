@@ -1,4 +1,4 @@
-package lxu.lxmapreduce.tmp;
+package lxu.lxmapreduce.configuration;
 
 import lxu.lxmapreduce.io.format.LongWritable;
 import lxu.lxmapreduce.io.format.Text;

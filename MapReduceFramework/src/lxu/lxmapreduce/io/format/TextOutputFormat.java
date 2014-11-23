@@ -10,10 +10,10 @@ import lxu.lxmapreduce.io.ReduceWriter;
 public class TextOutputFormat extends OutputFormat<Text, Text> {
     @Override
     public RecordWriter<Text, Text> createRecordWriter() {
-        return new MapWriter();
+	    return new MapWriter();
     }
 
-    public ReduceWriter createReduceWriter() {
-        return new ReduceWriter();
-    }
+	public ReduceWriter createReduceWriter() {
+		return new ReduceWriter();
+	}
 }

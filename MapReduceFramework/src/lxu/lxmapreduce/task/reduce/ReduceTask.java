@@ -1,27 +1,24 @@
 package lxu.lxmapreduce.task.reduce;
 
 import lxu.lxdfs.metadata.LocatedBlock;
-import lxu.lxmapreduce.io.RecordReader;
 import lxu.lxmapreduce.io.RecordWriter;
 import lxu.lxmapreduce.io.format.InputFormat;
 import lxu.lxmapreduce.io.format.OutputFormat;
-import lxu.lxmapreduce.io.format.ReduceReader;
+import lxu.lxmapreduce.io.ReduceReader;
 import lxu.lxmapreduce.io.format.Text;
 import lxu.lxmapreduce.task.Task;
 import lxu.lxmapreduce.task.TaskAttemptID;
 import lxu.lxmapreduce.task.TaskStatus;
-import lxu.lxmapreduce.tmp.Configuration;
-import lxu.lxmapreduce.tmp.JobConf;
-import lxu.lxmapreduce.tmp.TaskAttemptContext;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
+import lxu.lxmapreduce.task.TaskAttemptContext;
 import lxu.utils.ReflectionUtils;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.*;
 
 /**

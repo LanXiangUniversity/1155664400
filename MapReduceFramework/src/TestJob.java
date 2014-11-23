@@ -2,6 +2,8 @@ import lxu.lxmapreduce.io.format.*;
 import lxu.lxmapreduce.job.Job;
 import lxu.lxmapreduce.task.map.Mapper;
 import lxu.lxmapreduce.task.reduce.Reducer;
+import lxu.lxmapreduce.configuration.Configuration;
+import lxu.lxmapreduce.configuration.JobConf;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -10,7 +12,7 @@ import java.util.Iterator;
  * Created by magl on 14/11/17.
  */
 public class TestJob {
-    static public class TestMap extends Mapper {
+    static public class TestMap extends Mapper<LongWritable, Text, Text, Text> {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException {
             String[] words = value.toString().split(" ");
@@ -33,7 +35,7 @@ public class TestJob {
     }
 
     public static void main(String[] args) {
-		Job job = new Job(new lxu.lxmapreduce.configuration.JobConf(new lxu.lxmapreduce.configuration.Configuration()));
+		Job job = new Job(new JobConf(new Configuration()));
 	    job.setJarName("/Users/parasitew/Documents/testDir/Test.jar");
 		job.setMapperClass(TestMap.class);
 		job.setReducerClass(TestReduce.class);

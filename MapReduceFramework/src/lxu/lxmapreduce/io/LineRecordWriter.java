@@ -29,7 +29,6 @@ public class LineRecordWriter extends RecordWriter<Text, Text> {
 	@Override
 	public void write(Text key, Text value) throws IOException {
         int index = key.hashCode() % out.size();
-		System.out.println(key.getValue() + "      " + index);
 		this.out.get(index).write(key.getValue() + "\t" + value.getValue() + "\n");
 	}
 

@@ -214,6 +214,12 @@ public class JobTracker implements IJobTracker {
         return this.nameNode;
     }
 
+    public String getTaskLocation(TaskID taskID) {
+        String trackerName = taskIDToTrackerMap.get(taskID);
+        String hostIP = taskTrackerToHostIPMap.get(trackerName);
+        return hostIP;
+    }
+
     /*
     public static void main(String[] args) {
         try {
@@ -249,35 +255,39 @@ public class JobTracker implements IJobTracker {
                             // set all completed tasks failed
                             Set<TaskID> completedTasks =
                                     taskTrackerToCompleteTaskMap.get(trackerName);
-                            taskTrackerToCompleteTaskMap.remove(trackerName);
-                            for (TaskID completedTask : completedTasks) {
-                                String jobID = completedTask.getJobID();
-                                JobInProgress jobInProgress = jobs.get(jobID);
-                                if (jobInProgress.isComplete()) {
-                                    continue;
+                            if (completedTasks != null && completedTasks.size() != 0) {
+                                taskTrackerToCompleteTaskMap.remove(trackerName);
+                                for (TaskID completedTask : completedTasks) {
+                                    String jobID = completedTask.getJobID();
+                                    JobInProgress jobInProgress = jobs.get(jobID);
+                                    if (jobInProgress.isComplete()) {
+                                        continue;
+                                    }
+                                    System.out.println("Set completed task " +
+                                            completedTask + " to failed");
+                                    TaskInProgress task = taskIDToTIPMap.get(completedTask);
+                                    jobInProgress.addFailedTaskSet(task, true);
+                                    taskIDToTrackerMap.remove(completedTask);
+                                    taskIDToTIPMap.remove(completedTask);
                                 }
-                                System.out.println("Set completed task " +
-                                                   completedTask + " to failed");
-                                TaskInProgress task = taskIDToTIPMap.get(completedTask);
-                                jobInProgress.addFailedTaskSet(task, true);
-                                taskIDToTrackerMap.remove(completedTask);
-                                taskIDToTIPMap.remove(completedTask);
                             }
 
                             // set all running tasks failed
                             Set<TaskID> runningTasks = taskTrackerToTaskmap.get(trackerName);
-                            taskTrackerToTaskmap.remove(trackerName);
-                            for (TaskID runningTask : runningTasks) {
-                                String jobID = runningTask.getJobID();
-                                JobInProgress jobInProgress = jobs.get(jobID);
+                            if (runningTasks != null && runningTasks.size() != 0) {
+                                taskTrackerToTaskmap.remove(trackerName);
+                                for (TaskID runningTask : runningTasks) {
+                                    String jobID = runningTask.getJobID();
+                                    JobInProgress jobInProgress = jobs.get(jobID);
 
-                                System.out.println("Set completed task " +
-                                        runningTask + " to failed");
+                                    System.out.println("Set completed task " +
+                                            runningTask + " to failed");
 
-                                TaskInProgress task = taskIDToTIPMap.get(runningTask);
-                                jobInProgress.addFailedTaskSet(task, false);
-                                taskIDToTrackerMap.remove(runningTask);
-                                taskIDToTIPMap.remove(runningTask);
+                                    TaskInProgress task = taskIDToTIPMap.get(runningTask);
+                                    jobInProgress.addFailedTaskSet(task, false);
+                                    taskIDToTrackerMap.remove(runningTask);
+                                    taskIDToTIPMap.remove(runningTask);
+                                }
                             }
 
                             // remove the record of the task tracker

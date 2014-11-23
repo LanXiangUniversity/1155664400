@@ -27,8 +27,13 @@ import java.util.*;
  * Created by Wei on 11/13/14.
  */
 public class ReduceTask extends Task implements Serializable {
-	public ReduceTask(TaskAttemptID attemptID, int partition, LocatedBlock locatedBlock) {
+    HashSet<String> mapperLocations;
+	public ReduceTask(TaskAttemptID attemptID,
+                      int partition,
+                      LocatedBlock locatedBlock,
+                      HashSet<String> mapperLocations) {
 		super(attemptID, partition, locatedBlock);
+        this.mapperLocations = mapperLocations;
 	}
 
     @Override
@@ -51,8 +56,7 @@ public class ReduceTask extends Task implements Serializable {
 			IllegalAccessException, NoSuchMethodException, InvocationTargetException, IOException {
         System.out.println("reduce running");
 		int port = 19001;
-		String[] mapperAddrs = jobConf.getSocketAddrs();
-        System.out.println(Arrays.toString(mapperAddrs));
+        System.out.println(mapperLocations.toString());
 		// TODO:Init input file
 		HashMap<Text, LinkedList<Text>> reduceInput = new HashMap<>();
 
@@ -60,7 +64,7 @@ public class ReduceTask extends Task implements Serializable {
 		List<String> reduceOutput = new ArrayList<String>();
         reduceOutput.add("part-" + partition);
 
-		for (String addr : mapperAddrs) {
+		for (String addr : mapperLocations) {
 			HashMap<Text, LinkedList<Text>> reduceInput1 = null;
 			// TODO: is map localhost?
 			if (addr == InetAddress.getLocalHost().getHostAddress()) {

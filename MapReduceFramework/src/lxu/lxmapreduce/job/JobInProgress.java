@@ -6,6 +6,7 @@ import lxu.lxdfs.metadata.LocatedBlock;
 import lxu.lxmapreduce.metadata.TaskTrackerStatus;
 import lxu.lxmapreduce.task.*;
 import lxu.lxmapreduce.tmp.JobConf;
+import lxu.lxmapreduce.tmp.TaskID;
 
 import java.rmi.RemoteException;
 import java.util.*;
@@ -64,6 +65,7 @@ public class JobInProgress {
 
         System.out.println("Initializing job: " + jobID);
         LocatedBlock[] allBlocks = getFileBlocks(jobConf.getInputPath());
+        System.out.println("Reading all blocks done");
         numMapTasks = allBlocks.length;
         // Init Map Tasks
         this.maps = new TaskInProgress[numMapTasks];
@@ -81,6 +83,7 @@ public class JobInProgress {
 
         tasksInited = true;
         runningMapTasksMap = new HashMap<String, Set<TaskInProgress>>();
+        System.out.println("Initializing job done");
     }
 
     public LocatedBlock[] getFileBlocks(String fileName) {
@@ -181,6 +184,7 @@ public class JobInProgress {
         if (target == -1) {
             return null;
         }
+        System.out.println("assign target = " + target);
 
         Task result = maps[target].getTaskToRun(taskTrackerStatus.getTrackerName());
 
@@ -214,10 +218,11 @@ public class JobInProgress {
         // 0) Schedule a failed map task
         //
         for (TaskInProgress failedMapTask : failedMapTaskSet) {
-            if (!failedMapTask.isRunning()) {
+            if (failedMapTask.isRunnable() && !failedMapTask.isRunning()) {
                 taskInProgress = failedMapTask;
                 scheduleMap(trackerHost, taskInProgress);
                 failedMapTaskSet.remove(failedMapTask);
+                System.out.println("Assign failed task " + taskInProgress.getTaskID());
                 return taskInProgress.getIdWithinJob();
             }
         }
@@ -228,7 +233,7 @@ public class JobInProgress {
         if (trackerHost != null) {
             List<TaskInProgress> allTasks = localMapTasksMap.get(trackerHost);
             for (TaskInProgress task : allTasks) {
-                if (!task.isRunning()) {
+                if (task.isRunnable() && !task.isRunning()) {
                     taskInProgress = task;
                     break;
                 }
@@ -237,13 +242,15 @@ public class JobInProgress {
 
         if (taskInProgress != null) {
             scheduleMap(trackerHost, taskInProgress);
+            System.out.println("assigned local map task = " + taskInProgress.getIdWithinJob());
             return taskInProgress.getIdWithinJob();
         }
 
         // 2) non-local tasks
         for (TaskInProgress mapTask : maps) {
-            if (!mapTask.isRunning()) {
+            if (mapTask.isRunnable() && !mapTask.isRunning()) {
                 scheduleMap(trackerHost, mapTask);
+                System.out.println("assigned non-local map task = " + mapTask.getIdWithinJob());
                 return mapTask.getIdWithinJob();
             }
         }
@@ -297,7 +304,7 @@ public class JobInProgress {
         TaskInProgress taskInProgress = null;
 
         for (TaskInProgress failedReduceTask : failedReduceTaskSet) {
-            if (!failedReduceTask.isRunning()) {
+            if (failedReduceTask.isRunnable() && !failedReduceTask.isRunning()) {
                 taskInProgress = failedReduceTask;
                 scheduleReduce(taskInProgress);
                 failedReduceTaskSet.remove(failedReduceTask);
@@ -333,6 +340,18 @@ public class JobInProgress {
             return;
         }
         runningReduceTaskSet.add(taskInProgress);
+    }
+
+    public HashSet<String> getAllMapTaskLocations() {
+        HashSet<String> locations = new HashSet<String>();
+
+        for (TaskInProgress mapTask : maps) {
+            TaskID id = mapTask.getTaskID();
+            String location = jobTracker.getTaskLocation(id);
+            locations.add(location);
+        }
+
+        return locations;
     }
 
     public String getJobID() {
@@ -434,6 +453,7 @@ public class JobInProgress {
             }
         }
         failedTask.clearActiveTasks();
+        failedTask.setSuccessfulTaskID(null);
     }
 
     public boolean isComplete() {

@@ -49,7 +49,7 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
 		this.maxSplit = inputFiles.size() - 1;
 		this.inputFiles = inputFiles;
 		this.locatedBlockses = locatedBlockses;
-		System.out.println("init reader");
+		//System.out.println("init reader");
 
 		getInputSplit();
 	}

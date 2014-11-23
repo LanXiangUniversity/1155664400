@@ -87,7 +87,8 @@ public class TaskInProgress {
         if (isMapTask()) {
             newTask = new MapTask(attemptID, partition, locatedBlock);
         } else {
-            newTask = new ReduceTask(attemptID, partition, locatedBlock);
+            HashSet<String> locations = job.getAllMapTaskLocations();
+            newTask = new ReduceTask(attemptID, partition, locatedBlock, locations);
         }
 
         activeTasks.put(attemptID, taskTrackerName);
@@ -106,6 +107,10 @@ public class TaskInProgress {
         return !activeTasks.isEmpty();
     }
 
+    public boolean isRunnable() {
+        return successfulTaskID == null;
+    }
+
     public void clearActiveTasks() {
         this.activeTasks.clear();
     }
@@ -116,5 +121,17 @@ public class TaskInProgress {
 
     public LocatedBlock getLocatedBlock() {
         return locatedBlock;
+    }
+
+    public TaskID getTaskID() {
+        return taskID;
+    }
+
+    public TaskAttemptID getSuccessfulTaskID() {
+        return successfulTaskID;
+    }
+
+    public void setSuccessfulTaskID(TaskAttemptID successfulTaskID) {
+        this.successfulTaskID = successfulTaskID;
     }
 }

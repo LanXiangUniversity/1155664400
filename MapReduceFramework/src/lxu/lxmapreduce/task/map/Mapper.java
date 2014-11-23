@@ -59,7 +59,6 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
 	public void run(Context context) throws IOException {
 		while (context.nextKeyValue()) {
-            System.out.println("context has nextKeyValue");
 			map(context.getCurrentKey(), context.getCurrentValue(), context);
 		}
 	}

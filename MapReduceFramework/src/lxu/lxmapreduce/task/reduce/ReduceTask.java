@@ -81,8 +81,9 @@ public class ReduceTask extends Task implements Serializable {
 					sock.close();
 				} catch (Exception e) {
 					System.err.println("Reduce Task fails: Cannot connect to this tasktracker.");
-					this.taskStatus = TaskStatus.FAILED;
+					this.taskStatus.setState(TaskStatus.FAILED);
 					e.printStackTrace();
+					return;
 				}
 			}
 

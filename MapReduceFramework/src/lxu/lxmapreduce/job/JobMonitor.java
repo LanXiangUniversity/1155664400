@@ -8,6 +8,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -32,11 +34,10 @@ public class JobMonitor {
 		}
 		System.out.println("LXU Cluster Job Status");
 
-		ConcurrentHashMap<String, JobInProgress> jobs = jobTracker.getJobs();
+		HashMap<String, ArrayList<Integer>> jobs = jobTracker.getJobs();
 		for (String job : jobs.keySet()) {
-			JobInProgress jip = jobs.get(job);
-			int statusMap = jip.getJobStatus().getMapState();
-			int statusReduce = jip.getJobStatus().getReduceState();
+			int statusMap = jobs.get(job).get(0);
+			int statusReduce = jobs.get(job).get(1);
 
 			String map = "Map tasks: ";
 			String reduce = "Reduce tasks: ";
@@ -51,6 +52,7 @@ public class JobMonitor {
 				case 4: map += "KILLED";
 					break;
 				default:
+					map += "PENDING";
 					break;
 			}
 
@@ -64,6 +66,7 @@ public class JobMonitor {
 				case 4: reduce += "KILLED";
 					break;
 				default:
+					reduce += "PENDING";
 					break;
 			}
 

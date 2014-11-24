@@ -7,6 +7,7 @@ import lxu.lxmapreduce.task.*;
 import lxu.lxmapreduce.configuration.JobConf;
 import lxu.lxmapreduce.task.TaskID;
 
+import java.io.Serializable;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.*;
@@ -26,7 +27,7 @@ import java.util.*;
  * maps : All map tasks of this job
  * reduces : All reduce tasks of this job
  */
-public class JobInProgress {
+public class JobInProgress implements Serializable {
     private String jobID;
     private JobStatus jobStatus = null;
     private JobConf jobConf = null;

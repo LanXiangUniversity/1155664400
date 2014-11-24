@@ -180,8 +180,19 @@ public class JobTracker implements IJobTracker {
 	}
 
 	@Override
-	public ConcurrentHashMap<String, JobInProgress> getJobs() throws RemoteException {
-		return this.jobs;
+	public HashMap<String, ArrayList<Integer>> getJobs() throws RemoteException {
+		HashMap<String, ArrayList<Integer>> jobs = new HashMap<>();
+
+		for (String job : this.jobs.keySet()) {
+			ArrayList<Integer> list = new ArrayList<>();
+			JobInProgress jip = this.jobs.get(job);
+			list.add(jip.getJobStatus().getMapState());
+			list.add(jip.getJobStatus().getReduceState());
+
+			jobs.put(job, list);
+		}
+
+		return jobs;
 	}
 
 	/**

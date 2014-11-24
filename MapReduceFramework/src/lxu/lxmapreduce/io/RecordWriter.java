@@ -9,7 +9,7 @@ import java.io.IOException;
  * RecordWriter.java
  * Created by Wei on 11/11/14.
  *
- * Write output <key, value> pairs to an output file.
+ * Write output key, value pairs to an output file.
  */
 public abstract class RecordWriter<K, V> {
 	public abstract void initialize(List<String> outputFiles) throws FileNotFoundException;

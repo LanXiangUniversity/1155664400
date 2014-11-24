@@ -22,7 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * data structures of all running jobs and tasks.
  */
 public class JobTracker implements IJobTracker {
-    private static int HEARTBEAT_TIMEOUT = 10 * 1000;
+    private static int HEARTBEAT_TIMEOUT =
+            (new Configuration().getInt("mapreduce.heatbeat.interval", 10 * 1000));
 	// All known jobs (jobID -> JobInProgress)
 	public ConcurrentHashMap<String, JobInProgress> jobs;
 	private int nextJobID = 0;

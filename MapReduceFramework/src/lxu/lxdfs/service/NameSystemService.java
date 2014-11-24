@@ -28,8 +28,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * restoreBlocksQueue : Map from datanode to blocks to be restored
  */
 public class NameSystemService implements INameSystemService {
-    private static final int HEARTBEAT_TIMEOUT = 10 * 1000;
-    private static final int REPLICA_NUM = (new Configuration().getInt("mapreduce.replica.factor", 2));
+    private static final int HEARTBEAT_TIMEOUT =
+            (new Configuration().getInt("lxdfs.heartbeat.interval", 10 * 1000));
+    private static final int REPLICA_NUM =
+            (new Configuration().getInt("mapreduce.replica.factor", 2));
     // Index of DataNode to be allocated.
     private int nextDataNodeID = 0;
     // Path of root of the DFS

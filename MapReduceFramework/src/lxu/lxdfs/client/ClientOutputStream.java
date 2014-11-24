@@ -156,7 +156,7 @@ public class ClientOutputStream {
      *
      * Write data to the first DataNode.
      * Store data in the buffer, and send to the DataNode
-     * if the buffer size >= Block size.
+     * if the buffer size is larger than Block size.
      *
      * @param lines
      * @return # of lines writed

@@ -7,6 +7,7 @@ import lxu.lxmapreduce.configuration.JobConf;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * IJobTracker.java
@@ -27,4 +28,6 @@ public interface IJobTracker extends Remote {
 	                                   boolean initialContact,
 	                                   boolean acceptNewTasks,
 	                                   short responseID) throws RemoteException, NotBoundException;
+
+	public ConcurrentHashMap<String, JobInProgress> getJobs() throws RemoteException;
 }

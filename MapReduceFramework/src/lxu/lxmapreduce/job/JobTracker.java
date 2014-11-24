@@ -179,7 +179,12 @@ public class JobTracker implements IJobTracker {
 		return heartbeatResponse;
 	}
 
-    /**
+	@Override
+	public ConcurrentHashMap<String, JobInProgress> getJobs() throws RemoteException {
+		return this.jobs;
+	}
+
+	/**
      * updateTaskStatuses
      *
      * Update the statuses of all tasks running on one TaskTracker.
